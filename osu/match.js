@@ -5,7 +5,7 @@ const {
 	BanchoChannel,
 	BanchoLobbyPlayer,
 } = require("bancho.js");
-const settings = require("./settings.json");
+const settings = require("../settings.json");
 /**
  * @class
  * @prop { BanchoMultiplayerChannel } channel The bancho channel the lobby is being hosted in

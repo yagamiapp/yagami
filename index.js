@@ -1,6 +1,7 @@
 // Import Libraries
 const { Match } = require("./osu/match");
 const Banchojs = require("bancho.js");
+const { TourneyBot } = require("./discord/bot");
 require("dotenv").config();
 
 let credentials = {
@@ -23,6 +24,7 @@ client
 	})
 	.catch(console.error);
 
+let discord = new TourneyBot();
 /**
  * @param {Banchojs.PrivateMessage} msg
  */
