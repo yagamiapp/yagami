@@ -1,14 +1,22 @@
-const { BanchoClient, BanchoChannel, BanchoMessage } = require("bancho.js");
+const {
+	BanchoClient,
+	BanchoMessage,
+	BanchoMultiplayerChannel,
+	BanchoChannel,
+	BanchoLobbyPlayer,
+} = require("bancho.js");
 const settings = require("./settings.json");
-
+/**
+ * @class
+ * @prop { BanchoMultiplayerChannel } channel The bancho channel the lobby is being hosted in
+ * @public
+ */
 class Match {
 	/**
 	 * Represents a tournament match
-	 * @class
 	 * @param { BanchoClient } client The client used for sending messages and grabbing lobbies
 	 * @param { string } ircName The name of the tournament match in IRC format
 	 * @param { string } mappoolName the mappool ID of the mappool to be used in this tournament
-	 * @param { BanchoChannel } channel The channel the match is taking place in
 	 */
 	constructor(client, ircName, mappoolName) {
 		this.client = client;
@@ -16,8 +24,13 @@ class Match {
 		this.mappoolName = mappoolName;
 		this.messages = [];
 		console.log(`Creating a ${mappoolName} match, in lobby ${ircName}.`);
-
+		/**
+		 * @type { BanchoMultiplayerChannel }
+		 */
 		this.channel = client.getChannel(ircName);
+		if (this.channel instanceof BanchoChannel) {
+			throw "Matches cannot be started in non-multiplayer rooms";
+		}
 		settings.rounds.forEach((el) => {
 			if (el.acronym === mappoolName) {
 				if (el.enabled) {

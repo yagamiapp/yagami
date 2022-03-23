@@ -1,5 +1,5 @@
 // Import Libraries
-const { Match } = require("./match.js");
+const { Match } = require("./osu/match");
 const Banchojs = require("bancho.js");
 require("dotenv").config();
 
