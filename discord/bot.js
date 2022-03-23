@@ -1,9 +1,10 @@
-const { Client, Intents } = require("discord.js");
+const { Client, Intents, Collection } = require("discord.js");
 const commandUpdate = require("./deploy-commands");
+const fs = require("fs");
 require("dotenv").config();
 
 /**
- * @prop {Client} client The discord bot
+ * @prop {Client} bot The discord bot
  */
 class TourneyBot {
 	constructor() {
@@ -11,28 +12,48 @@ class TourneyBot {
 		 * @type {Client}
 		 * @private
 		 */
-		const client = new Client({
+		const bot = new Client({
 			intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES],
 		});
 
-		client.commands = new Collection();
+		bot.commands = new Collection();
 		const commandFiles = fs
-			.readdirSync("./commands")
+			.readdirSync("./discord/commands")
 			.filter((file) => file.endsWith(".js"));
 
 		for (const file of commandFiles) {
 			const command = require(`./commands/${file}`);
 			// Set a new item in the Collection
 			// With the key as the command name and the value as the exported module
-			client.commands.set(command.data.name, command);
+			bot.commands.set(command.data.name, command);
 		}
 
 		commandUpdate.deployCommands();
 
-		client.once("ready", () => {
+		bot.on("interactionCreate", async (interaction) => {
+			if (!interaction.isCommand()) return;
+
+			const command = bot.commands.get(interaction.commandName);
+
+			if (!command) return;
+
+			try {
+				await command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				await interaction.reply({
+					content: "There was an error while executing this command!",
+					ephemeral: true,
+				});
+			}
+		});
+
+		bot.once("ready", () => {
 			console.log("Connected to Discord!");
 		});
 
-		client.token(process.env.discordToken);
+		bot.login(process.env.discordToken);
 	}
 }
+
+module.exports.TourneyBot = TourneyBot;
