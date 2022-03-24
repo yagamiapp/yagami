@@ -1,0 +1,46 @@
+@font-face {
+	font-family: MavenPro;
+	src: url("../fonts/MavenPro-VariableFont_wght.ttf");
+}
+body {
+	padding: 0;
+	margin: 0;
+	font-family: "MavenPro";
+	color: white;
+	background-color: #000405;
+	overflow: visible;
+}
+
+.tagline {
+	color: white;
+	font-size: 72px;
+	width: 500px;
+}
+
+section {
+	position: relative;
+	height: 100vh;
+	padding: 0;
+	margin: 0;
+}
+
+.header {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+	border-bottom: 3px solid white;
+}
+
+.header video {
+	position: absolute;
+	filter: blur(10px) opacity(0.5);
+	min-height: 110%;
+	min-width: 110%;
+	z-index: -1;
+}
+
+.logo {
+	height: 500px;
+	width: 500px;
+}

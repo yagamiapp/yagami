@@ -1,0 +1,7 @@
+{
+	"hosting": {
+		"site": "clx-blitz-tourney",
+		"public": "public",
+		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+	}
+}
