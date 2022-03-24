@@ -28,7 +28,7 @@ class TourneyBot {
 			bot.commands.set(command.data.name, command);
 		}
 
-		commandUpdate.deployCommands();
+		// commandUpdate.deployCommands();
 
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isCommand()) return;
@@ -38,10 +38,11 @@ class TourneyBot {
 			if (!command) return;
 
 			try {
+				await interaction.deferReply();
 				await command.execute(interaction);
 			} catch (error) {
 				console.error(error);
-				await interaction.reply({
+				await interaction.editReply({
 					content: "There was an error while executing this command!",
 					ephemeral: true,
 				});
