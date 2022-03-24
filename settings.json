@@ -1,6 +1,100 @@
 {
 	"rounds": [
 		{
+			"name": "Finals",
+			"acronym": "F",
+			"best_of": 13,
+			"bans": 2,
+			"enabled": true,
+			"mappool": [
+				{
+					"identifier": "NM1",
+					"id": 2944895,
+					"namestring": "LiSA - Tsumibito [Amasphiee's Expert]"
+				},
+				{
+					"identifier": "NM2",
+					"id": 3057533,
+					"namestring": "penoreri - Sulfur [Dioxide]"
+				},
+				{
+					"identifier": "NM3",
+					"namestring": "Yonekura Chihiro - DEAR MY WAKER [Shizurre's Expert]",
+					"id": 3338782
+				},
+				{
+					"identifier": "NM4",
+					"namestring": "PSYQUI - Hysteric Night Girl -Awakening- (feat. Such) [LeCandy's Another]",
+					"id": 3113401
+				},
+				{
+					"identifier": "NM5",
+					"namestring": "Chroma - Sayonara Planet Wars [01:59:931]",
+					"id": 2786752
+				},
+				{
+					"identifier": "NM6",
+					"id": 1641637,
+					"namestring": "RUMI - Densetsu no Matsuri [Oni]"
+				},
+				{
+					"identifier": "NM7",
+					"id": 3440950,
+					"namestring": "Camellia - WYSI (When You See It) [Cursed Difficult Collab]"
+				},
+				{
+					"identifier": "HD1",
+					"id": 2917259,
+					"namestring": "K/DA - DRUM GO DUM feat. Aluna, Wolftyla, Bekuh BOOM [PandaHero's Extra]"
+				},
+				{
+					"identifier": "HD2",
+					"id": 58978,
+					"namestring": "Paper Tongues - Ride To California [Insane]"
+				},
+				{
+					"identifier": "HD3",
+					"id": 2897507,
+					"namestring": "GaragebandPoke - Battle! (Miror B.) Remix [Rain Dish]"
+				},
+				{
+					"identifier": "HR1",
+					"id": 1653195,
+					"namestring": "Camellia feat. Nanahira - Kansoku Eisei [apalfj's Insane]"
+				},
+				{
+					"identifier": "HR2",
+					"id": 1531315,
+					"namestring": "bill wurtz - La de da de da de da de day oh [Ladest Das]"
+				},
+				{
+					"identifier": "HR3",
+					"namestring": "OSTER project - Violet Rose [Insane]",
+					"id": 2457698
+				},
+				{
+					"identifier": "DT1",
+					"id": 2342533,
+					"namestring": "Yasuda Rei - styles [Insane]"
+				},
+				{
+					"identifier": "DT2",
+					"namestring": "Petit Rabbit's - No Poi! (nenpulse bootleg remix) [YakiBoss's Hard]",
+					"id": 937188
+				},
+				{
+					"identifier": "DT3",
+					"namestring": "PinocchioP feat. Hatsune Miku - Ghosts Play to the Audience [Hard]",
+					"id": 3123098
+				},
+				{
+					"identifier": "DT4",
+					"namestring": "android52 - super anime groove 3d world [bor's Insane]",
+					"id": 1213428
+				}
+			]
+		},
+		{
 			"name": "Grand Finals",
 			"acronym": "GF",
 			"best_of": 13,
