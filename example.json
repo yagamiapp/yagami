@@ -220,7 +220,7 @@
 				}
 			},
 			"users": {
-				"08712438492823": {
+				"130866411999461376": {
 					"discord": {
 						"avatar": "0568933c575b8f3d7e3e80d1480bffd2",
 						"avatarURL": "https://cdn.discordapp.com/avatars/130866411999461376/0568933c575b8f3d7e3e80d1480bffd2.webp",
@@ -275,6 +275,7 @@
 						"name": "Yagami Blitz Cup",
 						"score_mode": 3,
 						"team_mode": 0,
+						"force_nf": true,
 						"mod_multipliers": {
 							"NM": 0.8,
 							"HD": 1.0,
