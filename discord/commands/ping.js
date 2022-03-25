@@ -11,6 +11,7 @@ module.exports = {
 	 * @param {CommandInteraction} interaction
 	 */
 	async execute(interaction) {
-		await interaction.reply({ ephemeral: true, content: "Pong!" });
+		await interaction.editReply("Pong!");
 	},
+	ephemeral: true,
 };

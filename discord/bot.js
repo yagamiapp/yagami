@@ -38,7 +38,7 @@ class TourneyBot {
 			if (!command) return;
 
 			try {
-				await interaction.deferReply();
+				await interaction.deferReply({ ephemeral: command.ephemeral });
 				await command.execute(interaction);
 			} catch (error) {
 				console.error(error);

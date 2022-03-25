@@ -1,0 +1,347 @@
+{
+	"global_mappools": [
+		{
+			"name": "osu! World Cup Grand Finals",
+			"maps": [
+				{
+					"identifier": "NM1",
+					"data": {
+						"approved": "1",
+						"submit_date": "2013-05-15 11:32:26",
+						"approved_date": "2013-07-06 08:54:46",
+						"last_update": "2013-07-06 08:51:22",
+						"artist": "Luxion",
+						"beatmap_id": "252002",
+						"beatmapset_id": "93398",
+						"bpm": "196",
+						"creator": "RikiH_",
+						"creator_id": "686209",
+						"difficultyrating": "5.744717597961426",
+						"diff_aim": "2.7706098556518555",
+						"diff_speed": "2.9062750339508057",
+						"diff_size": "4",
+						"diff_overall": "8",
+						"diff_approach": "9",
+						"diff_drain": "7",
+						"hit_length": "114",
+						"source": "BMS",
+						"genre_id": "2",
+						"language_id": "5",
+						"title": "High-Priestess",
+						"total_length": "146",
+						"version": "Overkill",
+						"file_md5": "c8f08438204abfcdd1a748ebfae67421",
+						"mode": "0",
+						"tags": "kloyd flower roxas",
+						"favourite_count": "140",
+						"rating": "9.44779",
+						"playcount": "94637",
+						"passcount": "10599",
+						"count_normal": "388",
+						"count_slider": "222",
+						"count_spinner": "3",
+						"max_combo": "899",
+						"storyboard": "0",
+						"video": "0",
+						"download_unavailable": "0",
+						"audio_unavailable": "0"
+					}
+				},
+				{
+					"identifier": "NM2",
+					"data": {
+						"approved": "1",
+						"submit_date": "2013-05-15 11:32:26",
+						"approved_date": "2013-07-06 08:54:46",
+						"last_update": "2013-07-06 08:51:22",
+						"artist": "Luxion",
+						"beatmap_id": "252002",
+						"beatmapset_id": "93398",
+						"bpm": "196",
+						"creator": "RikiH_",
+						"creator_id": "686209",
+						"difficultyrating": "5.744717597961426",
+						"diff_aim": "2.7706098556518555",
+						"diff_speed": "2.9062750339508057",
+						"diff_size": "4",
+						"diff_overall": "8",
+						"diff_approach": "9",
+						"diff_drain": "7",
+						"hit_length": "114",
+						"source": "BMS",
+						"genre_id": "2",
+						"language_id": "5",
+						"title": "High-Priestess",
+						"total_length": "146",
+						"version": "Overkill 2",
+						"file_md5": "c8f08438204abfcdd1a748ebfae67421",
+						"mode": "0",
+						"tags": "kloyd flower roxas",
+						"favourite_count": "140",
+						"rating": "9.44779",
+						"playcount": "94637",
+						"passcount": "10599",
+						"count_normal": "388",
+						"count_slider": "222",
+						"count_spinner": "3",
+						"max_combo": "899",
+						"storyboard": "0",
+						"video": "0",
+						"download_unavailable": "0",
+						"audio_unavailable": "0"
+					}
+				}
+			]
+		},
+		{
+			"name": "osu! World Cup Finals",
+			"maps": [
+				{
+					"identifier": "NM1",
+					"map": {
+						"approved": "1",
+						"submit_date": "2013-05-15 11:32:26",
+						"approved_date": "2013-07-06 08:54:46",
+						"last_update": "2013-07-06 08:51:22",
+						"artist": "Luxion",
+						"beatmap_id": "252002",
+						"beatmapset_id": "93398",
+						"bpm": "196",
+						"creator": "RikiH_",
+						"creator_id": "686209",
+						"difficultyrating": "5.744717597961426",
+						"diff_aim": "2.7706098556518555",
+						"diff_speed": "2.9062750339508057",
+						"diff_size": "4",
+						"diff_overall": "8",
+						"diff_approach": "9",
+						"diff_drain": "7",
+						"hit_length": "114",
+						"source": "BMS",
+						"genre_id": "2",
+						"language_id": "5",
+						"title": "High-Priestess",
+						"total_length": "146",
+						"version": "Overkill",
+						"file_md5": "c8f08438204abfcdd1a748ebfae67421",
+						"mode": "0",
+						"tags": "kloyd flower roxas",
+						"favourite_count": "140",
+						"rating": "9.44779",
+						"playcount": "94637",
+						"passcount": "10599",
+						"count_normal": "388",
+						"count_slider": "222",
+						"count_spinner": "3",
+						"max_combo": "899",
+						"storyboard": "0",
+						"video": "0",
+						"download_unavailable": "0",
+						"audio_unavailable": "0"
+					}
+				},
+				{
+					"identifier": "NM2",
+					"map": {
+						"approved": "1",
+						"submit_date": "2013-05-15 11:32:26",
+						"approved_date": "2013-07-06 08:54:46",
+						"last_update": "2013-07-06 08:51:22",
+						"artist": "Luxion",
+						"beatmap_id": "252002",
+						"beatmapset_id": "93398",
+						"bpm": "196",
+						"creator": "RikiH_",
+						"creator_id": "686209",
+						"difficultyrating": "5.744717597961426",
+						"diff_aim": "2.7706098556518555",
+						"diff_speed": "2.9062750339508057",
+						"diff_size": "4",
+						"diff_overall": "8",
+						"diff_approach": "9",
+						"diff_drain": "7",
+						"hit_length": "114",
+						"source": "BMS",
+						"genre_id": "2",
+						"language_id": "5",
+						"title": "High-Priestess",
+						"total_length": "146",
+						"version": "Overkill 2",
+						"file_md5": "c8f08438204abfcdd1a748ebfae67421",
+						"mode": "0",
+						"tags": "kloyd flower roxas",
+						"favourite_count": "140",
+						"rating": "9.44779",
+						"playcount": "94637",
+						"passcount": "10599",
+						"count_normal": "388",
+						"count_slider": "222",
+						"count_spinner": "3",
+						"max_combo": "899",
+						"storyboard": "0",
+						"video": "0",
+						"download_unavailable": "0",
+						"audio_unavailable": "0"
+					}
+				}
+			]
+		}
+	],
+	"guilds": {
+		"1234567890111213": {
+			"pending_users": {
+				"1ka8dls": {
+					"avatar": "4c2621036b2a044f54eedba6e8505c6d",
+					"avatarURL": "https://cdn.discordapp.com/avatars/265144290240495617/4c2621036b2a044f54eedba6e8505c6d.webp",
+					"bot": false,
+					"createdTimestamp": 1483285724936,
+					"defaultAvatarURL": "https://cdn.discordapp.com/embed/avatars/3.png",
+					"discriminator": "8958",
+					"displayAvatarURL": "https://cdn.discordapp.com/avatars/265144290240495617/4c2621036b2a044f54eedba6e8505c6d.webp",
+					"flags": 768,
+					"id": "265144290240495617",
+					"system": false,
+					"tag": "clxxiii#8958",
+					"username": "clxxiii"
+				},
+				"9dla01l": {
+					"avatar": "afe219409ebd306f665d8c021bb81cd7",
+					"avatarURL": "https://cdn.discordapp.com/avatars/143204376918360065/afe219409ebd306f665d8c021bb81cd7.webp",
+					"bot": false,
+					"createdTimestamp": 1454212984066,
+					"defaultAvatarURL": "https://cdn.discordapp.com/embed/avatars/3.png",
+					"discriminator": "8113",
+					"displayAvatarURL": "https://cdn.discordapp.com/avatars/143204376918360065/afe219409ebd306f665d8c021bb81cd7.webp",
+					"flags": 64,
+					"id": "143204376918360065",
+					"system": false,
+					"tag": "Vac4ncy#8113",
+					"username": "Vac4ncy"
+				}
+			},
+			"users": {
+				"08712438492823": {
+					"discord": {
+						"avatar": "0568933c575b8f3d7e3e80d1480bffd2",
+						"avatarURL": "https://cdn.discordapp.com/avatars/130866411999461376/0568933c575b8f3d7e3e80d1480bffd2.webp",
+						"bot": false,
+						"createdTimestamp": 1451271384001,
+						"defaultAvatarURL": "https://cdn.discordapp.com/embed/avatars/1.png",
+						"discriminator": "1646",
+						"displayAvatarURL": "https://cdn.discordapp.com/avatars/130866411999461376/0568933c575b8f3d7e3e80d1480bffd2.webp",
+						"flags": 768,
+						"id": "130866411999461376",
+						"system": false,
+						"tag": "bradley#1646",
+						"username": "bradley"
+					},
+					"osu": {
+						"user_id": "1",
+						"username": "User name",
+						"join_date": "2014-07-13 06:26:30",
+						"count300": "1337",
+						"count100": "123",
+						"count50": "69",
+						"playcount": "42",
+						"ranked_score": "666666",
+						"total_score": "999999998",
+						"pp_rank": "2442",
+						"level": "50.5050",
+						"pp_raw": "3113",
+						"accuracy": "98.1234",
+						"count_rank_ss": "54",
+						"count_rank_ssh": "54",
+						"count_rank_s": "81",
+						"count_rank_sh": "81",
+						"count_rank_a": "862",
+						"country": "DE",
+						"total_seconds_played": "1823790",
+						"pp_country_rank": "1337",
+						"events": [
+							{
+								"display_html": "<img src='/images/A_small.png'/>...",
+								"beatmap_id": "222342",
+								"beatmapset_id": "54851",
+								"date": "2013-07-07 22:34:04",
+								"epicfactor": "1"
+							}
+						]
+					}
+				}
+			},
+			"tournaments": [
+				{
+					"rules": {
+						"name": "Yagami Blitz Cup",
+						"score_mode": 3,
+						"team_mode": 0,
+						"mod_multipliers": {
+							"NM": 0.8,
+							"HD": 1.0,
+							"HR": 1.0,
+							"DT": 1.0,
+							"EZ": 1.5,
+							"FL": 1.0,
+							"SD": 1.1
+						}
+					},
+					"rounds": [
+						{
+							"name": "Grand Finals",
+							"acronym": "GF",
+							"best_of": 11,
+							"enabled": true,
+							"bans": 2,
+							"pool": [
+								{
+									"identifer": "NM1",
+									"map": {
+										"approved": "1",
+										"submit_date": "2013-05-15 11:32:26",
+										"approved_date": "2013-07-06 08:54:46",
+										"last_update": "2013-07-06 08:51:22",
+										"artist": "Luxion",
+										"beatmap_id": "252002",
+										"beatmapset_id": "93398",
+										"bpm": "196",
+										"creator": "RikiH_",
+										"creator_id": "686209",
+										"difficultyrating": "5.744717597961426",
+										"diff_aim": "2.7706098556518555",
+										"diff_speed": "2.9062750339508057",
+										"diff_size": "4",
+										"diff_overall": "8",
+										"diff_approach": "9",
+										"diff_drain": "7",
+										"hit_length": "114",
+										"source": "BMS",
+										"genre_id": "2",
+										"language_id": "5",
+										"title": "High-Priestess",
+										"total_length": "146",
+										"version": "Overkill",
+										"file_md5": "c8f08438204abfcdd1a748ebfae67421",
+										"mode": "0",
+										"tags": "kloyd flower roxas",
+										"favourite_count": "140",
+										"rating": "9.44779",
+										"playcount": "94637",
+										"passcount": "10599",
+										"count_normal": "388",
+										"count_slider": "222",
+										"count_spinner": "3",
+										"max_combo": "899",
+										"storyboard": "0",
+										"video": "0",
+										"download_unavailable": "0",
+										"audio_unavailable": "0"
+									}
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	}
+}
