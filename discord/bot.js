@@ -1,6 +1,7 @@
 const { Client, Intents, Collection } = require("discord.js");
 const commandUpdate = require("./deploy-commands");
 const fs = require("fs");
+const join = require("./join");
 require("dotenv").config();
 
 /**
@@ -47,6 +48,11 @@ class TourneyBot {
 					ephemeral: true,
 				});
 			}
+		});
+
+		// Setup server on join
+		bot.on("guildCreate", (ev) => {
+			join.onJoin(ev);
 		});
 
 		bot.once("ready", () => {
