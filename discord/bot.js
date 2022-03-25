@@ -29,7 +29,8 @@ class TourneyBot {
 			bot.commands.set(command.data.name, command);
 		}
 
-		// commandUpdate.deployCommands();
+		// Command updating for testing purposes
+		commandUpdate.deployCommands(process.env.testGuildId);
 
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isCommand()) return;
