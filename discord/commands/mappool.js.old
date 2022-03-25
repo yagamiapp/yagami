@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { CommandInteraction, MessageEmbed } = require("discord.js");
-const { FirebaseManager } = require("../../firebase");
+const firebase = require("../../firebase");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,9 +19,7 @@ module.exports = {
 	async execute(interaction) {
 		let id = interaction.options.getString("id");
 
-		let firebase = new FirebaseManager();
-
-		await firebase.getData("guilds", interaction.guildId);
+		let pools = await firebase.getData("guilds", interaction.guildId);
 
 		let mappool = pools.filter((obj) => obj.acronym == id);
 
