@@ -1,4 +1,34 @@
 {
+	"pending_users": {
+		"1ka8dls": {
+			"avatar": "4c2621036b2a044f54eedba6e8505c6d",
+			"avatarURL": "https://cdn.discordapp.com/avatars/265144290240495617/4c2621036b2a044f54eedba6e8505c6d.webp",
+			"bot": false,
+			"createdTimestamp": 1483285724936,
+			"defaultAvatarURL": "https://cdn.discordapp.com/embed/avatars/3.png",
+			"discriminator": "8958",
+			"displayAvatarURL": "https://cdn.discordapp.com/avatars/265144290240495617/4c2621036b2a044f54eedba6e8505c6d.webp",
+			"flags": 768,
+			"id": "265144290240495617",
+			"system": false,
+			"tag": "clxxiii#8958",
+			"username": "clxxiii"
+		},
+		"9dla01l": {
+			"avatar": "afe219409ebd306f665d8c021bb81cd7",
+			"avatarURL": "https://cdn.discordapp.com/avatars/143204376918360065/afe219409ebd306f665d8c021bb81cd7.webp",
+			"bot": false,
+			"createdTimestamp": 1454212984066,
+			"defaultAvatarURL": "https://cdn.discordapp.com/embed/avatars/3.png",
+			"discriminator": "8113",
+			"displayAvatarURL": "https://cdn.discordapp.com/avatars/143204376918360065/afe219409ebd306f665d8c021bb81cd7.webp",
+			"flags": 64,
+			"id": "143204376918360065",
+			"system": false,
+			"tag": "Vac4ncy#8113",
+			"username": "Vac4ncy"
+		}
+	},
 	"global_mappools": [
 		{
 			"name": "osu! World Cup Grand Finals",
@@ -189,36 +219,6 @@
 	],
 	"guilds": {
 		"1234567890111213": {
-			"pending_users": {
-				"1ka8dls": {
-					"avatar": "4c2621036b2a044f54eedba6e8505c6d",
-					"avatarURL": "https://cdn.discordapp.com/avatars/265144290240495617/4c2621036b2a044f54eedba6e8505c6d.webp",
-					"bot": false,
-					"createdTimestamp": 1483285724936,
-					"defaultAvatarURL": "https://cdn.discordapp.com/embed/avatars/3.png",
-					"discriminator": "8958",
-					"displayAvatarURL": "https://cdn.discordapp.com/avatars/265144290240495617/4c2621036b2a044f54eedba6e8505c6d.webp",
-					"flags": 768,
-					"id": "265144290240495617",
-					"system": false,
-					"tag": "clxxiii#8958",
-					"username": "clxxiii"
-				},
-				"9dla01l": {
-					"avatar": "afe219409ebd306f665d8c021bb81cd7",
-					"avatarURL": "https://cdn.discordapp.com/avatars/143204376918360065/afe219409ebd306f665d8c021bb81cd7.webp",
-					"bot": false,
-					"createdTimestamp": 1454212984066,
-					"defaultAvatarURL": "https://cdn.discordapp.com/embed/avatars/3.png",
-					"discriminator": "8113",
-					"displayAvatarURL": "https://cdn.discordapp.com/avatars/143204376918360065/afe219409ebd306f665d8c021bb81cd7.webp",
-					"flags": 64,
-					"id": "143204376918360065",
-					"system": false,
-					"tag": "Vac4ncy#8113",
-					"username": "Vac4ncy"
-				}
-			},
 			"users": {
 				"130866411999461376": {
 					"discord": {
