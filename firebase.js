@@ -13,7 +13,8 @@ class FirebaseManager {
 			client_id: process.env.firebaseClientId,
 			auth_uri: "https://accounts.google.com/o/oauth2/auth",
 			token_uri: "https://oauth2.googleapis.com/token",
-			auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+			auth_provider_x509_cert_url:
+				"https://www.googleapis.com/oauth2/v1/certs",
 			client_x509_cert_url:
 				"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-2qxi3%40yagami-aef78.iam.gserviceaccount.com",
 		};
@@ -23,12 +24,12 @@ class FirebaseManager {
 			databaseURL: "https://yagami-aef78-default-rtdb.firebaseio.com",
 		});
 
-		const db = admin.database();
-		const ref = db.ref();
+		this.db = admin.database();
+		this.ref = this.db.ref();
 	}
 	async getData(...reference) {
 		let data;
-		let currentRef = ref;
+		let currentRef = this.ref;
 		for (let i = 0; i < reference.length; i++) {
 			currentRef = currentRef.child(reference[i]);
 		}
@@ -40,7 +41,7 @@ class FirebaseManager {
 	}
 
 	async setData(data, ...reference) {
-		let currentRef = ref;
+		let currentRef = this.ref;
 		for (let i = 0; i < reference.length; i++) {
 			currentRef = currentRef.child(reference[i]);
 		}
@@ -50,7 +51,7 @@ class FirebaseManager {
 
 	async pushData(data, ...reference) {
 		let oldData;
-		let currentRef = ref;
+		let currentRef = this.ref;
 
 		for (let i = 0; i < reference.length; i++) {
 			currentRef = currentRef.child(reference[i]);
