@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { CommandInteraction, MessageEmbed } = require("discord.js");
-const options = require("../../settings.json");
+const { FirebaseManager } = require("../../firebase");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,7 +19,11 @@ module.exports = {
 	async execute(interaction) {
 		let id = interaction.options.getString("id");
 
-		let mappool = options.rounds.filter((obj) => obj.acronym == id);
+		let firebase = new FirebaseManager();
+
+		await firebase.getData("guilds", interaction.guildId);
+
+		let mappool = pools.filter((obj) => obj.acronym == id);
 
 		if (mappool.length == 0) {
 			await interaction.editReply({
@@ -33,4 +37,5 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 		}
 	},
+	ephemeral: true,
 };
