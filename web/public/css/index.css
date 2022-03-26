@@ -41,6 +41,19 @@ section {
 }
 
 .logo {
+	background: rgb(248, 128, 0);
+	background: linear-gradient(
+		180deg,
+		rgba(248, 128, 0, 1) 0%,
+		rgba(242, 35, 35, 1) 100%
+	);
+	filter: drop-shadow(0 0 25px black);
+	-webkit-mask-image: url(../static/yagami_mask.svg);
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: 50% 50%;
+	mask-image: url(../static/yagami_mask.svg);
+	mask-repeat: no-repeat;
+	mask-position: 50% 50%;
 	height: 500px;
 	width: 500px;
 }

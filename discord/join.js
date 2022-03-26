@@ -4,7 +4,7 @@ let template = require("../templates/guild.json");
 let deploy = require("./deploy-commands");
 
 /**
- *
+ * @desc Deploys commands to guild on 
  * @param { Guild } ev
  */
 module.exports.onJoin = async (ev) => {
