@@ -1,10 +1,17 @@
 const express = require("express");
 const app = express();
+const auth = require("./auth");
 const path = require("path");
 const PORT = process.env.PORT | 3000;
 
 module.exports.init = () => {
-	app.get("/api/:endpoint");
+	app.get("/auth", (req, res) => {
+		auth.authUser(req.query, req, res);
+	});
+
+	// app.get("/api/:endpoint", (req, res) => {
+
+	// });
 
 	app.use("/", express.static(path.join(__dirname, "public")));
 
