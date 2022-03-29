@@ -22,6 +22,11 @@ module.exports = {
 			(key) => user[key] === undefined && delete user[key]
 		);
 
+		// Key deletes itself after 60 seconds
+		setTimeout(() => {
+			firebase.setData({}, "pending_users", id);
+		}, 60000);
+
 		let data = {
 			guild: interaction.guildId,
 			discord: user,
