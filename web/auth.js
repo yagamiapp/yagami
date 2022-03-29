@@ -11,8 +11,6 @@ require("dotenv").config();
  * @param {response} res
  */
 module.exports.authUser = async (query, req, res) => {
-	console.log(query);
-
 	let osuReqBody = {
 		client_id: process.env.osuClientId,
 		client_secret: process.env.osuClientSecret,
@@ -29,8 +27,6 @@ module.exports.authUser = async (query, req, res) => {
 	});
 
 	authResponse = authResponse.data;
-
-	console.log(authResponse);
 
 	if (authResponse.error) {
 		res.writeHead(400);
