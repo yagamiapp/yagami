@@ -7,7 +7,7 @@ require("dotenv").config();
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName("auth")
+		.setName("link")
 		.setDescription("Links your osu! account to your Discord Account"),
 	/**
 	 *
