@@ -1,0 +1,18 @@
+{
+	"rules": {
+		"name": "",
+		"score_mode": 3,
+		"team_mode": 0,
+		"force_nf": true,
+		"mod_multipliers": {
+			"NM": 1.0,
+			"HD": 1.0,
+			"HR": 1.0,
+			"DT": 1.0,
+			"EZ": 1.5,
+			"FL": 1.0,
+			"SD": 1.0
+		}
+	},
+	"rounds": []
+}
