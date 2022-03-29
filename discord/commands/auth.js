@@ -31,7 +31,9 @@ module.exports = {
 
 		let link = `https://osu.ppy.sh/oauth/authorize/?client_id=${process.env.osuClientId}&redirect_uri=${process.env.osuRedirectURI}&response_type=code&state=${id}`;
 
-		let embed = new MessageEmbed().setColor("#123456").setDescription(link);
+		let embed = new MessageEmbed()
+			.setColor("#123456")
+			.setDescription(`[Click here to login with osu!](${link})`);
 		await interaction.editReply({ embeds: [embed] });
 	},
 	ephemeral: true,
