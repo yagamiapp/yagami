@@ -14,4 +14,5 @@ module.exports = {
 		await interaction.editReply("Pong!");
 	},
 	ephemeral: true,
+	defer: false,
 };
