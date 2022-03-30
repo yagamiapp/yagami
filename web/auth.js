@@ -69,9 +69,9 @@ module.exports.authUser = async (query, req, res) => {
 
 	let bot = discordClient.getBot();
 
-	bot.channels
-		.fetch(authReq.interaction.channel)
-		.messages.edit(authReq.interaction.message, { embeds: [embed] });
+	let channel = await bot.channels.fetch(authReq.interaction.channel);
 
-	bot.res.sendFile(path.join(__dirname, "auth.html"));
+	channel.messages.edit(authReq.interaction.message, { embeds: [embed] });
+
+	res.sendFile(path.join(__dirname, "auth.html"));
 };
