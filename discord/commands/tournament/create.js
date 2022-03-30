@@ -35,7 +35,7 @@ module.exports = {
 				Woohoo! 🥳 Your new tournament, \`${acronym}\` has been created!
 				Currently, your tournament's name is \`My Tournament\`, but you can change that!
 
-				**Here are the next steps to get things running:**
+				Here are the next steps to get things running:
 			`;
 			let embed = new MessageEmbed()
 				.setColor("#F88000")
@@ -56,7 +56,23 @@ module.exports = {
 					"Begin making your first mappool",
 					stripIndent`
 				\`\`\`
-				/mappool create
+				/rounds create
+				\`\`\`
+				`
+				)
+				.addField(
+					"Add teams to your tournament",
+					stripIndent`
+				\`\`\`
+				/teams create
+				\`\`\`
+				`
+				)
+				.addField(
+					"Make your first match",
+					stripIndent`
+				\`\`\`
+				/matches create
 				\`\`\`
 				`
 				);
