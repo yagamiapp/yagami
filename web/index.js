@@ -9,6 +9,12 @@ module.exports.init = () => {
 		auth.authUser(req.query, req, res);
 	});
 
+	app.get("/invite", (req, res) => {
+		res.redirect(
+			"https://discord.com/api/oauth2/authorize?client_id=956030276050493441&permissions=36843030592&scope=bot%20applications.commands"
+		);
+	});
+
 	// app.get("/api/:endpoint", (req, res) => {
 
 	// });
