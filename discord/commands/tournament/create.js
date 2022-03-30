@@ -33,8 +33,9 @@ module.exports = {
 
 			let message = stripIndent`
 				Woohoo! 🥳 Your new tournament, \`${acronym}\` has been created!
+				Currently, your tournament's name is \`My Tournament\`, but you can change that!
 
-				**Here are the next steps to get set up:**
+				**Here are the next steps to get things running:**
 			`;
 			let embed = new MessageEmbed()
 				.setColor("#F88000")
