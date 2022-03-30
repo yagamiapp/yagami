@@ -1,6 +1,8 @@
 const firebase = require("../firebase");
 const axios = require("axios");
 const path = require("path");
+const { MessageEmbed } = require("discord.js");
+const discordClient = require("../discord");
 const { request, response } = require("express");
 require("dotenv").config();
 
@@ -62,5 +64,14 @@ module.exports.authUser = async (query, req, res) => {
 
 	await firebase.setData({}, "pending_users", query.state);
 
-	res.sendFile(path.join(__dirname, "auth.html"));
+	// Update embed with Success message
+	let embed = new MessageEmbed().setTitle("Success!");
+
+	let bot = discordClient.getBot();
+
+	bot.channels
+		.fetch(authReq.interaction.channel)
+		.messages.edit(authReq.interaction.message, { embeds: [embed] });
+
+	bot.res.sendFile(path.join(__dirname, "auth.html"));
 };
