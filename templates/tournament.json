@@ -1,6 +1,6 @@
 {
 	"rules": {
-		"name": "",
+		"name": "My Tournament",
 		"score_mode": 3,
 		"team_mode": 0,
 		"force_nf": true,

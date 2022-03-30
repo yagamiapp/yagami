@@ -1,6 +1,6 @@
 //@ts-check
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { CommandInteraction } = require("discord.js");
+const { CommandInteraction, MessageEmbed } = require("discord.js");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -11,7 +11,11 @@ module.exports = {
 	 * @param {CommandInteraction} interaction
 	 */
 	async execute(interaction) {
-		await interaction.editReply("Pong!");
+		let embed = new MessageEmbed()
+			.setColor("#F88000")
+			.setDescription("🏓 Pong!");
+		await interaction.reply({ embeds: [embed] });
 	},
-	ephemeral: true,
+	ephemeral: false,
+	defer: false,
 };

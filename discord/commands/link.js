@@ -7,7 +7,7 @@ require("dotenv").config();
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName("auth")
+		.setName("link")
 		.setDescription("Links your osu! account to your Discord Account"),
 	/**
 	 *
@@ -30,6 +30,10 @@ module.exports = {
 		let data = {
 			guild: interaction.guildId,
 			discord: user,
+			interaction: {
+				channel: interaction.channelId,
+				message: interaction.id,
+			},
 		};
 
 		firebase.setData(data, "pending_users", id);
@@ -42,4 +46,5 @@ module.exports = {
 		await interaction.editReply({ embeds: [embed] });
 	},
 	ephemeral: true,
+	defer: true,
 };
