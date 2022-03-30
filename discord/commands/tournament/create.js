@@ -31,6 +31,14 @@ module.exports = {
 				acronym
 			);
 
+			await firebase.setData(
+				acronym,
+				"guilds",
+				interaction.guildId,
+				"tournaments",
+				"active_tournament"
+			);
+
 			let message = stripIndent`
 				Woohoo! 🥳 Your new tournament, \`${acronym}\` has been created!
 				Currently, your tournament's name is \`My Tournament\`, but you can change that!
