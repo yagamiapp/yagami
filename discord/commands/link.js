@@ -30,6 +30,10 @@ module.exports = {
 		let data = {
 			guild: interaction.guildId,
 			discord: user,
+			interaction: {
+				channel: interaction.channelId,
+				message: interaction.id,
+			},
 		};
 
 		firebase.setData(data, "pending_users", id);
