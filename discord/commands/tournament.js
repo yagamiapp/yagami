@@ -26,6 +26,33 @@ module.exports = {
 			subcommand
 				.setName("edit")
 				.setDescription("Edits the currently selected tournament")
+				.addStringOption((option) =>
+					option
+						.setName("name")
+						.setDescription("The name for your tournament")
+				)
+				.addStringOption((option) =>
+					option
+						.setName("acronym")
+						.setDescription("Change the acronym of your tournament")
+				)
+				.addIntegerOption((option) =>
+					option
+						.setName("score")
+						.setDescription(
+							"Changes the way scores are handled in the lobby"
+						)
+						.addChoice("Score", 0)
+						.addChoice("Combo", 1)
+						.addChoice("Accuracy", 2)
+						.addChoice("ScoreV2", 3)
+						.addChoice("ScoreV2 Accuracy", 4)
+				)
+				.addBooleanOption((option) =>
+					option
+						.setName("force_nf")
+						.setDescription("NF should be used with all maps")
+				)
 		),
 	/**
 	 *
@@ -47,6 +74,6 @@ module.exports = {
 			});
 		}
 	},
-	ephemeral: true,
+	ephemeral: false,
 	defer: true,
 };
