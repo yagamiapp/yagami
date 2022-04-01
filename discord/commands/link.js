@@ -23,8 +23,13 @@ module.exports = {
 		);
 
 		// Key deletes itself after 60 seconds
-		setTimeout(() => {
+		setTimeout(async () => {
 			firebase.setData({}, "pending_users", id);
+
+			let embed = new MessageEmbed()
+				.setDescription("Auth request timed out")
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
 		}, 60000);
 
 		let data = {
