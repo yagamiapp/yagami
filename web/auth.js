@@ -49,10 +49,10 @@ module.exports.authUser = async (query, req, res) => {
 	userData = userData.data;
 
 	let authReq = await firebase.getData("pending_users", query.state);
-
-	if (query.state == null) {
-		res.redirect(400, "/");
+	if (authReq == null) {
+		res.writeHead(400);
 		res.end();
+		return;
 	}
 
 	let userPayload = {
