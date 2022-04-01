@@ -2,8 +2,9 @@ const firebase = require("../firebase");
 const axios = require("axios");
 const path = require("path");
 const { MessageEmbed } = require("discord.js");
-const discordClient = require("../discord");
+const linkCommand = require("../discord/commands/link");
 const { request, response } = require("express");
+const { stripIndents } = require("common-tags/lib");
 require("dotenv").config();
 
 /**
@@ -65,13 +66,29 @@ module.exports.authUser = async (query, req, res) => {
 	await firebase.setData({}, "pending_users", query.state);
 
 	// Update embed with Success message
-	let embed = new MessageEmbed().setTitle("Success!");
+	let embed = new MessageEmbed()
+		.setThumbnail(userData.avatar_url)
+		.setTitle("Authorization Success!")
 
-	let bot = discordClient.getBot();
+		.setImage(userData.cover_url)
+		.setDescription(
+			stripIndents`
+			Successfully connected discord account to \`${userData.username}\`!
+			
+			**Rank**: \`#${userData.statistics.global_rank.toLocaleString()} (${
+				userData.statistics.pp
+			} pp)\`
+			**Accuracy**: \`${userData.statistics.hit_accuracy}%\` | **Level**: \`${
+				userData.statistics.level.current
+			}\`
+			**Total Score**: \`${userData.statistics.total_score}\`
+			`
+		)
+		.setColor("LUMINOUS_VIVID_PINK");
 
-	let channel = await bot.channels.fetch(authReq.interaction.channel);
+	let interaction = linkCommand[query.state];
+	interaction.editReply({ embeds: [embed] });
+	linkCommand.clearInteraction(query.state);
 
-	channel.messages.edit(authReq.interaction.message, { embeds: [embed] });
-
-	res.sendFile(path.join(__dirname, "auth.html"));
+	res.redirect("../authorized");
 };

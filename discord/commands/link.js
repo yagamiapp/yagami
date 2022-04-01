@@ -30,20 +30,20 @@ module.exports = {
 		let data = {
 			guild: interaction.guildId,
 			discord: user,
-			interaction: {
-				channel: interaction.channelId,
-				message: interaction.id,
-			},
 		};
 
 		firebase.setData(data, "pending_users", id);
-
 		let link = `https://osu.ppy.sh/oauth/authorize/?client_id=${process.env.osuClientId}&redirect_uri=${process.env.osuRedirectURI}&response_type=code&state=${id}`;
+
+		this[id] = interaction;
 
 		let embed = new MessageEmbed()
 			.setColor("#123456")
 			.setDescription(`[Click here to login with osu!](${link})`);
 		await interaction.editReply({ embeds: [embed] });
+	},
+	clearInteraction(id) {
+		this[id] = null;
 	},
 	ephemeral: true,
 	defer: true,
