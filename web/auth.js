@@ -50,6 +50,11 @@ module.exports.authUser = async (query, req, res) => {
 
 	let authReq = await firebase.getData("pending_users", query.state);
 
+	if (query.state == null) {
+		res.redirect(400, "/");
+		res.end();
+	}
+
 	let userPayload = {
 		osu: userData,
 		discord: authReq.discord,
@@ -91,4 +96,5 @@ module.exports.authUser = async (query, req, res) => {
 	linkCommand.clearInteraction(query.state);
 
 	res.redirect("../authorized");
+	res.end();
 };
