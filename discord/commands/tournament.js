@@ -38,7 +38,7 @@ module.exports = {
 				)
 				.addIntegerOption((option) =>
 					option
-						.setName("score")
+						.setName("score_mode")
 						.setDescription(
 							"Changes the way scores are handled in the lobby"
 						)
