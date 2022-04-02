@@ -47,6 +47,10 @@ module.exports = {
 			.setDescription(`[Click here to login with osu!](${link})`);
 		await interaction.editReply({ embeds: [embed] });
 	},
+	/**
+	 *
+	 * @param {string} id
+	 */
 	clearInteraction(id) {
 		this[id] = null;
 	},
