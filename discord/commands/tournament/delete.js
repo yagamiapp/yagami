@@ -16,9 +16,11 @@ module.exports = {
 		);
 
 		if (tourney == null) {
-			let embed = new MessageEmbed().setDescription(
-				`**Err**: No tournament with the acronym \`${acro}\` found.`
-			);
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: No tournament with the acronym \`${acro}\` found.`
+				)
+				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
