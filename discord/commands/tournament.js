@@ -13,7 +13,7 @@ module.exports = {
 				.addStringOption((option) =>
 					option
 						.setName("acronym")
-						.setDescription("The acronym for the tournament")
+						.setDescription("The acronym of the tournament")
 						.setRequired(true)
 				)
 		)
@@ -61,7 +61,21 @@ module.exports = {
 				.addStringOption((option) =>
 					option
 						.setName("acronym")
-						.setDescription("The acronym of the tournament ")
+						.setDescription("The acronym of the tournament")
+						.setRequired(true)
+				)
+		)
+		.addSubcommand((option) =>
+			option
+				.setName("activate")
+				.setDescription(
+					"Changes which tournament the other commands apply to"
+				)
+				.addStringOption((option) =>
+					option
+						.setName("acronym")
+						.setDescription("The acronym of the tournament")
+						.setRequired(true)
 				)
 		),
 	/**
