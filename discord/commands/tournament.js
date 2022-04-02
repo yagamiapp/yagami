@@ -27,7 +27,9 @@ module.exports = {
 				.setName("edit")
 				.setDescription("Edits the currently selected tournament")
 				.addStringOption((option) =>
-					option.setName("name").setDescription("The name for your tournament")
+					option
+						.setName("name")
+						.setDescription("The name for your tournament")
 				)
 				.addStringOption((option) =>
 					option
@@ -37,7 +39,9 @@ module.exports = {
 				.addIntegerOption((option) =>
 					option
 						.setName("score")
-						.setDescription("Changes the way scores are handled in the lobby")
+						.setDescription(
+							"Changes the way scores are handled in the lobby"
+						)
 						.addChoice("Score", 0)
 						.addChoice("Combo", 1)
 						.addChoice("Accuracy", 2)
@@ -65,7 +69,9 @@ module.exports = {
 	 * @param {CommandInteraction} interaction
 	 */
 	async execute(interaction) {
-		if (interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+		if (
+			interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
+		) {
 			let subcommand = interaction.options.getSubcommand();
 			let file = require("./tournament/" + subcommand + ".js");
 			await file.execute(interaction);
