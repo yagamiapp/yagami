@@ -5,13 +5,13 @@ const {
 	BanchoChannel,
 	BanchoLobbyPlayer,
 } = require("bancho.js");
-const settings = require("../settings.json");
 /**
  * @class
+ * @desc Represents a bancho lobby
  * @prop { BanchoMultiplayerChannel } channel The bancho channel the lobby is being hosted in
  * @public
  */
-class Match {
+class Lobby {
 	/**
 	 * Represents a tournament match
 	 * @param { BanchoClient } client The client used for sending messages and grabbing lobbies
@@ -31,17 +31,6 @@ class Match {
 		if (this.channel instanceof BanchoChannel) {
 			throw "Matches cannot be started in non-multiplayer rooms";
 		}
-		settings.rounds.forEach((el) => {
-			if (el.acronym === mappoolName) {
-				if (el.enabled) {
-					this.mappool = el;
-				} else {
-					throw "This mappool is currently disabled for use!";
-				}
-			} else {
-				throw "Mappool not found";
-			}
-		});
 
 		this.channel.on("message", (msg) => {
 			this.msgHandler(msg);
@@ -96,4 +85,4 @@ class Match {
 	}
 }
 
-module.exports.Match = Match;
+module.exports.Match = Lobby;
