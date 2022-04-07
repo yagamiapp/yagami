@@ -13,17 +13,14 @@ const {
  */
 class Lobby {
 	/**
-	 * Represents a tournament match
+	 *
 	 * @param { BanchoClient } client The client used for sending messages and grabbing lobbies
 	 * @param { string } ircName The name of the tournament match in IRC format
-	 * @param { string } mappoolName the mappool ID of the mappool to be used in this tournament
 	 */
-	constructor(client, ircName, mappoolName) {
+	constructor(client, ircName) {
 		this.client = client;
 		this.ircName = ircName;
-		this.mappoolName = mappoolName;
 		this.messages = [];
-		console.log(`Creating a ${mappoolName} match, in lobby ${ircName}.`);
 		/**
 		 * @type { BanchoMultiplayerChannel }
 		 */
@@ -31,20 +28,6 @@ class Lobby {
 		if (this.channel instanceof BanchoChannel) {
 			throw "Matches cannot be started in non-multiplayer rooms";
 		}
-
-		this.channel.on("message", (msg) => {
-			this.msgHandler(msg);
-		});
-
-		// Set up listeners
-		this.channel.lobby.on("matchFinished", () => {
-			console.log(this.channel.lobby.slots);
-		});
-
-		this.channel.lobby.on("allPlayersReady", () => {
-			this.channel.lobby.startMatch(5);
-			this.channel.sendMessage("glhf!");
-		});
 	}
 
 	/**
@@ -85,4 +68,4 @@ class Lobby {
 	}
 }
 
-module.exports.Match = Lobby;
+module.exports.Lobby = Lobby;
