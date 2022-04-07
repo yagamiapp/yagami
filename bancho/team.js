@@ -16,11 +16,11 @@ class Team {
 		this.players = players;
 	}
 	/**
-	 * @desc Used to compare scores to another team
+	 * @desc Compares one team to another based on the score mode
 	 * @public
 	 * @function
-	 * @param {Team} team A second team to compare the scores to
-	 * @returns { number } An Integer (1 if given tram's score is lower, -1 if given team's score is higher)
+	 * @param {Team} team A second team to compare to
+	 * @returns { number } Positive integer if this team "wins", negative if other team "wins"
 	 */
 	compareTo(team) {
 		let thisTeamScore = 0;
@@ -44,8 +44,7 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.players.forEach((player) => {
-			outputString +=
-				player.user.ircUsername + ": " + player.score + "; ";
+			outputString += player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}
