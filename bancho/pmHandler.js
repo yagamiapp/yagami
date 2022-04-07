@@ -1,10 +1,13 @@
+const { Lobby } = require("./lobby");
+const bancho = require("./index");
+
 module.exports.pmHandler = async (msg) => {
 	if (msg.message.startsWith("!join")) {
 		let command = msg.message.split(" ");
 		let channelName = command[1];
 		let mappoolName = command[2];
 		try {
-			let match = new Match(client, channelName, mappoolName);
+			let match = new Lobby(bancho.client, channelName, mappoolName);
 			await match.initializeMatch();
 			matches.push(match);
 		} catch (e) {
