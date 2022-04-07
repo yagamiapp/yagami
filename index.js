@@ -4,4 +4,4 @@ const bancho = require("./bancho");
 
 web.init();
 discord.init();
-// bancho.init();
+bancho.init();
