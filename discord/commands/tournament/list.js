@@ -1,6 +1,6 @@
 let firebase = require("../../../firebase");
 let { CommandInteraction, MessageEmbed } = require("discord.js");
-let { stripIndent } = require("common-tags");
+let { stripIndents } = require("common-tags");
 
 module.exports = {
 	/**
@@ -14,8 +14,6 @@ module.exports = {
 			"tournaments"
 		);
 
-		console.log(tournaments);
-
 		if (tournaments == null) {
 			let embed = new MessageEmbed()
 				.setTitle("No Tournaments Found")
@@ -28,21 +26,30 @@ module.exports = {
 		let active_tournament = tournaments[tournaments.active_tournament];
 
 		let embed = new MessageEmbed()
-			.setTitle(
-				"Tournaments in guild: **" + interaction.guild.name + "**"
-			)
+			.setTitle("Tournaments in this server:")
+			.setColor("#F88000")
 			.addField(
-				`Active Tournament: \`${tournaments.active_tournament}\``,
-				stripIndent`
-				\`\`\`
-				Name: ${active_tournament.rules.name}
-				Acronym: ${tournaments.active_tournament}
-				Score Mode: ${active_tournament.rules.score_mode}
-				Team Mode: ${active_tournament.rules.team_mode}
-				Force NF: ${active_tournament.rules.force_nf}
-				\`\`\`
-			`
+				`**Active Tournament: \`${tournaments.active_tournament}\`**`,
+				stripIndents`
+				**Name:** ${active_tournament.rules.name}
+				**Acronym:** ${tournaments.active_tournament}
+				**Score Mode:** ${active_tournament.rules.score_mode}
+				**Team Mode:** ${active_tournament.rules.team_mode}
+				**Force NF:** ${active_tournament.rules.force_nf}
+				`
 			);
+
+		let tourneyString = "";
+		for (const key in tournaments) {
+			if (key != tournaments.active_tournament && key != "active_tournament") {
+				const element = tournaments[key];
+				console.log(element);
+
+				tourneyString += `**${key}:** ${element.rules?.name}\n`;
+			}
+		}
+
+		embed.addField("Other Tournaments", tourneyString);
 
 		await interaction.editReply({ embeds: [embed] });
 	},
