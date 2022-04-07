@@ -1,3 +1,4 @@
+const { BanchoClient } = require("bancho.js");
 require("dotenv").config();
 const { pmHandler } = require("./pmHandler");
 
@@ -8,7 +9,7 @@ module.exports.init = () => {
 		apiKey: process.env.banchoAPIKey,
 	};
 
-	const client = new Banchojs.BanchoClient(credentials);
+	const client = new BanchoClient(credentials);
 
 	let matches = [];
 
@@ -18,6 +19,7 @@ module.exports.init = () => {
 			client.on("PM", (msg) => {
 				console.log(`${msg.user.ircUsername} >> ${msg.message}`);
 				pmHandler(msg);
+				module.exports.client = client;
 			});
 		})
 		.catch(console.error);
