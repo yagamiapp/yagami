@@ -43,7 +43,7 @@ module.exports = {
 			let latestTourney;
 			for (let key in tournaments) {
 				let element = tournaments[key];
-				if (!(element == acro)) {
+				if (!(element == acro) && !(key == "active_tournament")) {
 					latestTourney = key;
 				}
 			}
@@ -83,9 +83,8 @@ module.exports = {
 			);
 		}, 60000);
 
-		let embed = new MessageEmbed()
-			.setColor("DARK_RED")
-			.setTitle("⚠ WARNING ⚠").setDescription(stripIndents`
+		let embed = new MessageEmbed().setColor("DARK_RED").setTitle("⚠ WARNING ⚠")
+			.setDescription(stripIndents`
                     Deleting a tournament is **IRREVERSIBLE** and **CANNOT** be undone.
 
                     All of your matches, teams, mappools, and settings will be **lost FOREVER!**
