@@ -57,7 +57,11 @@ module.exports.pushData = async (data, ...reference) => {
 		oldData = val.val();
 	});
 
-	oldData.push(data);
+	if (oldData == null) {
+		currentRef.set([data]);
+		return;
+	}
 
+	oldData.push(data);
 	currentRef.set(oldData);
 };
