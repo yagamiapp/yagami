@@ -59,13 +59,7 @@ module.exports.authUser = async (query, req, res) => {
 		discord: authReq.discord,
 	};
 
-	await firebase.setData(
-		userPayload,
-		"guilds",
-		authReq.guild,
-		"users",
-		authReq.discord.id
-	);
+	await firebase.setData(userPayload, "users", authReq.discord.id);
 
 	await firebase.setData({}, "pending_users", query.state);
 
