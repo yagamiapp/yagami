@@ -48,8 +48,9 @@ module.exports = {
 				tourneyString += `**${key}:** ${element.rules?.name}\n`;
 			}
 		}
-
-		embed.addField("Other Tournaments", tourneyString);
+		if (!(tourneyString == "")) {
+			embed.addField("Other Tournaments", tourneyString);
+		}
 
 		await interaction.editReply({ embeds: [embed] });
 	},
