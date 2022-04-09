@@ -23,7 +23,7 @@ module.exports = {
 		);
 
 		// Key deletes itself after 60 seconds
-		setTimeout(async () => {
+		this["interaction-" + id] = setTimeout(async () => {
 			firebase.setData({}, "pending_users", id);
 
 			let embed = new MessageEmbed()
