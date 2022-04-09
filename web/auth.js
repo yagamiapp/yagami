@@ -57,6 +57,8 @@ module.exports.authUser = async (query, req, res) => {
 	let userPayload = {
 		osu: userData,
 		discord: authReq.discord,
+		access_token: authResponse.access_token,
+		last_profile_update: Date.now(),
 	};
 
 	await firebase.setData(userPayload, "users", authReq.discord.id);
