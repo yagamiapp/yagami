@@ -23,7 +23,7 @@ module.exports = {
 		);
 
 		// Key deletes itself after 60 seconds
-		this["interaction-" + id] = setTimeout(async () => {
+		this["interval-" + id] = setTimeout(async () => {
 			firebase.setData({}, "pending_users", id);
 
 			let embed = new MessageEmbed()
@@ -53,6 +53,15 @@ module.exports = {
 	 */
 	clearInteraction(id) {
 		this[id] = null;
+	},
+	/**
+	 *
+	 * @param {string} id
+	 */
+	removeInterval(id) {
+		let interval = this["interval-" + id];
+		clearInterval(interval);
+		this["interval-" + interval] = null;
 	},
 	ephemeral: true,
 	defer: true,

@@ -72,8 +72,7 @@ module.exports.authUser = async (query, req, res) => {
 	await firebase.setData({}, "pending_users", query.state);
 
 	// Cancel timeout message
-	let timeoutMessage = linkCommand["interaction-" + query.state];
-	clearTimeout(timeoutMessage);
+	linkCommand.removeInterval(query.state);
 
 	// Update embed with Success message
 	let embed = new MessageEmbed()
