@@ -23,15 +23,7 @@ module.exports = {
 		}
 
 		// Command updating for testing purposes
-		const slashCommands = [];
-
-		fs.readdirSync("./discord/commands")
-			.filter((file) => file.endsWith(".js"))
-			.forEach((file) => {
-				let fileModule = require("./commands/" + file);
-				slashCommands.push(fileModule.data);
-			});
-		commandUpdate.deployCommands(process.env.testGuildId, slashCommands);
+		commandUpdate.deployCommands(process.env.testGuildId);
 
 		// Command Handler
 		bot.on("interactionCreate", async (interaction) => {
