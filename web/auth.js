@@ -5,6 +5,7 @@ const { MessageEmbed } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { request, response } = require("express");
 const { stripIndents } = require("common-tags/lib");
+const { deployCommands } = require("../discord/deploy-commands");
 require("dotenv").config();
 
 /**
@@ -70,6 +71,10 @@ module.exports.authUser = async (query, req, res) => {
 
 	await firebase.setData({}, "pending_users", query.state);
 
+	// Cancel timeout message
+	let timeoutMessage = linkCommand["interaction-" + query.state];
+	clearTimeout(timeoutMessage);
+
 	// Update embed with Success message
 	let embed = new MessageEmbed()
 		.setThumbnail(userData.avatar_url)
@@ -85,8 +90,8 @@ module.exports.authUser = async (query, req, res) => {
 			} pp)\`
 			**Accuracy**: \`${userData.statistics.hit_accuracy}%\` | **Level**: \`${
 				userData.statistics.level.current
-			}\`
-			**Total Score**: \`${userData.statistics.total_score}\`
+			}.${userData.statistics.level.progress}\`
+			**Total Score**: \`${userData.statistics.total_score.toLocaleString()}\`
 			`
 		)
 		.setColor("LUMINOUS_VIVID_PINK");
@@ -94,6 +99,8 @@ module.exports.authUser = async (query, req, res) => {
 	let interaction = linkCommand[query.state];
 	interaction.editReply({ embeds: [embed] });
 	linkCommand.clearInteraction(query.state);
+
+	deployCommands(interaction.guildId);
 
 	res.redirect("../authorized");
 	res.end();
