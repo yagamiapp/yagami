@@ -1,5 +1,7 @@
 let { CommandInteraction } = require("discord.js");
 const firebase = require("../../../firebase");
+const { deployCommands } = require("../../deploy-commands");
+const linkCommand = require("./list");
 module.exports = {
 	/**
 	 *
@@ -57,5 +59,9 @@ module.exports = {
 			"tournaments",
 			"active_tournament"
 		);
+
+		linkCommand.execute(interaction);
+
+		deployCommands(interaction.guildId);
 	},
 };
