@@ -1,11 +1,9 @@
 const firebase = require("../firebase");
 const axios = require("axios");
-const path = require("path");
 const { MessageEmbed } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { request, response } = require("express");
 const { stripIndents } = require("common-tags/lib");
-const { deployCommands } = require("../discord/deploy-commands");
 require("dotenv").config();
 
 /**
@@ -98,8 +96,6 @@ module.exports.authUser = async (query, req, res) => {
 	let interaction = linkCommand[query.state];
 	interaction.editReply({ embeds: [embed] });
 	linkCommand.clearInteraction(query.state);
-
-	deployCommands(interaction.guildId);
 
 	res.redirect("../authorized");
 	res.end();

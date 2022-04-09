@@ -7,7 +7,8 @@ const { getData } = require("../firebase");
 module.exports.getCommand = async (id) => {
 	let command = new SlashCommandBuilder()
 		.setName("createteam")
-		.setDescription("Creates a team for the tournament");
+		.setDescription("Creates a team for the tournament")
+		.addStringOption((option) => option.setName("team_name").setRequired(true));
 
 	let activeTournament = await getData(
 		"guilds",

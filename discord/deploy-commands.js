@@ -1,6 +1,5 @@
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
-const { getCommand } = require("./createTeamCommandDeploy");
 const fs = require("fs");
 require("dotenv").config();
 /**
@@ -17,8 +16,6 @@ module.exports.deployCommands = async (guildId) => {
 			let fileModule = require("./commands/" + file);
 			if (!fileModule.dontPushByDefault) commands.push(fileModule.data);
 		});
-
-	commands.push(await getCommand(guildId));
 
 	const rest = new REST({ version: "9" }).setToken(process.env.discordToken);
 
