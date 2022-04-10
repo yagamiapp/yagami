@@ -29,7 +29,7 @@ module.exports = {
 			let embed = new MessageEmbed()
 				.setTitle("Error")
 				.setDescription(
-					`You are already registered to the tournament!\n\nUse \`/unregister\` to unregister.`
+					`You are already registered to the tournament!\n\nUse \`/deregister\` to deregister.`
 				)
 				.setColor("RED");
 			interaction.editReply({ embeds: [embed] });
