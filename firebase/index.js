@@ -70,8 +70,9 @@ module.exports.pushData = async (data, ...reference) => {
 module.exports.updateUser = async (interaction) => {
 	let user = await this.getData("users", interaction.user.id);
 
-	if (user == null || user.last_profile_update > Date.now() - 5 * 60 * 1000) {
-		return;
+	// Cache data for 5 minutes
+	if (user == null || user.last_profile_update < Date.now() + 5 * 60 * 1000) {
+		return user;
 	}
 
 	let userData;
@@ -141,8 +142,6 @@ module.exports.updateUser = async (interaction) => {
 		access_token: user.access_token,
 		last_profile_update: Date.now(),
 	};
-
-	console.log(userPayload);
 
 	await this.setData(userPayload, "users", interaction.user.id);
 
