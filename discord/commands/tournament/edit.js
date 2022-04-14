@@ -1,6 +1,6 @@
-let { CommandInteraction } = require("discord.js");
+let { CommandInteraction, MessageEmbed } = require("discord.js");
 const firebase = require("../../../firebase");
-const { deployCommands } = require("../../deploy-commands");
+let { stripIndents } = require("common-tags");
 module.exports = {
 	/**
 	 *
@@ -59,6 +59,20 @@ module.exports = {
 			"active_tournament"
 		);
 
-		deployCommands(interaction.guildId);
+		let embed = new MessageEmbed()
+			.setTitle("Successfully changed settings!")
+			.setColor("GREEN")
+			.setDescription(
+				stripIndents`
+				**Name:** ${tournament.rules.name}
+				**Acronym:** ${active_tournament}
+				**Score Mode:** ${tournament.rules.score_mode}
+				**Team Mode:** ${tournament.rules.team_mode}
+				**Team Size:** ${tournament.rules.team_size}
+				**Force NF:** ${tournament.rules.force_nf}
+				`
+			);
+
+		await interaction.editReply({ embeds: [embed] });
 	},
 };
