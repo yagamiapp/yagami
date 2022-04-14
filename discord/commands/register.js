@@ -63,7 +63,7 @@ module.exports = {
 		}
 
 		let team = {
-			name: "My Team",
+			name: user.osu.username + "'s team",
 			members: [user],
 		};
 
