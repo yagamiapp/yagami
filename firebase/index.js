@@ -11,8 +11,7 @@ var serviceAccount = {
 	project_id: "yagami-aef78",
 	private_key_id: process.env.firebasePrivateKeyId,
 	private_key: process.env.firebasePrivateKey,
-	client_email:
-		"firebase-adminsdk-2qxi3@yagami-aef78.iam.gserviceaccount.com",
+	client_email: "firebase-adminsdk-2qxi3@yagami-aef78.iam.gserviceaccount.com",
 	client_id: process.env.firebaseClientId,
 	auth_uri: "https://accounts.google.com/o/oauth2/auth",
 	token_uri: "https://oauth2.googleapis.com/token",
@@ -40,6 +39,7 @@ module.exports = {
 		await push(ref, data, reference);
 	},
 	updateUser: async (interaction) => {
-		await update(interaction);
+		let data = await update(ref, interaction);
+		return data;
 	},
 };

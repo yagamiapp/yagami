@@ -1,8 +1,9 @@
 const { set: setData } = require("./set");
+const { get: getData } = require("./get");
 require("dotenv").config();
 
 module.exports.update = async (ref, interaction) => {
-	let user = await this.getData("users", interaction.user.id);
+	let user = await getData(ref, ["users", interaction.user.id]);
 
 	// Cache data for 5 minutes
 	if (user == null || user.last_profile_update < Date.now() + 5 * 60 * 1000) {
@@ -14,8 +15,7 @@ module.exports.update = async (ref, interaction) => {
 
 	// Clear undefined keys from object
 	Object.keys(discordUserData).forEach(
-		(key) =>
-			discordUserData[key] === undefined && delete discordUserData[key]
+		(key) => discordUserData[key] === undefined && delete discordUserData[key]
 	);
 
 	try {
@@ -68,7 +68,7 @@ module.exports.update = async (ref, interaction) => {
 			last_profile_update: Date.now(),
 		};
 
-		await setData(userPayload, "users", interaction.user.id);
+		await setData(ref, userPayload, ["users", interaction.user.id]);
 	}
 
 	let userPayload = {
@@ -78,7 +78,7 @@ module.exports.update = async (ref, interaction) => {
 		last_profile_update: Date.now(),
 	};
 
-	await setData(userPayload, "users", interaction.user.id);
+	await setData(ref, userPayload, ["users", interaction.user.id]);
 
 	return userPayload;
 };

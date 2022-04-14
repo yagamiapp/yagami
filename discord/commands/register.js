@@ -25,7 +25,7 @@ module.exports = {
 			active_tournament
 		);
 
-		if (currentTournament.teams[interaction.user.id] != null) {
+		if (currentTournament.teams?.[interaction.user.id] != null) {
 			let embed = new MessageEmbed()
 				.setTitle("Error")
 				.setDescription(
