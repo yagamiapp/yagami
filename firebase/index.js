@@ -39,7 +39,6 @@ module.exports = {
 		await push(ref, data, reference);
 	},
 	updateUser: async (interaction) => {
-		let data = await update(ref, interaction);
-		return data;
+		return await update(ref, interaction);
 	},
 };
