@@ -22,20 +22,9 @@ module.exports = {
 	 * @param {CommandInteraction} interaction
 	 */
 	async execute(interaction) {
-		if (
-			interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
-		) {
-			let subcommand = interaction.options.getSubcommand();
-			let file = require("./team/" + subcommand + ".js");
-			await file.execute(interaction);
-		} else {
-			let embed = new MessageEmbed()
-				.setDescription("Missing Permissions")
-				.setColor("#FF6666");
-			await interaction.editReply({
-				embeds: [embed],
-			});
-		}
+		let subcommand = interaction.options.getSubcommand();
+		let file = require("./team/" + subcommand + ".js");
+		await file.execute(interaction);
 	},
 	ephemeral: true,
 	defer: true,
