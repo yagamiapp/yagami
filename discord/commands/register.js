@@ -25,6 +25,15 @@ module.exports = {
 			active_tournament
 		);
 
+		if (!currentTournament.settings.allow_registration) {
+			let embed = new MessageEmbed()
+				.setTitle("Error")
+				.setDescription("Registrations are closed.")
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		if (currentTournament.teams?.[interaction.user.id] != null) {
 			let embed = new MessageEmbed()
 				.setTitle("Error")
@@ -32,7 +41,7 @@ module.exports = {
 					`You are already registered to the tournament!\n\nUse \`/deregister\` to deregister.`
 				)
 				.setColor("RED");
-			interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 

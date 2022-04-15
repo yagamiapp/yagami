@@ -15,15 +15,9 @@ module.exports = {
 			"tournaments",
 			"active_tournament"
 		);
-		let tournament = await firebase.getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
 
 		// Replace data at acronym
-		let toggle = !tournament.settings.allow_registration;
+		let toggle = interaction.options.getBoolean("enabled");
 		firebase.setData(
 			toggle,
 			"guilds",
@@ -39,7 +33,7 @@ module.exports = {
 			.setColor("GREEN")
 			.setDescription(
 				stripIndents`
-                Toggled registration status to ${toggle}
+                Set registration status to ${toggle}
 				`
 			);
 
