@@ -1,11 +1,14 @@
 //@ts-check
-const { MessageEmbed } = require("discord.js");
+const { CommandInteraction, MessageEmbed } = require("discord.js");
 
 module.exports = {
+	/**
+	 *
+	 * @param {CommandInteraction} interaction
+	 */
 	async execute(interaction) {
-		let embed = new MessageEmbed()
-			.setColor("#F88000")
-			.setDescription("🏓 Pong!");
-		await interaction.editReply({ embeds: [embed] });
+		let user = interaction.options.getUser("user");
+		let dm = await user.createDM();
+		dm.send("Hi!");
 	},
 };
