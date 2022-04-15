@@ -10,6 +10,7 @@ const bot = new Client({
 
 module.exports = {
 	init() {
+		// Make Collection of commands
 		bot.commands = new Collection();
 		const commandFiles = fs
 			.readdirSync("./discord/commands")
@@ -20,6 +21,17 @@ module.exports = {
 			// Set a new item in the Collection
 			// With the key as the command name and the value as the exported module
 			bot.commands.set(command.data.name, command);
+		}
+
+		// Make collection of buttons
+		bot.buttons = new Collection();
+		const buttonFiles = fs
+			.readdirSync("./discord/buttons")
+			.filter((file) => file.endsWith(".js"));
+
+		for (const file of buttonFiles) {
+			const button = require(`./buttons/${file}`);
+			bot.buttons.set(button.data.customId, button);
 		}
 
 		// Command updating for testing purposes
@@ -44,6 +56,25 @@ module.exports = {
 				console.error(error);
 				await interaction.editReply({
 					content: "There was an error while executing this command!",
+					ephemeral: true,
+				});
+			}
+		});
+		// Button Handler
+		bot.on("interactionCreate", async (interaction) => {
+			if (!interaction.isButton()) return;
+			console.log(interaction.customId);
+
+			const button = bot.buttons.get(interaction.customId);
+
+			if (!button) return;
+
+			try {
+				await button.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				await interaction.reply({
+					content: "There was an error while executing this button!",
 					ephemeral: true,
 				});
 			}
