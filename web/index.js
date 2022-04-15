@@ -4,6 +4,7 @@ const app = express();
 const auth = require("./auth");
 const path = require("path");
 const redirects = require("./redirects.json");
+const api = require("./api");
 const PORT = process.env.PORT | 3000;
 
 module.exports.init = () => {
@@ -29,9 +30,10 @@ module.exports.init = () => {
 		});
 	}
 
-	// app.get("/api/:endpoint", (req, res) => {
-
-	// });
+	app.get("/api/:endpoint", async (req, res) => {
+		let { endpoint } = req.params;
+		await api.execute(endpoint, req, res);
+	});
 
 	app.use("/", express.static(path.join(__dirname, "public")));
 
