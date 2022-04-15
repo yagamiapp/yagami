@@ -61,6 +61,8 @@ module.exports.update = async (ref, interaction) => {
 		});
 		userData = userData.data;
 
+		delete userData.page;
+
 		let userPayload = {
 			osu: userData,
 			discord: discordUserData,

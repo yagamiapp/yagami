@@ -47,6 +47,8 @@ module.exports.authUser = async (query, req, res) => {
 	});
 	userData = userData.data;
 
+	delete userData.page;
+
 	let authReq = await firebase.getData("pending_users", query.state);
 	if (authReq == null) {
 		res.writeHead(400);
