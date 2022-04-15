@@ -93,6 +93,6 @@ module.exports.authUser = async (query, req, res) => {
 	interaction.editReply({ embeds: [embed] });
 	linkCommand.clearInteraction(query.state);
 
-	res.redirect("../authorized?id=" + authReq.discord.id);
+	res.redirect("../authorized/?id=" + authReq.discord.id);
 	res.end();
 };
