@@ -3,6 +3,7 @@ const { rateLimit } = require("express-rate-limit");
 const app = express();
 const auth = require("./auth");
 const path = require("path");
+const redirects = require("./redirects.json");
 const PORT = process.env.PORT | 3000;
 
 module.exports.init = () => {
@@ -20,11 +21,13 @@ module.exports.init = () => {
 		auth.authUser(req.query, req, res);
 	});
 
-	app.get("/invite", (req, res) => {
-		res.redirect(
-			"https://discord.com/api/oauth2/authorize?client_id=956030276050493441&permissions=36843030592&scope=bot%20applications.commands"
-		);
-	});
+	// Set up redirects
+	for (let i = 0; i < redirects.length; i++) {
+		let redirect = redirects[i];
+		app.get(redirect.path, (req, res) => {
+			res.redirect(redirect.dest);
+		});
+	}
 
 	// app.get("/api/:endpoint", (req, res) => {
 
