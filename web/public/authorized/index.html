@@ -120,7 +120,7 @@
 		let queryString = window.location.search;
 		let urlParams = new URLSearchParams(queryString);
 		let data = fetch(
-			"http://localhost:3000/api/get_user?u=" + urlParams.get("id")
+			"../api/get_user?u=" + urlParams.get("id")
 		)
 			.then((res) => res.json())
 			.then((res) => {
