@@ -1,10 +1,21 @@
 const express = require("express");
+const { rateLimit } = require("express-rate-limit");
 const app = express();
 const auth = require("./auth");
 const path = require("path");
 const PORT = process.env.PORT | 3000;
 
 module.exports.init = () => {
+	const limiter = rateLimit({
+		windowMs: 30 * 1000,
+		max: 15,
+		standardHeaders: true,
+		legacyHeaders: false,
+	});
+
+	// Apply the rate limiting middleware to all requests
+	app.use(limiter);
+
 	app.get("/auth", (req, res) => {
 		auth.authUser(req.query, req, res);
 	});
