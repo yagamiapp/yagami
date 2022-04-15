@@ -54,7 +54,8 @@ module.exports = {
 				name: inviterData.osu.username,
 				url: "https://osu.ppy.sh/u/" + inviterData.osu.id,
 			});
-		await interaction.editReply({
+
+		dm.send({
 			embeds: [embed],
 			components: [inviteAccept],
 		});
