@@ -1,6 +1,6 @@
 const firebase = require("../firebase");
 const axios = require("axios");
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, CommandInteraction } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { request, response } = require("express");
 const { stripIndents } = require("common-tags/lib");
@@ -91,9 +91,17 @@ module.exports.authUser = async (query, req, res) => {
 		)
 		.setColor("LUMINOUS_VIVID_PINK");
 
+	/**
+	 * @type {CommandInteraction}
+	 */
 	let interaction = linkCommand[query.state];
-	interaction.editReply({ embeds: [embed] });
-	linkCommand.clearInteraction(query.state);
+	await interaction.editReply({ embeds: [embed] });
+	try {
+		await interaction.member.setNickname(userData.username);
+	} catch (e) {
+		console.log("No permission to change nickname!");
+	}
+	interaction.linkCommand.clearInteraction(query.state);
 
 	res.redirect("../authorized/?id=" + authReq.discord.id);
 	res.end();
