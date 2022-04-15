@@ -22,6 +22,16 @@ module.exports = {
 			active_tournament
 		);
 
+		if (tournament.settings.allow_registration) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Error:** You cannot edit tournament settings while registration is allowed."
+				)
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		let acronym = active_tournament;
 		options.forEach((element) => {
 			let prop = element.name;
