@@ -101,7 +101,7 @@ module.exports.authUser = async (query, req, res) => {
 	} catch (e) {
 		console.log("No permission to change nickname!");
 	}
-	interaction.linkCommand.clearInteraction(query.state);
+	linkCommand.clearInteraction(query.state);
 
 	res.redirect("../authorized/?id=" + authReq.discord.id);
 	res.end();
