@@ -45,7 +45,7 @@ module.exports = {
 			return;
 		}
 		// In case registration is disabled
-		if (!tournament.settings.allow_registration) {
+		if (!tournament.allow_registration) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You cannot make changes to your team when registrations are closed.`
@@ -55,7 +55,7 @@ module.exports = {
 			return;
 		}
 		// In case the team size is 1
-		if (tournament.rules.team_size == 1) {
+		if (tournament.settings.team_size == 1) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You cannot invite a user if the team size is 1.`
@@ -85,7 +85,7 @@ module.exports = {
 			return;
 		}
 		// In case the team is full
-		if (inviterTournamentData.members.length >= tournament.rules.team_size) {
+		if (inviterTournamentData.members.length >= tournament.settings.team_size) {
 			let embed = new MessageEmbed()
 				.setDescription(`**Err**: Your team is full.`)
 				.setColor("RED");
@@ -134,15 +134,14 @@ module.exports = {
 				stripIndents`
 			You've received an invite to join a team from ${inviterData.osu.username}!
 
-			${inviterData.osu.username} has invited you to join the team, **${inviterTournamentData.name}**!
+			${inviterData.osu.username} has invited you to join the team, **${inviterTournamentData.name}** in **${tournament.settings.name}**!
 			`
 			)
 			.setColor(tournament.settings.color || "#F88000")
 			.setThumbnail("https://s.ppy.sh/a/" + inviterData.osu.id)
 			.setAuthor({
-				iconURL: "https://s.ppy.sh/a/" + inviterData.osu.id,
-				name: inviterData.osu.username,
-				url: "https://osu.ppy.sh/u/" + inviterData.osu.id,
+				iconURL: tournament.settings.icon_url,
+				name: tournament.settings.name,
 			})
 			.addField(`**${inviterTournamentData.name}:**`, teamString);
 

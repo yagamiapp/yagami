@@ -21,7 +21,7 @@ module.exports = {
 			active_tournament
 		);
 
-		if (!currentTournament.settings.allow_registration) {
+		if (!currentTournament.allow_registration) {
 			let embed = new MessageEmbed()
 				.setDescription("**Err**: Registrations are closed.")
 				.setColor("RED");
@@ -49,7 +49,8 @@ module.exports = {
 			members: [interaction.user.id],
 		};
 
-		if (currentTournament.rules.team_size == 1) team.name = user.osu.username;
+		if (currentTournament.settings.team_size == 1)
+			team.name = user.osu.username;
 
 		await setData(
 			team,
@@ -61,7 +62,7 @@ module.exports = {
 			interaction.user.id
 		);
 
-		if (currentTournament.rules.team_size == 1) {
+		if (currentTournament.settings.team_size == 1) {
 			let embed = new MessageEmbed()
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)
