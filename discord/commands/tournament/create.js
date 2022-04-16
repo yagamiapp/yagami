@@ -1,4 +1,3 @@
-let template = require("../../../templates/tournament.json");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const firebase = require("../../../firebase");
 let { stripIndent } = require("common-tags");
