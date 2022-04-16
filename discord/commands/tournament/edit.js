@@ -2,14 +2,13 @@ let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const firebase = require("../../../firebase");
 let { stripIndents } = require("common-tags");
+
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("edit")
 		.setDescription("Edits the currently selected tournament")
 		.addStringOption((option) =>
-			option
-				.setName("name")
-				.setDescription("The name for your tournament")
+			option.setName("name").setDescription("The name for your tournament")
 		)
 		.addStringOption((option) =>
 			option
@@ -19,9 +18,7 @@ module.exports = {
 		.addIntegerOption((option) =>
 			option
 				.setName("score_mode")
-				.setDescription(
-					"Changes the way scores are handled in the lobby"
-				)
+				.setDescription("Changes the way scores are handled in the lobby")
 				.addChoice("Score", 0)
 				.addChoice("Combo", 1)
 				.addChoice("Accuracy", 2)
@@ -56,7 +53,7 @@ module.exports = {
 			active_tournament
 		);
 
-		if (tournament.settings.allow_registration) {
+		if (tournament.allow_registration) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Error:** You cannot edit tournament settings while registration is allowed."
@@ -72,48 +69,59 @@ module.exports = {
 			if (prop == "acronym") {
 				acronym = element.value.toUpperCase();
 			} else {
-				tournament.rules[prop] = element.value;
+				tournament.settings[prop] = element.value;
 			}
 		});
 
-		// Clear data in database
-		firebase.setData(
-			{},
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
+		// If the acronym is changed, we need to update the active_tournament
+		if (acronym != active_tournament) {
+			// Clear data in database
+			firebase.setData(
+				{},
+				"guilds",
+				interaction.guildId,
+				"tournaments",
+				active_tournament
+			);
 
-		// Replace data at acronym
-		firebase.setData(
-			tournament,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			acronym
-		);
+			// Replace data at acronym
+			firebase.setData(
+				tournament,
+				"guilds",
+				interaction.guildId,
+				"tournaments",
+				acronym
+			);
 
-		// Change active tournament to acronym
-		firebase.setData(
-			acronym,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
+			// Change active tournament to acronym
+			firebase.setData(
+				acronym,
+				"guilds",
+				interaction.guildId,
+				"tournaments",
+				"active_tournament"
+			);
+		} else {
+			firebase.setData(
+				tournament,
+				"guilds",
+				interaction.guildId,
+				"tournaments",
+				active_tournament
+			);
+		}
 
 		let embed = new MessageEmbed()
 			.setTitle("Successfully changed settings!")
 			.setColor("GREEN")
 			.setDescription(
 				stripIndents`
-				**Name:** ${tournament.rules.name}
-				**Acronym:** ${active_tournament}
-				**Score Mode:** ${tournament.rules.score_mode}
-				**Team Mode:** ${tournament.rules.team_mode}
-				**Team Size:** ${tournament.rules.team_size}
-				**Force NF:** ${tournament.rules.force_nf}
+				**Name:** ${tournament.settings.name}
+				**Acronym:** ${acronym}
+				**Score Mode:** ${tournament.settings.score_mode}
+				**Team Mode:** ${tournament.settings.team_mode}
+				**Team Size:** ${tournament.settings.team_size}
+				**Force NF:** ${tournament.settings.force_nf}
 				`
 			);
 

@@ -32,7 +32,6 @@ module.exports = {
 			interaction.guildId,
 			"tournaments",
 			active_tournament,
-			"settings",
 			"allow_registration"
 		);
 

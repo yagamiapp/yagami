@@ -1,5 +1,5 @@
 {
-	"rules": {
+	"settings": {
 		"name": "My Tournament",
 		"score_mode": 3,
 		"team_mode": 0,
@@ -15,7 +15,5 @@
 		}
 	},
 	"rounds": [],
-	"settings": {
-		"allow_registration": false
-	}
+	"allow_registration": false
 }

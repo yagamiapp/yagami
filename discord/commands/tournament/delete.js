@@ -45,7 +45,7 @@ module.exports = {
 				"tournaments"
 			);
 
-			// Get last tournament in tourney list and
+			// Get last tournament in tourney list and set it to the active tournament
 			let latestTourney;
 			for (let key in tournaments) {
 				let element = tournaments[key];
@@ -54,13 +54,23 @@ module.exports = {
 				}
 			}
 
-			await firebase.setData(
-				latestTourney,
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				"active_tournament"
-			);
+			if (latestTourney == undefined) {
+				await firebase.setData(
+					null,
+					"guilds",
+					interaction.guildId,
+					"tournaments",
+					"active_tournament"
+				);
+			} else {
+				await firebase.setData(
+					latestTourney,
+					"guilds",
+					interaction.guildId,
+					"tournaments",
+					"active_tournament"
+				);
+			}
 
 			let embed = new MessageEmbed()
 				.setTitle("Successfully Deleted `" + acro + "`")
@@ -89,9 +99,8 @@ module.exports = {
 			);
 		}, 60000);
 
-		let embed = new MessageEmbed()
-			.setColor("DARK_RED")
-			.setTitle("⚠ WARNING ⚠").setDescription(stripIndents`
+		let embed = new MessageEmbed().setColor("DARK_RED").setTitle("⚠ WARNING ⚠")
+			.setDescription(stripIndents`
                     Deleting a tournament is **IRREVERSIBLE** and **CANNOT** be undone.
 
                     All of your matches, teams, mappools, and settings will be **lost FOREVER!**

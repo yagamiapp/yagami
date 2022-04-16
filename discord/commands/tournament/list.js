@@ -31,24 +31,21 @@ module.exports = {
 			.addField(
 				`**Active Tournament: \`${tournaments.active_tournament}\`**`,
 				stripIndents`
-				**Name:** ${active_tournament.rules.name}
+				**Name:** ${active_tournament.settings.name}
 				**Acronym:** ${tournaments.active_tournament}
-				**Score Mode:** ${active_tournament.rules.score_mode}
-				**Team Mode:** ${active_tournament.rules.team_mode}
-				**Force NF:** ${active_tournament.rules.force_nf}
+				**Score Mode:** ${active_tournament.settings.score_mode}
+				**Team Mode:** ${active_tournament.settings.team_mode}
+				**Force NF:** ${active_tournament.settings.force_nf}
 				`
 			);
 
 		let tourneyString = "";
 		for (const key in tournaments) {
-			if (
-				key != tournaments.active_tournament &&
-				key != "active_tournament"
-			) {
+			if (key != tournaments.active_tournament && key != "active_tournament") {
 				const element = tournaments[key];
 				console.log(element);
 
-				tourneyString += `**${key}:** ${element.rules?.name}\n`;
+				tourneyString += `**${key}:** ${element.settings?.name}\n`;
 			}
 		}
 		if (!(tourneyString == "")) {
