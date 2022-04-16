@@ -1,4 +1,9 @@
-const { MessageButton, ButtonInteraction, Message } = require("discord.js");
+const {
+	MessageButton,
+	ButtonInteraction,
+	Message,
+	MessageEmbed,
+} = require("discord.js");
 
 module.exports = {
 	data: new MessageButton()
@@ -9,7 +14,10 @@ module.exports = {
 	 *
 	 * @param {ButtonInteraction} interaction
 	 */
-	async execute(interaction) {
-		interaction.update("Declining invite...");
+	async execute(interaction, command) {
+		let embed = new MessageEmbed()
+			.setTitle("✅ Invite Declined")
+			.setColor("RED");
+		interaction.update({ content: null, embeds: [embed], components: [] });
 	},
 };

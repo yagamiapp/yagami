@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { CommandInteraction, MessageEmbed } = require("discord.js");
-const { setData, getData, pushData, updateUser } = require("../../firebase");
+const { setData, getData, updateUser } = require("../../firebase");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -34,7 +34,7 @@ module.exports = {
 			return;
 		}
 
-		if (currentTournament.teams?.[interaction.user.id] != null) {
+		if (currentTournament.users?.[interaction.user.id] != null) {
 			let embed = new MessageEmbed()
 				.setTitle("Error")
 				.setDescription(
@@ -47,20 +47,27 @@ module.exports = {
 
 		let user = await updateUser(interaction);
 
-		user.access_token = null;
-		user.last_profile_update = null;
+		// user.access_token = null;
+		// user.last_profile_update = null;
+
+		let team = {
+			name: user.osu.username + "'s team",
+			members: [interaction.user.id],
+		};
+
+		if (currentTournament.rules.team_size == 1) team.name = user.osu.username;
+
+		await setData(
+			team,
+			"guilds",
+			interaction.guildId,
+			"tournaments",
+			active_tournament,
+			"users",
+			interaction.user.id
+		);
 
 		if (currentTournament.rules.team_size == 1) {
-			await setData(
-				user,
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				active_tournament,
-				"teams",
-				interaction.user.id
-			);
-
 			let embed = new MessageEmbed()
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)
@@ -70,21 +77,6 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
-
-		let team = {
-			name: user.osu.username + "'s team",
-			members: [user],
-		};
-
-		await setData(
-			team,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament,
-			"teams",
-			interaction.user.id
-		);
 
 		let embed = new MessageEmbed()
 			.setTitle("Registered")
