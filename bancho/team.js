@@ -1,22 +1,12 @@
 /**
  * A collection of BanchoLobbyUser objects
  */
-
-const { BanchoLobbyPlayer, BanchoLobbyPlayerScore } = require("bancho.js");
-
-/**
- *
- */
 class Team {
-	/**
-	 * @constructor
-	 * @param  {...BanchoLobbyPlayer} players A list of players on the team
-	 */
 	constructor(...players) {
 		this.players = players;
 	}
 	/**
-	 * @desc Compares one team to another based on the score mode
+	 * Compares one team to another based on the score mode
 	 * @public
 	 * @function
 	 * @param {Team} team A second team to compare to
@@ -44,7 +34,8 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.players.forEach((player) => {
-			outputString += player.user.ircUsername + ": " + player.score + "; ";
+			outputString +=
+				player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}

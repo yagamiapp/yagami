@@ -1,17 +1,8 @@
 const { stripIndents } = require("common-tags/lib");
-const {
-	CommandInteraction,
-	MessageEmbed,
-	MessageActionRow,
-	MessageButton,
-} = require("discord.js");
+const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
 const { getData } = require("../../../firebase");
 
 module.exports = {
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let active_tournament = await getData(
 			"guilds",
@@ -29,13 +20,15 @@ module.exports = {
 		// Get data of invitee
 		let invitee = interaction.options.getUser("user");
 		let inviteeData = await getData("users", invitee.id);
-		let inviteeTournamentData = tournament.users?.[invitee.id];
 		// Get data of inviter
 		let inviterData = await getData("users", interaction.user.id);
 		let inviterTournamentData = tournament.users?.[interaction.user.id];
 
 		// In case the user is not in a team
-		if (inviterTournamentData == null || inviterTournamentData.name == null) {
+		if (
+			inviterTournamentData == null ||
+			inviterTournamentData.name == null
+		) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You cannot invite a user if you do not own a team.`

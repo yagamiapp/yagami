@@ -18,7 +18,7 @@ module.exports.init = () => {
 	// Apply the rate limiting middleware to all requests
 	app.use(limiter);
 
-	app.get("/auth", (req, res) => {
+	app.get("/auth", (req, res) => { // lgtm [js/missing-rate-limiting]
 		auth.authUser(req.query, req, res);
 	});
 
@@ -37,7 +37,7 @@ module.exports.init = () => {
 
 	app.use("/", express.static(path.join(__dirname, "public")));
 
-	app.get("*", (req, res) => {
+	app.get("*", (req, res) => { // lgtm [js/missing-rate-limiting]
 		res.status(404).sendFile(path.join(__dirname, "404.html"));
 	});
 

@@ -1,6 +1,4 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { CommandInteraction, Permissions, MessageEmbed } = require("discord.js");
-const fs = require("fs");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -17,10 +15,6 @@ module.exports = {
 						.setRequired(true)
 				)
 		),
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let subcommand = interaction.options.getSubcommand();
 		let file = require("./team/" + subcommand + ".js");

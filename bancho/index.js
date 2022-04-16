@@ -11,8 +11,6 @@ module.exports.init = () => {
 
 	const client = new BanchoClient(credentials);
 
-	let matches = [];
-
 	client
 		.connect()
 		.then(async () => {

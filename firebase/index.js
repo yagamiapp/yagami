@@ -4,14 +4,14 @@ const { get } = require("./get"),
 	{ set } = require("./set"),
 	{ push } = require("./push"),
 	{ update } = require("./update");
-const axios = require("axios").default;
 
 var serviceAccount = {
 	type: "service_account",
 	project_id: "yagami-aef78",
 	private_key_id: process.env.firebasePrivateKeyId,
 	private_key: process.env.firebasePrivateKey,
-	client_email: "firebase-adminsdk-2qxi3@yagami-aef78.iam.gserviceaccount.com",
+	client_email:
+		"firebase-adminsdk-2qxi3@yagami-aef78.iam.gserviceaccount.com",
 	client_id: process.env.firebaseClientId,
 	auth_uri: "https://accounts.google.com/o/oauth2/auth",
 	token_uri: "https://oauth2.googleapis.com/token",

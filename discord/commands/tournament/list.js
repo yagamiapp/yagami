@@ -1,12 +1,8 @@
 let firebase = require("../../../firebase");
-let { CommandInteraction, MessageEmbed } = require("discord.js");
+let { MessageEmbed } = require("discord.js");
 let { stripIndents } = require("common-tags");
 
 module.exports = {
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let tournaments = await firebase.getData(
 			"guilds",
@@ -41,7 +37,10 @@ module.exports = {
 
 		let tourneyString = "";
 		for (const key in tournaments) {
-			if (key != tournaments.active_tournament && key != "active_tournament") {
+			if (
+				key != tournaments.active_tournament &&
+				key != "active_tournament"
+			) {
 				const element = tournaments[key];
 				console.log(element);
 

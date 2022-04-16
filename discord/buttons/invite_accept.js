@@ -1,10 +1,4 @@
-const {
-	MessageButton,
-	ButtonInteraction,
-	Message,
-	MessageActionRow,
-	MessageEmbed,
-} = require("discord.js");
+const { MessageButton, MessageActionRow, MessageEmbed } = require("discord.js");
 const { getData, setData } = require("../../firebase");
 
 module.exports = {
@@ -12,10 +6,6 @@ module.exports = {
 		.setCustomId("invite_accept")
 		.setLabel("Accept")
 		.setStyle("PRIMARY"),
-	/**
-	 *
-	 * @param {ButtonInteraction} interaction
-	 */
 	async execute(interaction, command) {
 		let active_tournament = await getData(
 			"guilds",
@@ -63,7 +53,10 @@ module.exports = {
 					"You are already in a team. Joining this team will remove you from your current team."
 				)
 				.setColor("RED");
-			await interaction.update({ embeds: [embed], components: [inviteAccept] });
+			await interaction.update({
+				embeds: [embed],
+				components: [inviteAccept],
+			});
 			return;
 		}
 
@@ -71,7 +64,9 @@ module.exports = {
 			memberOf: command.options.user,
 		};
 
-		tournament.users[command.options.user].members.push(interaction.user.id);
+		tournament.users[command.options.user].members.push(
+			interaction.user.id
+		);
 
 		let embed = new MessageEmbed()
 			.setTitle("✅ Invite Accepted ✅")
@@ -88,7 +83,9 @@ module.exports = {
 		let tourneyGuild = await interaction.client.guilds.fetch(
 			command.options.guild
 		);
-		let tourneyMember = await tourneyGuild.members.fetch(command.options.user);
+		let tourneyMember = await tourneyGuild.members.fetch(
+			command.options.user
+		);
 
 		let dm = await tourneyMember.createDM();
 		let dmEmbed = new MessageEmbed()

@@ -1,10 +1,6 @@
-let { CommandInteraction, MessageEmbed } = require("discord.js");
+let { MessageEmbed } = require("discord.js");
 const firebase = require("../../../firebase");
 module.exports = {
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
 

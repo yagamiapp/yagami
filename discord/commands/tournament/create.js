@@ -1,13 +1,9 @@
 let template = require("../../../templates/tournament.json");
 const firebase = require("../../../firebase");
 let { stripIndent } = require("common-tags");
-let { CommandInteraction, MessageEmbed } = require("discord.js");
+let { MessageEmbed } = require("discord.js");
 
 module.exports = {
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let acronym = interaction.options.getString("acronym");
 		acronym = acronym.toUpperCase();

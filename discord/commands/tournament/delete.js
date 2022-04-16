@@ -1,11 +1,7 @@
 const { stripIndents } = require("common-tags/lib");
-const { CommandInteraction, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const firebase = require("../../../firebase");
 module.exports = {
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
 		let tourney = await firebase.getData(
@@ -83,8 +79,9 @@ module.exports = {
 			);
 		}, 60000);
 
-		let embed = new MessageEmbed().setColor("DARK_RED").setTitle("⚠ WARNING ⚠")
-			.setDescription(stripIndents`
+		let embed = new MessageEmbed()
+			.setColor("DARK_RED")
+			.setTitle("⚠ WARNING ⚠").setDescription(stripIndents`
                     Deleting a tournament is **IRREVERSIBLE** and **CANNOT** be undone.
 
                     All of your matches, teams, mappools, and settings will be **lost FOREVER!**

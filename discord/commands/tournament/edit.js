@@ -1,11 +1,7 @@
-let { CommandInteraction, MessageEmbed } = require("discord.js");
+let { MessageEmbed } = require("discord.js");
 const firebase = require("../../../firebase");
 let { stripIndents } = require("common-tags");
 module.exports = {
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let options = interaction.options.data[0].options;
 

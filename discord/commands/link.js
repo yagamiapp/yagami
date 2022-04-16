@@ -1,6 +1,6 @@
 //@ts-check
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { CommandInteraction, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const crypto = require("crypto");
 const firebase = require("../../firebase");
 require("dotenv").config();
@@ -9,10 +9,6 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("link")
 		.setDescription("Links your osu! account to your Discord Account"),
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		var id = crypto.randomBytes(5).toString("hex");
 		let user = interaction.user.toJSON();

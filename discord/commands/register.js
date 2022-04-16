@@ -1,15 +1,11 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { CommandInteraction, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const { setData, getData, updateUser } = require("../../firebase");
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("register")
 		.setDescription("Make a new team and register to the tournament"),
-	/**
-	 *
-	 * @param {CommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		let active_tournament = await getData(
 			"guilds",
@@ -55,7 +51,8 @@ module.exports = {
 			members: [interaction.user.id],
 		};
 
-		if (currentTournament.rules.team_size == 1) team.name = user.osu.username;
+		if (currentTournament.rules.team_size == 1)
+			team.name = user.osu.username;
 
 		await setData(
 			team,
@@ -72,7 +69,9 @@ module.exports = {
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)
 				.setColor("#F88000")
-				.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png");
+				.setThumbnail(
+					"https://yagami.clxxiii.dev/static/yagami%20var.png"
+				);
 
 			await interaction.editReply({ embeds: [embed] });
 			return;
