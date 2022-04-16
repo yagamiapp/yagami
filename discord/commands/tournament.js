@@ -21,15 +21,13 @@ for (const file of subcommandFiles) {
 module.exports = {
 	data,
 	async execute(interaction) {
-		if (
-			interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
-		) {
+		if (interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
 			let subcommand = interaction.options.getSubcommand();
 			let file = subcommands[subcommand];
 			await file.execute(interaction);
 		} else {
 			let embed = new MessageEmbed()
-				.setDescription("Missing Permissions")
+				.setDescription("**Err**: Missing Permissions")
 				.setColor("#FF6666");
 			await interaction.editReply({
 				embeds: [embed],

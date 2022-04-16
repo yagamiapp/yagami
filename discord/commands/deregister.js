@@ -23,9 +23,8 @@ module.exports = {
 		// In case the user is not registered
 		if (currentTournament?.users?.[interaction.user.id]?.name == null) {
 			let embed = new MessageEmbed()
-				.setTitle("Error")
 				.setDescription(
-					`You cannot deregister unless you are the owner of the team`
+					`**Err**: You cannot deregister unless you are the owner of the team`
 				)
 				.setColor("RED");
 			interaction.editReply({ embeds: [embed] });

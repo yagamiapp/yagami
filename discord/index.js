@@ -1,4 +1,4 @@
-const { Client, Intents, Collection } = require("discord.js");
+const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
 const commandUpdate = require("./deploy-commands");
 const fs = require("fs");
 const join = require("./join");
@@ -54,8 +54,13 @@ module.exports = {
 				await command.execute(interaction);
 			} catch (error) {
 				console.error(error);
+				let embed = new MessageEmbed()
+					.setColor("#ff0000")
+					.setDescription(
+						"**Err**: There was an error while executing this command!"
+					);
 				await interaction.editReply({
-					content: "There was an error while executing this command!",
+					embeds: [embed],
 					ephemeral: true,
 				});
 			}
@@ -83,8 +88,13 @@ module.exports = {
 				await button.execute(interaction, command);
 			} catch (error) {
 				console.error(error);
+				let embed = new MessageEmbed()
+					.setColor("#ff0000")
+					.setDescription(
+						"**Err**: There was an error while executing this button!"
+					);
 				await interaction.reply({
-					content: "There was an error while executing this button!",
+					embeds: [embed],
 					ephemeral: true,
 				});
 			}

@@ -16,8 +16,8 @@ module.exports = {
 
 		if (tournaments == null) {
 			let embed = new MessageEmbed()
-				.setTitle("No Tournaments Found")
-				.setColor("#FF4444");
+				.setDescription("**Err**:No Tournaments Found")
+				.setColor("RED");
 
 			await interaction.editReply({ embeds: [embed] });
 			return;
@@ -41,6 +41,7 @@ module.exports = {
 				Score Mode: ${active_tournament.settings.score_mode}
 				Team Mode: ${active_tournament.settings.team_mode}
 				Force NF: ${active_tournament.settings.force_nf}
+				Team Size: ${active_tournament.settings.team_size}
 				\`\`\`
 				`
 			);

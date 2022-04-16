@@ -75,7 +75,7 @@ module.exports = {
 		if (tournament.allow_registration) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					"**Error:** You cannot edit tournament settings while registration is allowed."
+					"**Err**: You cannot edit tournament settings while registration is allowed."
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
@@ -89,7 +89,7 @@ module.exports = {
 		) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					"**Error:** The icon url you provided is not a valid image."
+					"**Err**: The icon url you provided is not a valid image."
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
@@ -104,7 +104,7 @@ module.exports = {
 		) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					"**Error:** The color you provided is not a valid hex color."
+					"**Err**: The color you provided is not a valid hex color."
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });

@@ -75,7 +75,7 @@ module.exports = {
 
 			let embed = new MessageEmbed()
 				.setDescription(
-					"**Error**: A tournament with the acronym `" +
+					"**Err**: A tournament with the acronym `" +
 						acronym +
 						"` already exists in this guild!"
 				)

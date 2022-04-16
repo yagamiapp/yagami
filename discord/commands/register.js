@@ -23,8 +23,7 @@ module.exports = {
 
 		if (!currentTournament.settings.allow_registration) {
 			let embed = new MessageEmbed()
-				.setTitle("Error")
-				.setDescription("Registrations are closed.")
+				.setDescription("**Err**: Registrations are closed.")
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
@@ -32,9 +31,8 @@ module.exports = {
 
 		if (currentTournament.users?.[interaction.user.id] != null) {
 			let embed = new MessageEmbed()
-				.setTitle("Error")
 				.setDescription(
-					`You are already registered to the tournament!\n\nUse \`/deregister\` to deregister.`
+					`**Err**: You are already registered to the tournament!\n\nUse \`/deregister\` to deregister.`
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
@@ -51,8 +49,7 @@ module.exports = {
 			members: [interaction.user.id],
 		};
 
-		if (currentTournament.rules.team_size == 1)
-			team.name = user.osu.username;
+		if (currentTournament.rules.team_size == 1) team.name = user.osu.username;
 
 		await setData(
 			team,
@@ -69,9 +66,7 @@ module.exports = {
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)
 				.setColor("#F88000")
-				.setThumbnail(
-					"https://yagami.clxxiii.dev/static/yagami%20var.png"
-				);
+				.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png");
 
 			await interaction.editReply({ embeds: [embed] });
 			return;
