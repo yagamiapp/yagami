@@ -23,6 +23,16 @@ module.exports = {
 			"tournaments",
 			active_tournament
 		);
+		// In case the team size is 1
+		if (currentTournament.settings.team_size == 1) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: You cannot edit your team if the team size is 1.`
+				)
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
 
 		// In case the user does not own a team
 		if (!currentTournament.users[interaction.user.id].name) {

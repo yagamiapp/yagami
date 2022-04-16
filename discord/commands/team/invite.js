@@ -84,6 +84,14 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
+		// In case the team is full
+		if (inviterTournamentData.members.length >= tournament.rules.team_size) {
+			let embed = new MessageEmbed()
+				.setDescription(`**Err**: Your team is full.`)
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
 
 		let dm = await invitee.createDM();
 		let inviteAccept = new MessageActionRow().addComponents(
