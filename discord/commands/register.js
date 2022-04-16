@@ -47,6 +47,7 @@ module.exports = {
 		let team = {
 			name: user.osu.username + "'s team",
 			members: [interaction.user.id],
+			icon_url: "https://s.ppy.sh/a/" + user.osu.id,
 		};
 
 		if (currentTournament.settings.team_size == 1)
@@ -67,7 +68,7 @@ module.exports = {
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)
 				.setColor("#F88000")
-				.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png");
+				.setThumbnail(team.icon_url);
 
 			await interaction.editReply({ embeds: [embed] });
 			return;
@@ -79,7 +80,7 @@ module.exports = {
 				`You have been registered to the tournament!\n\nYou can change your team name and invite players with /team`
 			)
 			.setColor("#F88000")
-			.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png");
+			.setThumbnail(team.icon_url);
 
 		await interaction.editReply({ embeds: [embed] });
 	},

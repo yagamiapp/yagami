@@ -86,7 +86,10 @@ module.exports = {
 			.setTitle("See you next time!")
 			.setDescription(`Successfully deregistered to the tournament!`)
 			.setColor("#F88000")
-			.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png");
+			.setThumbnail(
+				currentTournament.settings.icon_url ||
+					"https://yagami.clxxiii.dev/static/yagami%20var.png"
+			);
 
 		await interaction.editReply({ embeds: [embed] });
 		return;

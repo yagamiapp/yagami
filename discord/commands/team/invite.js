@@ -148,8 +148,10 @@ module.exports = {
 			${inviterData.osu.username} has invited you to join the team, **${inviterTournamentData.name}** in **${tournament.settings.name}**!
 			`
 			)
-			.setColor(tournament.settings.color || "#F88000")
-			.setThumbnail("https://s.ppy.sh/a/" + inviterData.osu.id)
+			.setColor(
+				inviterTournamentData.color || tournament.settings.color || "#F88000"
+			)
+			.setThumbnail(inviterTournamentData.icon_url)
 			.setAuthor({
 				iconURL: tournament.settings.icon_url,
 				name: tournament.settings.name,
