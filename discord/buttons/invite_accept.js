@@ -22,44 +22,6 @@ module.exports = {
 
 		let userData = await getData("users", interaction.user.id);
 
-		if (
-			tournament.users[interaction.user.id] != null &&
-			!command.options.team_override
-		) {
-			let inviteAccept = new MessageActionRow().addComponents(
-				new MessageButton()
-					.setCustomId(
-						"invite_accept?user=" +
-							interaction.user.id +
-							"&guild=" +
-							command.options.guild +
-							"&team_override=true"
-					)
-					.setLabel("I'm sure")
-					.setStyle("PRIMARY"),
-				new MessageButton()
-					.setCustomId(
-						"invite_decline?user=" +
-							interaction.user.id +
-							"&guild=" +
-							command.options.guild
-					)
-					.setLabel("Nevermind")
-					.setStyle("DANGER")
-			);
-			let embed = new MessageEmbed()
-				.setTitle("⚠ Warning ⚠")
-				.setDescription(
-					"You are already in a team. Joining this team will remove you from your current team."
-				)
-				.setColor("RED");
-			await interaction.update({
-				embeds: [embed],
-				components: [inviteAccept],
-			});
-			return;
-		}
-
 		tournament.users[interaction.user.id] = {
 			memberOf: command.options.user,
 		};

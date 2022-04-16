@@ -30,6 +30,7 @@ module.exports = {
 		// Get data of invitee
 		let invitee = interaction.options.getUser("user");
 		let inviteeData = await getData("users", invitee.id);
+		let inviteeTournamentData = tournament.users?.[invitee.id];
 		// Get data of inviter
 		let inviterData = await getData("users", interaction.user.id);
 		let inviterTournamentData = tournament.users?.[interaction.user.id];
@@ -88,6 +89,16 @@ module.exports = {
 		if (inviterTournamentData.members.length >= tournament.settings.team_size) {
 			let embed = new MessageEmbed()
 				.setDescription(`**Err**: Your team is full.`)
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+		// In case the user is already in a team
+		if (inviteeTournamentData != null) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: User \`${inviteeData.osu.username}\` is already in a team.`
+				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
