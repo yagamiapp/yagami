@@ -35,10 +35,7 @@ module.exports = {
 		let inviterTournamentData = tournament.users?.[interaction.user.id];
 
 		// In case the user is not in a team
-		if (
-			inviterTournamentData == null ||
-			inviterTournamentData.name == null
-		) {
+		if (inviterTournamentData == null || inviterTournamentData.name == null) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You cannot invite a user if you do not own a team.`
@@ -132,7 +129,7 @@ module.exports = {
 			${inviterData.osu.username} has invited you to join the team, **${inviterTournamentData.name}**!
 			`
 			)
-			.setColor("#F88000")
+			.setColor(tournament.settings.color || "#F88000")
 			.setThumbnail("https://s.ppy.sh/a/" + inviterData.osu.id)
 			.setAuthor({
 				iconURL: "https://s.ppy.sh/a/" + inviterData.osu.id,
@@ -149,7 +146,8 @@ module.exports = {
 		embed = new MessageEmbed()
 			.setTitle(`Invite sent to ${inviteeData.osu.username}!`)
 			.setDescription("We'll send you a DM if they accept.")
-			.setColor("#F88000");
+			.setColor(tournament.settings.color || "#F88000")
+			.setThumbnail("https://s.ppy.sh/a/" + inviteeData.osu.id);
 		await interaction.editReply({ embeds: [embed] });
 	},
 };

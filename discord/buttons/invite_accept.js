@@ -64,9 +64,7 @@ module.exports = {
 			memberOf: command.options.user,
 		};
 
-		tournament.users[command.options.user].members.push(
-			interaction.user.id
-		);
+		tournament.users[command.options.user].members.push(interaction.user.id);
 
 		let embed = new MessageEmbed()
 			.setTitle("✅ Invite Accepted ✅")
@@ -83,9 +81,7 @@ module.exports = {
 		let tourneyGuild = await interaction.client.guilds.fetch(
 			command.options.guild
 		);
-		let tourneyMember = await tourneyGuild.members.fetch(
-			command.options.user
-		);
+		let tourneyMember = await tourneyGuild.members.fetch(command.options.user);
 
 		let dm = await tourneyMember.createDM();
 		let dmEmbed = new MessageEmbed()
@@ -93,7 +89,8 @@ module.exports = {
 			.setDescription(
 				` \`${userData.osu.username}\` accepted your invite to join your team!`
 			)
-			.setColor("#F88000");
+			.setColor(tournament.settings.color)
+			.setThumbnail(tournament.settings.icon_url);
 		await dm.send({ embeds: [dmEmbed] });
 
 		interaction.update({

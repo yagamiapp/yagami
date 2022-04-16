@@ -27,15 +27,21 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setTitle("Tournaments in this server:")
-			.setColor("#F88000")
-			.addField(
-				`**Active Tournament: \`${tournaments.active_tournament}\`**`,
+			.setColor(active_tournament.settings.color || "#F88000")
+			.setThumbnail(
+				active_tournament.settings.icon_url ||
+					"https://yagami.clxxiii.dev/static/yagami%20var.png"
+			)
+			.setDescription(
 				stripIndents`
-				**Name:** ${active_tournament.settings.name}
-				**Acronym:** ${tournaments.active_tournament}
-				**Score Mode:** ${active_tournament.settings.score_mode}
-				**Team Mode:** ${active_tournament.settings.team_mode}
-				**Force NF:** ${active_tournament.settings.force_nf}
+				Active Tournament: **${active_tournament.settings.name}**
+				\`\`\`
+				Name: ${active_tournament.settings.name}
+				Acronym: ${tournaments.active_tournament}
+				Score Mode: ${active_tournament.settings.score_mode}
+				Team Mode: ${active_tournament.settings.team_mode}
+				Force NF: ${active_tournament.settings.force_nf}
+				\`\`\`
 				`
 			);
 
@@ -43,7 +49,6 @@ module.exports = {
 		for (const key in tournaments) {
 			if (key != tournaments.active_tournament && key != "active_tournament") {
 				const element = tournaments[key];
-				console.log(element);
 
 				tourneyString += `**${key}:** ${element.settings?.name}\n`;
 			}
