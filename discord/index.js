@@ -63,14 +63,24 @@ module.exports = {
 		// Button Handler
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isButton()) return;
-			console.log(interaction.customId);
+			// Restructure command id into command object
+			let command = {};
+			let stringParse = interaction.customId.split("?");
+			command.name = stringParse[0];
 
-			const button = bot.buttons.get(interaction.customId);
+			let options = {};
+			stringParse[1]?.split("&").forEach((option) => {
+				// Split into key value pairs
+				option = option.split("=");
+				options[option[0]] = option[1];
+			});
+			command.options = options;
 
+			const button = bot.buttons.get(command.name);
 			if (!button) return;
 
 			try {
-				await button.execute(interaction);
+				await button.execute(interaction, command);
 			} catch (error) {
 				console.error(error);
 				await interaction.reply({
