@@ -36,6 +36,16 @@ module.exports = {
 				.setDescription("Change the size of the team")
 				.setMinValue(1)
 				.setMaxValue(16)
+		)
+		.addStringOption((option) =>
+			option
+				.setName("icon_url")
+				.setDescription("Set a custom icon for your tournament")
+		)
+		.addStringOption((option) =>
+			option
+				.setName("color")
+				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
 		),
 	async execute(interaction) {
 		let options = interaction.options.data[0].options;
@@ -52,11 +62,40 @@ module.exports = {
 			"tournaments",
 			active_tournament
 		);
-
+		// In case registration is enabled
 		if (tournament.allow_registration) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Error:** You cannot edit tournament settings while registration is allowed."
+				)
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+		// In case the icon_url does not lead to an image
+		let urlRegex = /(?:http|https).+(?:jpg|jpeg|png|webp|gif|svg)/;
+		if (
+			interaction.options.getString("icon_url") &&
+			!urlRegex.test(interaction.options.getString("icon_url"))
+		) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Error:** The icon url you provided is not a valid image."
+				)
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+		// In case the color is not a valid hex color
+		if (
+			interaction.options.getString("color") &&
+			!/#[1234567890abcdefABCDEF]{6}/.test(
+				interaction.options.getString("color")
+			)
+		) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Error:** The color you provided is not a valid hex color."
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
@@ -113,7 +152,7 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setTitle("Successfully changed settings!")
-			.setColor("GREEN")
+			.setColor(tournament.settings.color || "GREEN")
 			.setDescription(
 				stripIndents`
 				**Name:** ${tournament.settings.name}
@@ -123,8 +162,11 @@ module.exports = {
 				**Team Size:** ${tournament.settings.team_size}
 				**Force NF:** ${tournament.settings.force_nf}
 				`
+			)
+			.setThumbnail(
+				tournament.settings.icon_url ||
+					"https://yagami.clxxiii.dev/static/yagami%20var.png"
 			);
-
 		await interaction.editReply({ embeds: [embed] });
 	},
 };
