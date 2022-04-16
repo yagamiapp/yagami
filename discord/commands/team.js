@@ -1,24 +1,28 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
+const fs = require("fs");
+
+// Subcommand Handler
+let data = new SlashCommandBuilder()
+	.setName("team")
+	.setDescription("Manage your team as a captain");
+let subcommands = {};
+
+const subcommandFiles = fs
+	.readdirSync("./discord/commands/team")
+	.filter((file) => file.endsWith(".js"));
+
+for (const file of subcommandFiles) {
+	const subcommand = require(`./team/${file}`);
+	data.addSubcommand(subcommand.data);
+	subcommands[subcommand.data.name] = subcommand;
+}
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName("team")
-		.setDescription("Manage your team through discord commands")
-		.addSubcommand((command) =>
-			command
-				.setName("invite")
-				.setDescription("Invite a user to your team")
-				.addUserOption((option) =>
-					option
-						.setName("user")
-						.setDescription("The user you want to invite")
-						.setRequired(true)
-				)
-		),
+	data,
 	async execute(interaction) {
 		let subcommand = interaction.options.getSubcommand();
-		let file = require("./team/" + subcommand + ".js");
-		await file.execute(interaction);
+		let command = subcommands[subcommand];
+		await command.execute(interaction);
 	},
 	ephemeral: true,
 	defer: true,

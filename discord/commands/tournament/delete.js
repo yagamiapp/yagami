@@ -1,7 +1,17 @@
 const { stripIndents } = require("common-tags/lib");
+const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
 const firebase = require("../../../firebase");
 module.exports = {
+	data: new SlashCommandSubcommandBuilder()
+		.setName("delete")
+		.setDescription("Deletes a tournament")
+		.addStringOption((option) =>
+			option
+				.setName("acronym")
+				.setDescription("The acronym of the tournament")
+				.setRequired(true)
+		),
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
 		let tourney = await firebase.getData(

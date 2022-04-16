@@ -1,7 +1,45 @@
 let { MessageEmbed } = require("discord.js");
+const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const firebase = require("../../../firebase");
 let { stripIndents } = require("common-tags");
 module.exports = {
+	data: new SlashCommandSubcommandBuilder()
+		.setName("edit")
+		.setDescription("Edits the currently selected tournament")
+		.addStringOption((option) =>
+			option
+				.setName("name")
+				.setDescription("The name for your tournament")
+		)
+		.addStringOption((option) =>
+			option
+				.setName("acronym")
+				.setDescription("Change the acronym of your tournament")
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("score_mode")
+				.setDescription(
+					"Changes the way scores are handled in the lobby"
+				)
+				.addChoice("Score", 0)
+				.addChoice("Combo", 1)
+				.addChoice("Accuracy", 2)
+				.addChoice("ScoreV2", 3)
+				.addChoice("ScoreV2 Accuracy", 4)
+		)
+		.addBooleanOption((option) =>
+			option
+				.setName("force_nf")
+				.setDescription("NF should be used with all maps")
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("team_size")
+				.setDescription("Change the size of the team")
+				.setMinValue(1)
+				.setMaxValue(16)
+		),
 	async execute(interaction) {
 		let options = interaction.options.data[0].options;
 

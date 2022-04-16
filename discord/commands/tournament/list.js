@@ -1,8 +1,12 @@
 let firebase = require("../../../firebase");
+const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
 let { stripIndents } = require("common-tags");
 
 module.exports = {
+	data: new SlashCommandSubcommandBuilder()
+		.setName("list")
+		.setDescription("Lists all tournaments in this guild"),
 	async execute(interaction) {
 		let tournaments = await firebase.getData(
 			"guilds",

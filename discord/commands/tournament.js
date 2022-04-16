@@ -2,110 +2,30 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { Permissions, MessageEmbed } = require("discord.js");
 const fs = require("fs");
 
+// Subcommand Handler
+let data = new SlashCommandBuilder()
+	.setName("tournament")
+	.setDescription("Configuring agent for your tournament");
+let subcommands = {};
+
+const subcommandFiles = fs
+	.readdirSync("./discord/commands/tournament")
+	.filter((file) => file.endsWith(".js"));
+
+for (const file of subcommandFiles) {
+	const subcommand = require(`./tournament/${file}`);
+	data.addSubcommand(subcommand.data);
+	subcommands[subcommand.data.name] = subcommand;
+}
+
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName("tournament")
-		.setDescription("Configuring agent for your tournament!")
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("create")
-				.setDescription("Create a new tournament")
-				.addStringOption((option) =>
-					option
-						.setName("acronym")
-						.setDescription("The acronym of the tournament")
-						.setRequired(true)
-				)
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("list")
-				.setDescription("Lists all tournaments in this guild")
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName("edit")
-				.setDescription("Edits the currently selected tournament")
-				.addStringOption((option) =>
-					option
-						.setName("name")
-						.setDescription("The name for your tournament")
-				)
-				.addStringOption((option) =>
-					option
-						.setName("acronym")
-						.setDescription("Change the acronym of your tournament")
-				)
-				.addIntegerOption((option) =>
-					option
-						.setName("score_mode")
-						.setDescription(
-							"Changes the way scores are handled in the lobby"
-						)
-						.addChoice("Score", 0)
-						.addChoice("Combo", 1)
-						.addChoice("Accuracy", 2)
-						.addChoice("ScoreV2", 3)
-						.addChoice("ScoreV2 Accuracy", 4)
-				)
-				.addBooleanOption((option) =>
-					option
-						.setName("force_nf")
-						.setDescription("NF should be used with all maps")
-				)
-				.addIntegerOption((option) =>
-					option
-						.setName("team_size")
-						.setDescription("Change the size of the team")
-						.setMinValue(1)
-						.setMaxValue(16)
-				)
-		)
-		.addSubcommand((option) =>
-			option
-				.setName("delete")
-				.setDescription("Deletes a tournament")
-				.addStringOption((option) =>
-					option
-						.setName("acronym")
-						.setDescription("The acronym of the tournament")
-						.setRequired(true)
-				)
-		)
-		.addSubcommand((option) =>
-			option
-				.setName("activate")
-				.setDescription(
-					"Changes which tournament the other commands apply to"
-				)
-				.addStringOption((option) =>
-					option
-						.setName("acronym")
-						.setDescription("The acronym of the tournament")
-						.setRequired(true)
-				)
-		)
-		.addSubcommand((option) =>
-			option
-				.setName("registration")
-				.setDescription(
-					"Toggles the ability for users to register to the tournament"
-				)
-				.addBooleanOption((option) =>
-					option
-						.setName("enabled")
-						.setDescription(
-							"Whether registrations are allowed or not"
-						)
-						.setRequired(true)
-				)
-		),
+	data,
 	async execute(interaction) {
 		if (
 			interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
 		) {
 			let subcommand = interaction.options.getSubcommand();
-			let file = require("./tournament/" + subcommand + ".js");
+			let file = subcommands[subcommand];
 			await file.execute(interaction);
 		} else {
 			let embed = new MessageEmbed()

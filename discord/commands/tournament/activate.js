@@ -1,6 +1,16 @@
 let { MessageEmbed } = require("discord.js");
+const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const firebase = require("../../../firebase");
 module.exports = {
+	data: new SlashCommandSubcommandBuilder()
+		.setName("activate")
+		.setDescription("Changes which tournament the other commands apply to")
+		.addStringOption((option) =>
+			option
+				.setName("acronym")
+				.setDescription("The acronym of the tournament")
+				.setRequired(true)
+		),
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
 

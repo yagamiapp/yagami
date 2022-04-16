@@ -1,8 +1,18 @@
 const { stripIndents } = require("common-tags/lib");
+const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
 const { getData } = require("../../../firebase");
 
 module.exports = {
+	data: new SlashCommandSubcommandBuilder()
+		.setName("invite")
+		.setDescription("Invite a user to your team")
+		.addUserOption((option) =>
+			option
+				.setName("user")
+				.setDescription("The user you want to invite")
+				.setRequired(true)
+		),
 	async execute(interaction) {
 		let active_tournament = await getData(
 			"guilds",

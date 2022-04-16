@@ -1,9 +1,19 @@
 let template = require("../../../templates/tournament.json");
+const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const firebase = require("../../../firebase");
 let { stripIndent } = require("common-tags");
 let { MessageEmbed } = require("discord.js");
 
 module.exports = {
+	data: new SlashCommandSubcommandBuilder()
+		.setName("create")
+		.setDescription("Create a new tournament")
+		.addStringOption((option) =>
+			option
+				.setName("acronym")
+				.setDescription("The acronym of the tournament")
+				.setRequired(true)
+		),
 	async execute(interaction) {
 		let acronym = interaction.options.getString("acronym");
 		acronym = acronym.toUpperCase();
