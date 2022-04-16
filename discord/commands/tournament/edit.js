@@ -25,6 +25,15 @@ module.exports = {
 				.addChoice("ScoreV2", 3)
 				.addChoice("ScoreV2 Accuracy", 4)
 		)
+		.addIntegerOption((option) =>
+			option
+				.setName("team_mode")
+				.setDescription("Changes the way users play in the lobby")
+				.addChoice("Head to Head", 0)
+				.addChoice("Tag Coop", 1)
+				.addChoice("Team Vs", 2)
+				.addChoice("Tag Team Vs", 3)
+		)
 		.addBooleanOption((option) =>
 			option
 				.setName("force_nf")
