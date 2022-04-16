@@ -35,7 +35,7 @@ module.exports = {
 			return;
 		}
 
-		let tournamentName = tournaments[acro].rules.name;
+		let tournamentName = tournaments[acro].settings.name;
 
 		await firebase.setData(
 			acro,
@@ -47,9 +47,7 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setTitle("Active Tournament Updated!")
-			.setDescription(
-				`Active tournament switched to \`${tournamentName}\``
-			)
+			.setDescription(`Active tournament switched to \`${tournamentName}\``)
 			.setColor("GREEN");
 
 		await interaction.editReply({ embeds: [embed] });
