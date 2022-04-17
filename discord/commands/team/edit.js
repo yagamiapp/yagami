@@ -17,7 +17,9 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
+				.setDescription(
+					"Set a custom color for your tournament e.g.(#0EB8B9)"
+				)
 		),
 	async execute(interaction) {
 		let active_tournament = await getData(
@@ -127,10 +129,17 @@ module.exports = {
 		for (let i = 0; i < team.members.length; i++) {
 			let member = team.members[i];
 			let memberData = await getData("users", member);
+			let rank = memberData.osu.statistics.global_rank;
+			if (rank == null) {
+				rank = "Unranked";
+			} else {
+				rank = `${rank.toLocaleString()}`;
+			}
+
 			teamString += `
 			:flag_${memberData.osu.country_code.toLowerCase()}: ${
 				memberData.osu.username
-			} (#${memberData.osu.statistics.global_rank.toLocaleString()})`;
+			} (#${rank})`;
 			if (i == 0) {
 				teamString += " **(c)**";
 			}
