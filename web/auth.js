@@ -70,6 +70,8 @@ module.exports.authUser = async (query, req, res) => {
 	// Cancel timeout message
 	linkCommand.removeInterval(query.state);
 
+	let rank = userData.statistics.global_rank.toLocaleString() || "-";
+
 	// Update embed with Success message
 	let embed = new MessageEmbed()
 		.setThumbnail(userData.avatar_url)
@@ -80,9 +82,7 @@ module.exports.authUser = async (query, req, res) => {
 			stripIndents`
 			Successfully connected discord account to \`${userData.username}\`!
 			
-			**Rank**: \`#${userData.statistics.global_rank.toLocaleString()} (${
-				userData.statistics.pp
-			} pp)\`
+			**Rank**: \`#${rank} (${userData.statistics.pp} pp)\`
 			**Accuracy**: \`${userData.statistics.hit_accuracy}%\` | **Level**: \`${
 				userData.statistics.level.current
 			}.${userData.statistics.level.progress}\`
