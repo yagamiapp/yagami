@@ -74,8 +74,6 @@ module.exports = {
 			components.components[2].disabled = true;
 		}
 
-		console.log(components);
-
 		let embed = new MessageEmbed()
 			.setColor(tournament.settings.color)
 			.setTitle(round.name)

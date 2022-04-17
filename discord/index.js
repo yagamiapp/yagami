@@ -41,6 +41,26 @@ module.exports = {
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isCommand()) return;
 
+			// Craft message to send to console
+
+			let optionString = "";
+			if (interaction.options.data[0]) {
+				interaction.options.data[0].options.forEach((option) => {
+					console.log(option);
+					optionString += `${option.name}: ${option.value}  `;
+				});
+			}
+			let subcommand;
+			try {
+				subcommand = interaction.options.getSubcommand();
+			} catch {
+				subcommand = "";
+			}
+			let guild = interaction.guild.nameAcronym ?? "DM Channel";
+			console.log(
+				`[${guild}] ${interaction.user.username}#${interaction.user.discriminator} >> /${interaction.commandName} ${subcommand} ${optionString}`
+			);
+
 			const command = bot.commands.get(interaction.commandName);
 
 			if (!command) return;
@@ -68,6 +88,7 @@ module.exports = {
 		// Button Handler
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isButton()) return;
+
 			// Restructure command id into command object
 			let command = {};
 			let stringParse = interaction.customId.split("?");
@@ -80,6 +101,17 @@ module.exports = {
 				options[option[0]] = option[1];
 			});
 			command.options = options;
+
+			// Craft message to send to console
+			let guild = interaction.guild.nameAcronym ?? "DM Channel";
+			let optionString = "";
+			for (const key in command.options) {
+				const element = command.options[key];
+				optionString += `${key}: ${element}  `;
+			}
+			console.log(
+				`[${guild}] ${interaction.user.username}#${interaction.user.discriminator} >> [${command.name}] ${optionString}`
+			);
 
 			const button = bot.buttons.get(command.name);
 			if (!button) return;

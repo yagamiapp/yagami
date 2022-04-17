@@ -68,7 +68,6 @@ module.exports = {
 				.setStyle("PRIMARY")
 		);
 
-		console.log(index);
 		if (index == 0) {
 			components.components[0].disabled = true;
 		}
@@ -88,6 +87,14 @@ module.exports = {
 			)
 			.addField("Mappool", poolString)
 			.setThumbnail(tournament.settings.icon_url);
+
+		if (interaction.isCommand()) {
+			await interaction.editReply({
+				embeds: [embed],
+				components: [components],
+			});
+			return;
+		}
 		await interaction.update({
 			embeds: [embed],
 			components: [components],

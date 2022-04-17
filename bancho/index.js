@@ -14,6 +14,7 @@ module.exports.init = () => {
 	client
 		.connect()
 		.then(async () => {
+			console.log("Connected to Bancho!");
 			client.on("PM", (msg) => {
 				console.log(`${msg.user.ircUsername} >> ${msg.message}`);
 				pmHandler(msg);
