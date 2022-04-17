@@ -5,7 +5,7 @@ const { stripIndents } = require("common-tags/lib");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
-		.setName("create")
+		.setName("edit")
 		.setDescription("Create a new round")
 		.addStringOption((option) =>
 			option
@@ -29,6 +29,13 @@ module.exports = {
 				.setDescription("How many bans each team is allowed in a round")
 				.setMinValue(0)
 				.setMaxValue(2)
+		)
+		.addBooleanOption((option) =>
+			option
+				.setName("show_mappool")
+				.setDescription(
+					"Whether the round's mappool is visible to players or not"
+				)
 		),
 	async execute(interaction) {
 		let active_tournament = await getData(
@@ -46,35 +53,26 @@ module.exports = {
 		);
 
 		let acronym = interaction.options.getString("acronym").toUpperCase();
+		let round = tournament?.rounds?.[acronym];
+		let options = interaction.options.data[0].options;
 
-		console.log("Creating a new round with the acronym: " + acronym);
-
-		console.log("Checking if round Already Exists:");
-		let test = tournament?.rounds?.[acronym];
-
-		if (test) {
-			console.log("Test Failed");
-
+		// In case the round doesn't exist
+		if (round == null) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					"**Err**: A round with the acronym `" +
-						acronym +
-						"` already exists in tournament: " +
-						active_tournament
+					`**Err**: A round with the acronym ${acronym} does not exist.`
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
-		console.log("Test passed! Writing data to database");
 
-		// Construct round object
-		let round = {
-			name: "New Round",
-			best_of: interaction.options.getInteger("best_of") ?? 11,
-			bans: interaction.options.getInteger("bans") ?? 2,
-			show_mappool: false,
-		};
+		options.forEach((element) => {
+			let prop = element.name;
+			if (prop == "acronym") return;
+			round[prop] = element.value;
+		});
+
 		await setData(
 			round,
 			"guilds",
@@ -87,11 +85,13 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setColor(tournament.settings.color)
-			.setTitle("New round created!")
+			.setTitle("Settings Updated")
 			.setDescription(
 				stripIndents`
-                A new round with the acronym \`${acronym}\` has been created in the tournament: \`${tournament.settings.name}\`
-                To add a new map, use the command: \`/round \`
+                **${acronym}**: ${round.name}
+				Best of **${round.best_of}**
+				Bans: **${round.bans}**
+				Mappool Visible: **${round.show_mappool}**
             `
 			)
 			.setThumbnail(tournament.settings.icon_url);
