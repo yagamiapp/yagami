@@ -70,7 +70,13 @@ module.exports.authUser = async (query, req, res) => {
 	// Cancel timeout message
 	linkCommand.removeInterval(query.state);
 
-	let rank = userData.statistics.global_rank.toLocaleString() || "-";
+	let rank = userData.statistics.global_rank;
+
+	if (rank == null) {
+		rank = "Unranked";
+	} else {
+		rank = rank.toLocaleString();
+	}
 
 	// Update embed with Success message
 	let embed = new MessageEmbed()
