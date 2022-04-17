@@ -46,7 +46,6 @@ module.exports = {
 			let optionString = "";
 			if (interaction.options.data[0]) {
 				interaction.options.data[0].options.forEach((option) => {
-					console.log(option);
 					optionString += `${option.name}: ${option.value}  `;
 				});
 			}
@@ -103,7 +102,7 @@ module.exports = {
 			command.options = options;
 
 			// Craft message to send to console
-			let guild = interaction.guild.nameAcronym ?? "DM Channel";
+			let guild = interaction.guild?.nameAcronym ?? "DM Channel";
 			let optionString = "";
 			for (const key in command.options) {
 				const element = command.options[key];

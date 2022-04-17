@@ -56,7 +56,7 @@ module.exports = {
 			return;
 		}
 		// In case the team size is 1
-		if (tournament.settings.team_size == 1) {
+		if (inviterTournamentData.team_size == 1) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You cannot invite a user if the team size is 1.`
@@ -86,7 +86,9 @@ module.exports = {
 			return;
 		}
 		// In case the team is full
-		if (inviterTournamentData.members.length >= tournament.settings.team_size) {
+		if (
+			inviterTournamentData.members.length >= inviterTournamentData.team_size
+		) {
 			let embed = new MessageEmbed()
 				.setDescription(`**Err**: Your team is full.`)
 				.setColor("RED");
@@ -130,10 +132,17 @@ module.exports = {
 		for (let i = 0; i < inviterTournamentData.members.length; i++) {
 			let member = inviterTournamentData.members[i];
 			let memberData = await getData("users", member);
+			let rank = memberData.osu.statistics.global_rank;
+			if (rank == null) {
+				rank = "Unranked";
+			} else {
+				rank = `${rank.toLocaleString()}`;
+			}
+
 			teamString += `
 			:flag_${memberData.osu.country_code.toLowerCase()}: ${
 				memberData.osu.username
-			} (#${memberData.osu.statistics.global_rank.toLocaleString()})`;
+			} (#${rank})`;
 			if (i == 0) {
 				teamString += " **(c)**";
 			}
@@ -149,12 +158,17 @@ module.exports = {
 			`
 			)
 			.setColor(
-				inviterTournamentData.color || tournament.settings.color || "#F88000"
+				inviterTournamentData.color || inviterTournamentData.color || "#F88000"
 			)
 			.setThumbnail(inviterTournamentData.icon_url)
-			.setAuthor({
+			.setFooter({
 				iconURL: tournament.settings.icon_url,
-				name: tournament.settings.name,
+				text: tournament.settings.name,
+			})
+			.setAuthor({
+				name: inviterData.osu.username,
+				iconURL: "https://a.ppy.sh/" + inviterData.osu.id,
+				url: "https://osu.ppy.sh/users/" + inviterData.osu.id,
 			})
 			.addField(`**${inviterTournamentData.name}:**`, teamString);
 
@@ -166,7 +180,7 @@ module.exports = {
 		embed = new MessageEmbed()
 			.setTitle(`Invite sent to ${inviteeData.osu.username}!`)
 			.setDescription("We'll send you a DM if they accept.")
-			.setColor(tournament.settings.color || "#F88000")
+			.setColor(inviterTournamentData.color || "#F88000")
 			.setThumbnail("https://s.ppy.sh/a/" + inviteeData.osu.id);
 		await interaction.editReply({ embeds: [embed] });
 	},

@@ -19,35 +19,29 @@ module.exports = {
 			active_tournament
 		);
 
-		// In case there are no rounds
-		if (tournament.rounds.length == 0) {
+		// In case there are no teams
+		if (!tournament.users) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no rounds in this tournament.")
+				.setDescription("**Err**: There are no teams in this tournament.")
 				.setColor("RED");
 			await interaction.reply({ embeds: [embed] });
 			return;
 		}
 
-		// Put rounds in array
-		let rounds = [];
-		for (const key in tournament.rounds) {
-			const element = tournament.rounds[key];
-			element.identifier = key;
-			rounds.push(element);
+		// Put teams into array
+		let teams = [];
+		for (let id in tournament.users) {
+			let user = tournament.users[id];
+			if (user.name) {
+				teams.push(user);
+			}
 		}
+		// TODO: Compile teams into groups of 5 for each page
 
 		let index = parseInt(command.options.index);
 
 		// Select first round and build embed
-		let round = rounds[index];
-		let poolString = "";
-		if (round.pool != null) {
-			round.pool.forEach((element) => {
-				poolString += `**[${element.identifier}]**: ${element.data.artist} - ${element.data.title} [${element.data.version}]\n`;
-			});
-		} else {
-			poolString = "No pool";
-		}
+		let team = teams[index];
 
 		// Build buttons to scroll to other rounds
 		let components = new MessageActionRow().addComponents(
@@ -57,7 +51,7 @@ module.exports = {
 				.setStyle("PRIMARY"),
 			new MessageButton()
 				.setCustomId("placeholder")
-				.setLabel(`${index + 1}/${rounds.length}`)
+				.setLabel(`${index + 1}/${teams.length}`)
 				.setStyle("SECONDARY")
 				.setDisabled(true),
 			new MessageButton()
@@ -70,21 +64,34 @@ module.exports = {
 			components.components[0].disabled = true;
 		}
 
-		if (index == rounds.length - 1) {
+		if (index == teams.length - 1) {
 			components.components[2].disabled = true;
 		}
 
 		let embed = new MessageEmbed()
-			.setColor(tournament.settings.color)
-			.setTitle(`${round.identifier}: ${round.name}`)
-			.setDescription(
-				stripIndents`
-                **Best of:** ${round.best_of}
-                **Bans:** ${round.bans}
-            `
-			)
-			.addField("Mappool", poolString)
+			.setTitle("Teams")
+			.setColor(tournament.settings.color || "#F88000")
 			.setThumbnail(tournament.settings.icon_url);
+		let teamString = "";
+		for (let i = 0; i < team.members.length; i++) {
+			let member = team.members[i];
+			let memberData = await getData("users", member);
+			let rank = memberData.osu.statistics.global_rank;
+			if (rank == null) {
+				rank = "Unranked";
+			} else {
+				rank = `${rank.toLocaleString()}`;
+			}
+
+			teamString += `
+			:flag_${memberData.osu.country_code.toLowerCase()}: ${
+				memberData.osu.username
+			} (#${rank})`;
+			if (i == 0) {
+				teamString += " **(c)**";
+			}
+		}
+		embed.addField(team.name, teamString);
 
 		if (interaction.isCommand()) {
 			await interaction.editReply({

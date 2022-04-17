@@ -32,7 +32,7 @@ module.exports = {
 			return;
 		}
 		// In case the user is not in a team
-		if (!currentTournament.users[interaction.user.id] == null) {
+		if (currentTournament.users[interaction.user.id] == null) {
 			let embed = new MessageEmbed()
 				.setDescription(`**Err**: You are not in a team.`)
 				.setColor("RED");
@@ -92,29 +92,5 @@ module.exports = {
 			.setColor("DARK_RED");
 		interaction.editReply({ embeds: [embed], components: [confirm] });
 		return;
-
-		// let member = currentTournament.users[interaction.user.id].memberOf;
-		// let index = currentTournament.users[member].members.indexOf(
-		// 	interaction.user.id
-		// );
-		// if (index > -1) {
-		// 	currentTournament.users[member].members.splice(index, 1);
-		// }
-
-		// delete currentTournament.users[interaction.user.id];
-
-		// await setData(
-		// 	currentTournament,
-		// 	"guilds",
-		// 	interaction.guildId,
-		// 	"tournaments",
-		// 	active_tournament
-		// );
-
-		// let embed = new MessageEmbed()
-		// 	.setTitle("Success")
-		// 	.setDescription(`You have left your team.`)
-		// 	.setColor("GREEN");
-		// interaction.editReply({ embeds: [embed] });
 	},
 };
