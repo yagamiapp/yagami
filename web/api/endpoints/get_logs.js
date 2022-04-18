@@ -28,7 +28,7 @@ module.exports = {
 		// 	}
 		// });
 
-		res.write(JSON.stringify(logList));
+		res.write(JSON.stringify(logs));
 		res.end();
 	},
 };
