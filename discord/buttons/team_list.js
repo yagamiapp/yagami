@@ -3,7 +3,7 @@ let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 
 module.exports = {
-	data: new MessageButton().setCustomId("round_list"),
+	data: new MessageButton().setCustomId("team_list"),
 	async execute(interaction, command) {
 		let active_tournament = await getData(
 			"guilds",
@@ -46,7 +46,7 @@ module.exports = {
 		// Build buttons to scroll to other rounds
 		let components = new MessageActionRow().addComponents(
 			new MessageButton()
-				.setCustomId("round_list?index=" + (index - 1))
+				.setCustomId("team_list?index=" + (index - 1))
 				.setLabel("⬅")
 				.setStyle("PRIMARY"),
 			new MessageButton()
@@ -55,7 +55,7 @@ module.exports = {
 				.setStyle("SECONDARY")
 				.setDisabled(true),
 			new MessageButton()
-				.setCustomId("round_list?index=" + (index + 1))
+				.setCustomId("team_list?index=" + (index + 1))
 				.setLabel("➡")
 				.setStyle("PRIMARY")
 		);
