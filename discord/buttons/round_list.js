@@ -22,7 +22,9 @@ module.exports = {
 		// In case there are no rounds
 		if (tournament.rounds.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no rounds in this tournament.")
+				.setDescription(
+					"**Err**: There are no rounds in this tournament."
+				)
 				.setColor("RED");
 			await interaction.reply({ embeds: [embed] });
 			return;
@@ -53,7 +55,7 @@ module.exports = {
 		let components = new MessageActionRow().addComponents(
 			new MessageButton()
 				.setCustomId("round_list?index=" + (index - 1))
-				.setLabel("⬅")
+				.setLabel("◀")
 				.setStyle("PRIMARY"),
 			new MessageButton()
 				.setCustomId("placeholder")
@@ -62,7 +64,7 @@ module.exports = {
 				.setDisabled(true),
 			new MessageButton()
 				.setCustomId("round_list?index=" + (index + 1))
-				.setLabel("➡")
+				.setLabel("▶")
 				.setStyle("PRIMARY")
 		);
 

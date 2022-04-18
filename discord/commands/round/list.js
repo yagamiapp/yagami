@@ -23,11 +23,13 @@ module.exports = {
 		);
 
 		// In case there are no rounds
-		if (tournament.rounds.length == 0) {
+		if (!tournament.rounds) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no rounds in this tournament.")
+				.setDescription(
+					"**Err**: There are no rounds in this tournament."
+				)
 				.setColor("RED");
-			await interaction.reply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 
