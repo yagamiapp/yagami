@@ -19,12 +19,12 @@ module.exports = {
 			active_tournament
 		);
 
+		let users = await getData("users");
+
 		// In case there are no teams
 		if (!tournament.users) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: There are no teams in this tournament."
-				)
+				.setDescription("**Err**: There are no teams in this tournament.")
 				.setColor("RED");
 			await interaction.reply({ embeds: [embed] });
 			return;
@@ -38,12 +38,39 @@ module.exports = {
 				teams.push(user);
 			}
 		}
-		// TODO: Compile teams into groups of 5 for each page
+		// Sort teams by average rank
+		teams.sort((a, b) => {
+			let aAvg = 0;
+			let bAvg = 0;
+			for (let i = 0; i < a.members.length; i++) {
+				let user = users[a.members[i]];
+				if (user.osu.statistics.global_rank) {
+					aAvg += user.osu.statistics.global_rank;
+				}
+			}
+			for (let i = 0; i < b.members.length; i++) {
+				let user = users[b.members[i]];
+				if (user.osu.statistics.global_rank) {
+					bAvg += user.osu.statistics.global_rank;
+				}
+			}
+
+			aAvg /= a.members.length;
+			bAvg /= b.members.length;
+			return aAvg - bAvg;
+		});
+
+		// Group elements into groups of 6
+		let groups = [];
+		let groupSize = 6;
+		for (let i = 0; i < teams.length; i += groupSize) {
+			groups.push(teams.slice(i, i + groupSize));
+		}
 
 		let index = parseInt(command.options.index);
 
 		// Select first round and build embed
-		let team = teams[index];
+		let group = groups[index];
 
 		// Build buttons to scroll to other rounds
 		let components = new MessageActionRow().addComponents(
@@ -53,7 +80,7 @@ module.exports = {
 				.setStyle("PRIMARY"),
 			new MessageButton()
 				.setCustomId("placeholder")
-				.setLabel(`${index + 1}/${teams.length}`)
+				.setLabel(`${index + 1}/${groups.length}`)
 				.setStyle("SECONDARY")
 				.setDisabled(true),
 			new MessageButton()
@@ -66,7 +93,7 @@ module.exports = {
 			components.components[0].disabled = true;
 		}
 
-		if (index == teams.length - 1) {
+		if (index == groups.length - 1) {
 			components.components[2].disabled = true;
 		}
 
@@ -74,26 +101,31 @@ module.exports = {
 			.setTitle("Teams")
 			.setColor(tournament.settings.color || "#F88000")
 			.setThumbnail(tournament.settings.icon_url);
-		let teamString = "";
-		for (let i = 0; i < team.members.length; i++) {
-			let member = team.members[i];
-			let memberData = await getData("users", member);
-			let rank = memberData.osu.statistics.global_rank;
-			if (rank == null) {
-				rank = "Unranked";
-			} else {
-				rank = `${rank.toLocaleString()}`;
-			}
 
-			teamString += `
-			:flag_${memberData.osu.country_code.toLowerCase()}: ${
-				memberData.osu.username
-			} (#${rank})`;
-			if (i == 0) {
-				teamString += " **(c)**";
+		for (let i = 0; i < group.length; i++) {
+			let team = group[i];
+			let teamString = "";
+
+			for (let i = 0; i < team.members.length; i++) {
+				let member = team.members[i];
+				let memberData = await getData("users", member);
+				let rank = memberData.osu.statistics.global_rank;
+				if (rank == null) {
+					rank = "Unranked";
+				} else {
+					rank = `${rank.toLocaleString()}`;
+				}
+
+				teamString += `
+				:flag_${memberData.osu.country_code.toLowerCase()}: ${
+					memberData.osu.username
+				} (#${rank})`;
+				if (i == 0) {
+					teamString += " **(c)**";
+				}
 			}
+			embed.addField(team.name, teamString, true);
 		}
-		embed.addField(team.name, teamString);
 
 		if (interaction.isCommand()) {
 			await interaction.editReply({
