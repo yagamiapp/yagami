@@ -1,37 +1,76 @@
 const { REST } = require("@discordjs/rest");
+const { Guild } = require("discord.js");
 const { Routes } = require("discord-api-types/v9");
 const fs = require("fs");
 require("dotenv").config();
 /**
  *
- * @param {number} guildId
- * @param {Array} commands
+ * @param {Guild} guild
  */
-module.exports.deployCommands = async (guildId) => {
-	let commands = [];
+module.exports.deployCommands = async (guild) => {
+	let guildCommands = [];
 
 	fs.readdirSync("./discord/commands")
 		.filter((file) => file.endsWith(".js"))
 		.forEach((file) => {
 			let fileModule = require("./commands/" + file);
-			if (!fileModule.dontPushByDefault) commands.push(fileModule.data);
+			if (!fileModule.dontPushByDefault) guildCommands.push(fileModule.data);
 		});
 
 	const rest = new REST({ version: "9" }).setToken(process.env.discordToken);
 
 	rest
-		.put(Routes.applicationGuildCommands(process.env.clientId, guildId), {
-			body: commands,
+		.put(Routes.applicationGuildCommands(process.env.clientId, guild.id), {
+			body: guildCommands,
 		})
 		.then(() =>
 			console.log(
 				"Registered command(s) to " +
-					guildId +
+					guild.id +
 					": " +
-					commands.map((el) => {
+					guildCommands.map((el) => {
 						return el.name;
 					})
 			)
 		)
 		.catch(console.error);
+
+	/*
+	 * 	PERMISSION HANDLING
+	 */
+
+	// Get roles with admin perms & owner
+	let adminRoles = [];
+	for (let role of guild.roles.cache) {
+		if (role[1].permissions.has("ADMINISTRATOR")) adminRoles.push(role[0]);
+	}
+	let adminPerms = [];
+	adminRoles.forEach((role) => {
+		adminPerms.push({
+			id: role,
+			type: "ROLE",
+			permission: true,
+		});
+	});
+	let owner = await guild.fetchOwner();
+	adminPerms.push({
+		id: owner.id,
+		type: "USER",
+		permission: true,
+	});
+
+	// Assemble full perms object
+	let commandIDs = await rest.get(
+		Routes.applicationGuildCommands(process.env.clientId, guild.id)
+	);
+
+	let fullPermissions = [];
+	for (let command of commandIDs) {
+		if (!command.default_permission) {
+			let id = command.id;
+			fullPermissions.push({ id, permissions: adminPerms });
+		}
+	}
+
+	await guild.commands.permissions.set({ fullPermissions });
 };

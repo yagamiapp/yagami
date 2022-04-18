@@ -5,7 +5,8 @@ const fs = require("fs");
 // Subcommand Handler
 let data = new SlashCommandBuilder()
 	.setName("matches")
-	.setDescription("Create a matchup between two teams");
+	.setDescription("Create a matchup between two teams")
+	.setDefaultPermission(false);
 let subcommands = {};
 
 const subcommandFiles = fs
@@ -21,20 +22,9 @@ for (const file of subcommandFiles) {
 module.exports = {
 	data,
 	async execute(interaction) {
-		if (
-			interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
-		) {
-			let subcommand = interaction.options.getSubcommand();
-			let file = subcommands[subcommand];
-			await file.execute(interaction);
-		} else {
-			let embed = new MessageEmbed()
-				.setDescription("**Err**: Missing Permissions")
-				.setColor("#FF6666");
-			await interaction.editReply({
-				embeds: [embed],
-			});
-		}
+		let subcommand = interaction.options.getSubcommand();
+		let file = subcommands[subcommand];
+		await file.execute(interaction);
 	},
 	ephemeral: true,
 	defer: true,

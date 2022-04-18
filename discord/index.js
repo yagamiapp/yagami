@@ -8,8 +8,9 @@ const bot = new Client({
 	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES],
 });
 
+bot.login(process.env.discordToken);
 module.exports = {
-	init() {
+	async init() {
 		// Make Collection of commands
 		bot.commands = new Collection();
 		const commandFiles = fs
@@ -35,7 +36,8 @@ module.exports = {
 		}
 
 		// Command updating for testing purposes
-		commandUpdate.deployCommands(process.env.testGuildId);
+		let guild = await bot.guilds.fetch(process.env.testGuildId);
+		commandUpdate.deployCommands(guild);
 
 		// Command Handler
 		bot.on("interactionCreate", async (interaction) => {
@@ -147,8 +149,6 @@ module.exports = {
 			guildString = guildString.slice(0, -2);
 			console.log(`Current Guilds: ${guildString}`);
 		});
-
-		bot.login(process.env.discordToken);
 	},
 	getBot() {
 		return bot;
