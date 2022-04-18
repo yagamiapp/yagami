@@ -60,9 +60,9 @@ module.exports = {
 			return aAvg - bAvg;
 		});
 
-		// Group elements into groups of 6
+		// Group elements into groups of 3
 		let groups = [];
-		let groupSize = 6;
+		let groupSize = 3;
 		for (let i = 0; i < teams.length; i += groupSize) {
 			groups.push(teams.slice(i, i + groupSize));
 		}
@@ -124,7 +124,7 @@ module.exports = {
 					teamString += " **(c)**";
 				}
 			}
-			embed.addField(team.name, teamString, true);
+			embed.addField(team.name, teamString);
 		}
 
 		if (interaction.isCommand()) {
