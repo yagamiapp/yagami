@@ -5,7 +5,11 @@ const join = require("./join");
 require("dotenv").config();
 
 const bot = new Client({
-	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES],
+	intents: [
+		Intents.FLAGS.GUILDS,
+		Intents.FLAGS.DIRECT_MESSAGES,
+		Intents.FLAGS.GUILD_MEMBERS,
+	],
 });
 
 bot.login(process.env.discordToken);
@@ -45,9 +49,14 @@ module.exports = {
 
 			// Craft message to send to console
 
+			console.log(interaction.options.data[0]);
 			let optionString = "";
-			if (interaction.options.data[0]) {
+			if (interaction.options.data[0].options) {
 				interaction.options.data[0].options.forEach((option) => {
+					optionString += `${option.name}: ${option.value}  `;
+				});
+			} else if (interaction.options.data) {
+				interaction.options.data.forEach((option) => {
 					optionString += `${option.name}: ${option.value}  `;
 				});
 			}
@@ -135,7 +144,13 @@ module.exports = {
 
 		// Setup server on join
 		bot.on("guildCreate", (ev) => {
-			join.onJoin(ev);
+			join.onGuildJoin(ev);
+		});
+
+		// Check user on join
+		bot.on("guildMemberAdd", (member) => {
+			if (member.user.bot) return;
+			join.onUserJoin(member);
 		});
 
 		bot.once("ready", () => {
