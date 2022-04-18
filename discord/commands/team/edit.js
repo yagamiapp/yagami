@@ -17,9 +17,7 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription(
-					"Set a custom color for your tournament e.g.(#0EB8B9)"
-				)
+				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
 		),
 	async execute(interaction) {
 		let active_tournament = await getData(
@@ -59,7 +57,7 @@ module.exports = {
 			return;
 		}
 		// In case the user does not own a team
-		if (!currentTournament.users[interaction.user.id].name) {
+		if (!currentTournament.users[interaction.user.id]?.name) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You cannot edit your team unless you are the owner of the team`
