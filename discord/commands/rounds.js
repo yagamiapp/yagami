@@ -4,16 +4,16 @@ const fs = require("fs");
 
 // Subcommand Handler
 let data = new SlashCommandBuilder()
-	.setName("tournament")
-	.setDescription("Configuring agent for your tournament");
+	.setName("rounds")
+	.setDescription("Configuring agent for the rounds in your tournament");
 let subcommands = {};
 
 const subcommandFiles = fs
-	.readdirSync("./discord/commands/tournament")
+	.readdirSync("./discord/commands/rounds")
 	.filter((file) => file.endsWith(".js"));
 
 for (const file of subcommandFiles) {
-	const subcommand = require(`./tournament/${file}`);
+	const subcommand = require(`./rounds/${file}`);
 	data.addSubcommand(subcommand.data);
 	subcommands[subcommand.data.name] = subcommand;
 }
@@ -21,7 +21,9 @@ for (const file of subcommandFiles) {
 module.exports = {
 	data,
 	async execute(interaction) {
-		if (interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+		if (
+			interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
+		) {
 			let subcommand = interaction.options.getSubcommand();
 			let file = subcommands[subcommand];
 			await file.execute(interaction);
