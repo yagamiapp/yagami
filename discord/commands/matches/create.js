@@ -6,6 +6,12 @@ module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("create")
 		.setDescription("Creates a new matchup")
+		.addStringOption((option) =>
+			option
+				.setName("round")
+				.setDescription("The round acronym")
+				.setRequired(true)
+		)
 		.addUserOption((option) =>
 			option
 				.setName("team1")
@@ -17,9 +23,6 @@ module.exports = {
 				.setName("team2")
 				.setDescription("Any user from the second team")
 				.setRequired(true)
-		)
-		.addStringOption((option) =>
-			option.setName("round").setDescription("The round acronym")
 		),
 	async execute(interaction) {
 		let active_tournament = await getData(
@@ -78,9 +81,7 @@ module.exports = {
 		// In case the team1 user is not on a team
 		if (!teams[0]) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: The user from team 1 is not on a team"
-				)
+				.setDescription("**Err**: The user from team 1 is not on a team")
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -92,9 +93,7 @@ module.exports = {
 		// In case the team 2 user is not on a team
 		if (!teams[1]) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: The user from team 2 is not on a team"
-				)
+				.setDescription("**Err**: The user from team 2 is not on a team")
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
