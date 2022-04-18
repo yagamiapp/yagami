@@ -86,9 +86,7 @@ module.exports = {
 			return;
 		}
 		// In case the team is full
-		if (
-			inviterTournamentData.members.length >= inviterTournamentData.team_size
-		) {
+		if (inviterTournamentData.members.length >= tournament.settings.team_size) {
 			let embed = new MessageEmbed()
 				.setDescription(`**Err**: Your team is full.`)
 				.setColor("RED");
