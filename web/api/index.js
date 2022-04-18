@@ -16,7 +16,11 @@ module.exports = {
 		// Get file based on endpoint and call execute function
 		try {
 			let command = endpoints[endpoint];
-			if (!command) return;
+			if (!command) {
+				res.writeHead(404);
+				res.end();
+				return;
+			}
 			await command.execute(req, res);
 		} catch (e) {
 			res.writeHead(500);
