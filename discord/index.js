@@ -138,6 +138,14 @@ module.exports = {
 
 		bot.once("ready", () => {
 			console.log("Connected to Discord!");
+
+			// Log current servers
+			let guildString = "";
+			bot.guilds.cache.forEach((guild) => {
+				guildString += `${guild.name}, `;
+			});
+			guildString = guildString.slice(0, -2);
+			console.log(`Current Guilds: ${guildString}`);
 		});
 
 		bot.login(process.env.discordToken);
