@@ -12,9 +12,9 @@ const bot = new Client({
 	],
 });
 
-bot.login(process.env.discordToken);
 module.exports = {
 	async init() {
+		bot.login(process.env.discordToken);
 		// Make Collection of commands
 		bot.commands = new Collection();
 		const commandFiles = fs
