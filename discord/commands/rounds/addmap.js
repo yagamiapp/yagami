@@ -58,8 +58,15 @@ module.exports = {
 		let round = tournament.rounds?.[acronym];
 		let modEnum = convertAcronymToEnum(mods);
 
-		if (mods === "NM") {
-			mods = "";
+		switch (mods) {
+			case "NM":
+				mods = "";
+				break;
+			case "TB":
+				mods = "FM";
+				break;
+			default:
+				break;
 		}
 
 		// In case the round doesn't exist
