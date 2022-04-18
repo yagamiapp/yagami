@@ -4,7 +4,6 @@ let homedir = require("os").homedir();
 module.exports = {
 	endpoint: "get_logs",
 	async execute(req, res) {
-		console.log(req.query);
 		let logs = fs.readFileSync(homedir + "/.pm2/logs/yagami-out.log");
 		logs = logs.toString();
 		if (req.query.type == "text") {
@@ -14,7 +13,6 @@ module.exports = {
 			return;
 		}
 		logs = logs.split("\n");
-		let logList = {};
 		logs.forEach((line) => {
 			let lineRegex = line.match(/(?:(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}))/);
 			let time = lineRegex?.[0];
