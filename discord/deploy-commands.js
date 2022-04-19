@@ -40,6 +40,10 @@ module.exports.deployCommands = async (guild) => {
 	 */
 
 	// Get roles with admin perms & owner
+	let commandIDs = await rest.get(
+		Routes.applicationGuildCommands(process.env.clientId, guild.id)
+	);
+
 	let adminRoles = [];
 	for (let role of guild.roles.cache) {
 		if (role[1].permissions.has("ADMINISTRATOR")) adminRoles.push(role[0]);
@@ -52,18 +56,10 @@ module.exports.deployCommands = async (guild) => {
 			permission: true,
 		});
 	});
-	let owner = await guild.fetchOwner();
-	adminPerms.push({
-		id: owner.id,
-		type: "USER",
-		permission: true,
-	});
+	let owner = guild.ownerId;
+	if (owner) adminPerms.push({ id: owner, type: "USER", permission: true });
 
 	// Assemble full perms object
-	let commandIDs = await rest.get(
-		Routes.applicationGuildCommands(process.env.clientId, guild.id)
-	);
-
 	let fullPermissions = [];
 	for (let command of commandIDs) {
 		if (!command.default_permission) {
