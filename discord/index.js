@@ -46,7 +46,7 @@ module.exports = {
 			// Craft message to send to console
 
 			let optionString = "";
-			if (interaction.options.data[0].options) {
+			if (interaction.options.data[0]?.options) {
 				interaction.options.data[0].options.forEach((option) => {
 					optionString += `${option.name}: ${option.value}  `;
 				});
