@@ -39,10 +39,6 @@ module.exports = {
 			bot.buttons.set(button.data.customId, button);
 		}
 
-		// Command updating for testing purposes
-		let guild = await bot.guilds.fetch(process.env.testGuildId);
-		commandUpdate.deployCommands(guild);
-
 		// Command Handler
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isCommand()) return;
