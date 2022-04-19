@@ -14,7 +14,7 @@ const bot = new Client({
 
 module.exports = {
 	async init() {
-		bot.login(process.env.discordToken);
+		await bot.login(process.env.discordToken);
 		// Make Collection of commands
 		bot.commands = new Collection();
 		const commandFiles = fs
@@ -49,7 +49,6 @@ module.exports = {
 
 			// Craft message to send to console
 
-			console.log(interaction.options.data[0]);
 			let optionString = "";
 			if (interaction.options.data[0].options) {
 				interaction.options.data[0].options.forEach((option) => {
