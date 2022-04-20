@@ -31,5 +31,13 @@ module.exports = {
 		if (!member.manageable) return;
 
 		await member.setNickname(userData.osu.username);
+
+		let linkedRole = guild.settings.linked_role;
+		if (!linkedRole) return;
+
+		let linkedRoleObj = member.guild.roles.cache.get(linkedRole);
+		if (!linkedRoleObj)
+			await setData(null, "guilds", member.guild.id, "settings", "linked_role");
+		else await member.roles.add(linkedRoleObj);
 	},
 };

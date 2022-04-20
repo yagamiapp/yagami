@@ -97,13 +97,30 @@ module.exports.authUser = async (query, req, res) => {
 		)
 		.setColor("LUMINOUS_VIVID_PINK");
 
+	let guild = await firebase.getData("guilds", interaction.guildId);
+	if (guild.settings.change_nickname && interaction.member.manageable) {
+		await interaction.member.setNickname(userData.username);
+	}
+	if (guild.settings.linked_role && interaction.member.manageable) {
+		let role = interaction.guild.roles.cache.find(
+			(r) => r.id === guild.settings.linked_role
+		);
+		if (role) {
+			await interaction.member.roles.add(role);
+		} else {
+			await firebase.setData(
+				null,
+				"guilds",
+				interaction.guildId,
+				"settings",
+				"linked_role"
+			);
+		}
+	}
+
 	let interaction = linkCommand[query.state];
 	await interaction.editReply({ embeds: [embed] });
-	try {
-		await interaction.member.setNickname(userData.username);
-	} catch (e) {
-		console.log("No permission to change nickname!");
-	}
+
 	linkCommand.clearInteraction(query.state);
 
 	res.redirect("../authorized/?id=" + authReq.discord.id);
