@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "node index.js"
+		"start": "node index.js",
+		"dev": "nodemon index.js"
 	},
 	"author": "",
 	"license": "ISC",
@@ -21,5 +22,8 @@
 		"express": "^4.17.3",
 		"express-rate-limit": "^6.3.0",
 		"firebase-admin": "^10.0.2"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.15"
 	}
 }
