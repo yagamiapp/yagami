@@ -1,4 +1,4 @@
-const { getData } = require("../../../firebase");
+const { prisma } = require("../../../prisma");
 
 module.exports = {
 	async execute(req, res) {
@@ -8,7 +8,11 @@ module.exports = {
 			res.end();
 			return;
 		}
-		let user = await getData("users", req.query.u);
+		let user = await prisma.user.findFirst({
+			where: {
+				discord_id: req.query.u,
+			},
+		});
 
 		if (user == null) {
 			res.writeHeader(400);

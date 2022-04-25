@@ -130,9 +130,9 @@
 				let card = document.querySelector(".card");
 
 				bg.style.opacity = "0.5";
-				bg.style.backgroundImage = `url(${res.osu.cover_url})`;
+				bg.style.backgroundImage = `url(${res.osu_cover_url})`;
 
-				user.style.backgroundImage = `url(${res.osu.avatar_url})`;
+				user.style.backgroundImage = `url(https://s.ppy.sh/a/${res.osu_id})`;
 				setTimeout(() => {
 					card.style.opacity = 1;
 				}, 250);
