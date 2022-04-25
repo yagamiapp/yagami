@@ -4,6 +4,7 @@ const { MessageEmbed } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { request, response } = require("express");
 const { stripIndents } = require("common-tags/lib");
+const { prisma } = require("../prisma");
 require("dotenv").config();
 
 /**
@@ -13,6 +14,7 @@ require("dotenv").config();
  * @param {response} res
  */
 module.exports.authUser = async (query, req, res) => {
+	console.log("Authorizing...");
 	let osuReqBody = {
 		client_id: process.env.osuClientId,
 		client_secret: process.env.osuClientSecret,
@@ -31,6 +33,7 @@ module.exports.authUser = async (query, req, res) => {
 	authResponse = authResponse.data;
 
 	if (authResponse.error) {
+		console.log(authResponse);
 		res.writeHead(400);
 		res.end();
 		return;
@@ -47,28 +50,53 @@ module.exports.authUser = async (query, req, res) => {
 	});
 	userData = userData.data;
 
-	delete userData.page;
-
-	let authReq = await firebase.getData("pending_users", query.state);
-	if (authReq == null) {
+	if (linkCommand[query.state] == null) {
 		res.writeHead(400);
 		res.end();
 		return;
 	}
+	let { interaction, user, interval } = linkCommand[query.state];
 
 	let userPayload = {
-		osu: userData,
-		discord: authReq.discord,
-		access_token: authResponse,
-		last_profile_update: Date.now(),
+		discord_id: user.id,
+		discord_avatar: user.avatar,
+		discord_avatarURL: user.avatarURL,
+		discord_bot: user.bot,
+		discord_createdTimestamp: user.createdTimestamp,
+		discord_defaultAvatarURL: user.defaultAvatarURL,
+		discord_discriminator: user.discriminator,
+		discord_displayAvatarURL: user.displayAvatarURL,
+		discord_flags: user.flags,
+		discord_system: user.system,
+		discord_tag: user.tag,
+		discord_username: user.username,
+		osu_id: userData.id,
+		osu_username: userData.username,
+		osu_country_code: userData.country.code,
+		osu_country_name: userData.country.name,
+		osu_cover_url: userData.cover_url,
+		osu_ranked_score: userData.statistics.ranked_score,
+		osu_play_count: userData.statistics.play_count,
+		osu_total_score: userData.statistics.total_score,
+		osu_pp_rank: userData.statistics.global_rank ?? -1,
+		osu_level: userData.statistics.level.current,
+		osu_level_progress: userData.statistics.level.progress,
+		osu_hit_accuracy: userData.statistics.hit_accuracy,
+		osu_pp: userData.statistics.pp,
+		token_access_token: authResponse.access_token,
+		token_expires_in: authResponse.expires_in,
+		token_refresh_token: authResponse.refresh_token,
+		token_type: authResponse.token_type,
 	};
 
-	await firebase.setData(userPayload, "users", authReq.discord.id);
-
-	await firebase.setData({}, "pending_users", query.state);
-
+	await prisma.user
+		.create({
+			data: userPayload,
+		})
+		.then(console.log)
+		.catch(console.log);
 	// Cancel timeout message
-	linkCommand.removeInterval(query.state);
+	clearInterval(interval);
 
 	let rank = userData.statistics.global_rank;
 
@@ -97,32 +125,30 @@ module.exports.authUser = async (query, req, res) => {
 		)
 		.setColor("LUMINOUS_VIVID_PINK");
 
-	let guild = await firebase.getData("guilds", interaction.guildId);
-	if (guild.settings.change_nickname && interaction.member.manageable) {
-		await interaction.member.setNickname(userData.username);
-	}
-	if (guild.settings.linked_role && interaction.member.manageable) {
-		let role = interaction.guild.roles.cache.find(
-			(r) => r.id === guild.settings.linked_role
-		);
-		if (role) {
-			await interaction.member.roles.add(role);
-		} else {
-			await firebase.setData(
-				null,
-				"guilds",
-				interaction.guildId,
-				"settings",
-				"linked_role"
-			);
-		}
-	}
+	// if (guild.settings.change_nickname && interaction.member.manageable) {
+	// 	await interaction.member.setNickname(userData.username);
+	// }
+	// if (guild.settings.linked_role && interaction.member.manageable) {
+	// 	let role = interaction.guild.roles.cache.find(
+	// 		(r) => r.id === guild.settings.linked_role
+	// 	);
+	// 	if (role) {
+	// 		await interaction.member.roles.add(role);
+	// 	} else {
+	// 		await firebase.setData(
+	// 			null,
+	// 			"guilds",
+	// 			interaction.guildId,
+	// 			"settings",
+	// 			"linked_role"
+	// 		);
+	// 	}
+	// }
 
-	let interaction = linkCommand[query.state];
 	await interaction.editReply({ embeds: [embed] });
 
-	linkCommand.clearInteraction(query.state);
+	linkCommand.clearData(query.state);
 
-	res.redirect("../authorized/?id=" + authReq.discord.id);
+	res.redirect("../authorized/?id=" + user.id);
 	res.end();
 };

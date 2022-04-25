@@ -2,7 +2,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
 const crypto = require("crypto");
-const firebase = require("../../firebase");
 require("dotenv").config();
 
 module.exports = {
@@ -19,8 +18,8 @@ module.exports = {
 		);
 
 		// Key deletes itself after 60 seconds
-		this["interval-" + id] = setTimeout(async () => {
-			firebase.setData({}, "pending_users", id);
+		let interval = setTimeout(async () => {
+			delete this[id];
 
 			let embed = new MessageEmbed()
 				.setDescription("Auth request timed out")
@@ -28,15 +27,11 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 		}, 60000);
 
-		let data = {
-			guild: interaction.guildId,
-			discord: user,
-		};
+		// Assemble object to be stored
+		let payload = { interaction, user, interval };
+		this[id] = payload;
 
-		firebase.setData(data, "pending_users", id);
 		let link = `https://osu.ppy.sh/oauth/authorize/?client_id=${process.env.osuClientId}&redirect_uri=${process.env.osuRedirectURI}&response_type=code&state=${id}`;
-
-		this[id] = interaction;
 
 		let embed = new MessageEmbed()
 			.setColor("#123456")
@@ -47,17 +42,8 @@ module.exports = {
 	 *
 	 * @param {string} id
 	 */
-	clearInteraction(id) {
-		this[id] = null;
-	},
-	/**
-	 *
-	 * @param {string} id
-	 */
-	removeInterval(id) {
-		let interval = this["interval-" + id];
-		clearInterval(interval);
-		this["interval-" + interval] = null;
+	clearData(id) {
+		delete this[id];
 	},
 	ephemeral: true,
 	defer: true,
