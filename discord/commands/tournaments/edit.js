@@ -1,6 +1,7 @@
 let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const firebase = require("../../../firebase");
+const { fetchGuild, prisma } = require("../../../prisma");
 let { stripIndents } = require("common-tags");
 
 module.exports = {
@@ -59,18 +60,8 @@ module.exports = {
 	async execute(interaction) {
 		let options = interaction.options.data[0].options;
 
-		let active_tournament = await firebase.getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
-		let tournament = await firebase.getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 		// In case registration is enabled
 		if (tournament.allow_registration) {
 			let embed = new MessageEmbed()
@@ -111,69 +102,32 @@ module.exports = {
 			return;
 		}
 
-		let acronym = active_tournament;
 		options.forEach((element) => {
 			let prop = element.name;
-			if (prop == "acronym") {
-				acronym = element.value.toUpperCase();
-			} else {
-				tournament.settings[prop] = element.value;
-			}
+			tournament[prop] = element.value;
 		});
 
 		// If the acronym is changed, we need to update the active_tournament
-		if (acronym != active_tournament) {
-			// Clear data in database
-			firebase.setData(
-				{},
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				active_tournament
-			);
-
-			// Replace data at acronym
-			firebase.setData(
-				tournament,
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				acronym
-			);
-
-			// Change active tournament to acronym
-			firebase.setData(
-				acronym,
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				"active_tournament"
-			);
-		} else {
-			firebase.setData(
-				tournament,
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				active_tournament
-			);
-		}
+		await prisma.tournament.update({
+			where: { id: tournament.id },
+			data: tournament,
+		});
 
 		let embed = new MessageEmbed()
 			.setTitle("Successfully changed settings!")
-			.setColor(tournament.settings.color || "GREEN")
+			.setColor(tournament.color || "GREEN")
 			.setDescription(
 				stripIndents`
-				**Name:** ${tournament.settings.name}
-				**Acronym:** ${acronym}
-				**Score Mode:** ${tournament.settings.score_mode}
-				**Team Mode:** ${tournament.settings.team_mode}
-				**Team Size:** ${tournament.settings.team_size}
-				**Force NF:** ${tournament.settings.force_nf}
+				**Name:** ${tournament.name}
+				**Acronym:** ${tournament.acronym}
+				**Score Mode:** ${tournament.score_mode}
+				**Team Mode:** ${tournament.team_mode}
+				**Team Size:** ${tournament.team_size}
+				**Force NF:** ${tournament.force_nf}
 				`
 			)
 			.setThumbnail(
-				tournament.settings.icon_url ||
+				tournament.icon_url ||
 					"https://yagami.clxxiii.dev/static/yagami%20var.png"
 			);
 		await interaction.editReply({ embeds: [embed] });
