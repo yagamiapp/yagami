@@ -15,12 +15,16 @@ module.exports = {
 				.setRequired(true)
 		)
 		.addStringOption((option) =>
-			option.setName("name").setDescription("The name for your tournament")
+			option
+				.setName("name")
+				.setDescription("The name for your tournament")
 		)
 		.addIntegerOption((option) =>
 			option
 				.setName("score_mode")
-				.setDescription("Changes the way scores are handled in the lobby")
+				.setDescription(
+					"Changes the way scores are handled in the lobby"
+				)
 				.addChoice("Score", 0)
 				.addChoice("Combo", 1)
 				.addChoice("Accuracy", 2)
@@ -51,7 +55,9 @@ module.exports = {
 		.addIntegerOption((option) =>
 			option
 				.setName("x_v_x_mode")
-				.setDescription("How many players are playing against eachother")
+				.setDescription(
+					"How many players are playing against eachother"
+				)
 				.setMinValue(1)
 				.setMaxValue(8)
 		)
@@ -63,7 +69,9 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
+				.setDescription(
+					"Set a custom color for your tournament e.g.(#0EB8B9)"
+				)
 		),
 	async execute(interaction) {
 		let acronym = interaction.options.getString("acronym");
@@ -84,12 +92,23 @@ module.exports = {
 				"https://yagami.clxxiii.dev/static/yagami%20var.png",
 			allow_registrations: false,
 			XvX_mode: interaction.options.getInteger("x_v_x_mode") || 1,
-			// Guild_id: interaction.guildId,
+			Guild_id: interaction.guildId,
 		};
 
-		prisma.tournament
-			.create({
-				data: tourney,
+		let tournament = await prisma.tournament.create({
+			data: tourney,
+		});
+
+		console.log(tournament);
+
+		prisma.guild
+			.update({
+				where: {
+					guild_id: interaction.guildId,
+				},
+				data: {
+					active_tournament: tournament.id,
+				},
 			})
 			.then(console.log);
 
