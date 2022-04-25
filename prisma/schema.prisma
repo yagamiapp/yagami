@@ -128,9 +128,10 @@ model GlobalMappool {
 }
 
 model Guild {
-  guild_id        String       @id
-  change_nickname Boolean
-  linked_role     String
-  player_role     String
-  tournaments     Tournament[]
+  guild_id          String       @id
+  change_nickname   Boolean
+  linked_role       String
+  player_role       String
+  tournaments       Tournament[]
+  active_tournament Int?
 }
