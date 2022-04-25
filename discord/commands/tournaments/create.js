@@ -1,7 +1,8 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const firebase = require("../../../firebase");
+const { prisma } = require("../../../prisma");
 let { stripIndent } = require("common-tags");
 let { MessageEmbed } = require("discord.js");
+const { InteractionResponseType } = require("discord-api-types/v9");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -47,6 +48,13 @@ module.exports = {
 				.setMinValue(1)
 				.setMaxValue(16)
 		)
+		.addIntegerOption((option) =>
+			option
+				.setName("x_v_x_mode")
+				.setDescription("How many players are playing against eachother")
+				.setMinValue(1)
+				.setMaxValue(8)
+		)
 		.addStringOption((option) =>
 			option
 				.setName("icon_url")
@@ -60,76 +68,34 @@ module.exports = {
 	async execute(interaction) {
 		let acronym = interaction.options.getString("acronym");
 		acronym = acronym.toUpperCase();
-		console.log("Creating a new tournament with the acronym: " + acronym);
-
-		console.log("Checking if tournament Already Exists:");
-		let test = await firebase.getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			acronym
-		);
-
-		if (test) {
-			console.log("Test Failed");
-
-			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: A tournament with the acronym `" +
-						acronym +
-						"` already exists in this guild!"
-				)
-				.setColor("#FF6666");
-			await interaction.editReply({ embeds: [embed] });
-			return;
-		}
-		console.log("Test passed! Writing data to database");
 
 		// Construct tourney object
+		console.log(interaction.guildId);
 		let tourney = {
-			settings: {
-				name: interaction.options.getString("name") ?? "My Tournament",
-				score_mode: interaction.options.getInteger("score_mode") ?? 3,
-				team_mode: interaction.options.getInteger("team_mode") ?? 0,
-				force_nf: interaction.options.getBoolean("force_nf") ?? true,
-				color: interaction.options.getString("color") ?? "#F88000",
-				team_size: interaction.options.getInteger("team_size") ?? 1,
-				icon_url:
-					interaction.options.getString("icon_url") ??
-					"https://yagami.clxxiii.dev/static/yagami%20var.png",
-				mod_multipliers: {
-					NM: 1.0,
-					HD: 1.0,
-					HR: 1.0,
-					DT: 1.0,
-					EZ: 1.5,
-					FL: 1.0,
-					SD: 1.0,
-				},
-			},
-			rounds: [],
-			allow_registration: false,
+			acronym,
+			name: interaction.options.getString("name") ?? "My Tournament",
+			score_mode: interaction.options.getInteger("score_mode") ?? 3,
+			team_mode: interaction.options.getInteger("team_mode") ?? 0,
+			force_nf: interaction.options.getBoolean("force_nf") ?? true,
+			color: interaction.options.getString("color") ?? "#F88000",
+			team_size: interaction.options.getInteger("team_size") ?? 1,
+			icon_url:
+				interaction.options.getString("icon_url") ??
+				"https://yagami.clxxiii.dev/static/yagami%20var.png",
+			allow_registrations: false,
+			XvX_mode: interaction.options.getInteger("x_v_x_mode") || 1,
+			// Guild_id: interaction.guildId,
 		};
 
-		await firebase.setData(
-			tourney,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			acronym
-		);
-
-		await firebase.setData(
-			acronym,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
+		prisma.tournament
+			.create({
+				data: tourney,
+			})
+			.then(console.log);
 
 		let message = stripIndent`
 				Woohoo! 🥳 Your new tournament, \`${acronym}\` has been created!
-				Currently, your tournament's name is \`${tourney.settings.name}\`, but you can change that!
+				Currently, your tournament's name is \`${tourney.name}\`, but you can change that!
 
 				Here are the next steps to get things running:
 			`;

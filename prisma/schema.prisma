@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Map {
+  id                   Int            @id @default(autoincrement())
+  identifier           String         @unique
+  mods                 String
+  approved             String
+  approved_date        DateTime
+  artist               String
+  artist_unicode       String
+  audio_unavailable    Int
+  beatmap_id           String
+  beatmapset_id        String
+  bpm                  Int
+  count_normal         Int
+  count_slider         Int
+  count_spinner        Int
+  creator              String
+  creator_id           String
+  diff_aim             Int
+  diff_approach        Int
+  diff_drain           Int
+  diff_overall         Int
+  diff_size            Int
+  difficultyrating     Float
+  download_unavailable Int
+  favorite_count       Int
+  file_md5             String
+  genre_id             String
+  hit_length           Int
+  language_id          Int
+  last_update          DateTime
+  max_combo            Int
+  mode                 Int
+  packs                String
+  passcount            Int
+  playcount            Int
+  rating               Int
+  source               String
+  storyboard           Int
+  submit_date          DateTime
+  tags                 String
+  title                String
+  title_unicode        String
+  total_length         Int
+  version              String
+  video                Int
+  Round                Round          @relation(fields: [roundId], references: [id])
+  roundId              Int
+  GlobalMappool        GlobalMappool? @relation(fields: [globalMappoolId], references: [id])
+  globalMappoolId      Int?
+}
+
+model Round {
+  id           Int        @id @default(autoincrement())
+  acronym      String
+  name         String
+  bans         Int
+  best_of      Int
+  maps         Map[]
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+}
+
+model Tournament {
+  id                  Int     @id @default(autoincrement())
+  acronym             String
+  name                String
+  color               String
+  force_nf            Boolean
+  icon_url            String
+  score_mode          Int
+  team_mode           Int
+  team_size           Int
+  XvX_mode            Int
+  allow_registrations Boolean
+  rounds              Round[]
+  Guild               Guild?  @relation(fields: [Guild_id], references: [guild_id])
+  Guild_id            String?
+}
+
+model User {
+  discord_id               String  @id
+  discord_avatar           String
+  discord_avatarURL        String
+  discord_bot              Boolean
+  discord_createdTimestamp Int
+  discord_defaultAvatarURL String
+  discord_discriminator    String
+  discord_displayAvatarURL String
+  discord_flags            Int
+  discord_system           Boolean
+  discord_tag              String
+  discord_username         String
+  osu_id                   Int
+  osu_username             String
+  osu_country_code         String
+  osu_country_name         String
+  osu_cover_url            String
+  osu_ranked_score         Int
+  osu_play_count           Int
+  osu_total_score          Int
+  osu_pp_rank              Int
+  osu_level                Int
+  osu_level_progress       Int
+  osu_hit_accuracy         Float
+  osu_pp                   Float
+  token_access_token       String
+  token_expires_in         Int
+  token_refresh_token      String
+  token_type               String
+}
+
+model GlobalMappool {
+  id   Int    @id @default(autoincrement())
+  Name String
+  maps Map[]
+}
+
+model Guild {
+  guild_id        String       @id
+  change_nickname Boolean
+  linked_role     String
+  player_role     String
+  tournaments     Tournament[]
+}

@@ -1,19 +1,27 @@
 let deploy = require("./deploy-commands");
 const { GuildMember } = require("discord.js");
-const { getData, setData } = require("../firebase");
+const { prisma } = require("../prisma");
 
 module.exports = {
 	async onGuildJoin(guild) {
-		let guildData = await getData("guilds", guild.id);
-		if (!guildData) {
-			let data = {
-				settings: {
-					change_nickname: true,
-				},
-			};
-			await setData(data, "guilds", guild.id);
+		deploy.deployCommands(guild);
+		let tournament = await prisma.guild.findMany({
+			where: {
+				guild_id: guild.id,
+			},
+		});
+		if (!tournament[0]) {
+			prisma.guild
+				.create({
+					data: {
+						guild_id: guild.id,
+						change_nickname: true,
+						linked_role: "",
+						player_role: "",
+					},
+				})
+				.catch((err) => console.log(err));
 		}
-		deploy.deployCommands(guild.id);
 	},
 	/**
 	 *
