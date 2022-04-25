@@ -90,8 +90,12 @@ module.exports.authUser = async (query, req, res) => {
 	};
 
 	await prisma.user
-		.create({
-			data: userPayload,
+		.upsert({
+			where: {
+				discord_id: user.id,
+			},
+			create: userPayload,
+			update: userPayload,
 		})
 		.then(console.log)
 		.catch(console.log);
