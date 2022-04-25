@@ -45,7 +45,7 @@ module.exports = {
 		let tourneyString = "";
 		for (const tournament of tournaments) {
 			if (tournament.id != active_tournament.id)
-				tourneyString += tournament.name;
+				tourneyString += `[${tournament.acronym}]: ${tournament.name}`;
 		}
 		if (!(tourneyString == "")) {
 			embed.addField("Other Tournaments", tourneyString);

@@ -1,6 +1,5 @@
 let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const firebase = require("../../../firebase");
 const { fetchGuild, prisma } = require("../../../prisma");
 let { stripIndents } = require("common-tags");
 module.exports = {

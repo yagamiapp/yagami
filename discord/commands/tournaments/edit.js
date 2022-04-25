@@ -1,6 +1,5 @@
 let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const firebase = require("../../../firebase");
 const { fetchGuild, prisma } = require("../../../prisma");
 let { stripIndents } = require("common-tags");
 
@@ -63,7 +62,7 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		// In case registration is enabled
-		if (tournament.allow_registration) {
+		if (tournament.allow_registrations) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Err**: You cannot edit tournament settings while registration is allowed."

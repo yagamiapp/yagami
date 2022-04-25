@@ -15,7 +15,7 @@ module.exports = {
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
 
-		let tournament = prisma.tournament.findFirst({
+		let tournament = await prisma.tournament.findFirst({
 			where: {
 				acronym: acro,
 				Guild_id: interaction.guildId,
@@ -39,7 +39,7 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setTitle("Active Tournament Updated!")
-			.setDescription(`Active tournament switched to \`${tournamentName}\``)
+			.setDescription(`Active tournament switched to \`${tournament.name}\``)
 			.setColor("GREEN");
 
 		await interaction.editReply({ embeds: [embed] });

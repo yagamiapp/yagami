@@ -2,7 +2,6 @@ const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { prisma } = require("../../../prisma");
 let { stripIndent } = require("common-tags");
 let { MessageEmbed } = require("discord.js");
-const { InteractionResponseType } = require("discord-api-types/v9");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()

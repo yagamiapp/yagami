@@ -5,7 +5,6 @@ module.exports = {
 	/**
 	 * Fetches a guild from the database
 	 * @param {number} id The id of a guild
-	 * @returns {object}
 	 */
 	async fetchGuild(id) {
 		let guild = await prisma.guild.findFirst({
