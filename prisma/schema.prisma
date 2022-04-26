@@ -62,18 +62,19 @@ model Map {
 }
 
 model Round {
-  id           Int        @id @default(autoincrement())
-  acronym      String
-  name         String
-  bans         Int
-  best_of      Int
-  maps         Map[]
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId Int
+  id             Int        @id @default(autoincrement())
+  acronym        String
+  name           String
+  bans           Int
+  best_of        Int
+  maps           Map[]
+  tournament     Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId   Int
+  delete_warning String?
 }
 
 model Tournament {
-  id                  Int     @id @default(autoincrement())
+  id                  Int      @id @default(autoincrement())
   acronym             String
   name                String
   color               String
@@ -85,8 +86,9 @@ model Tournament {
   XvX_mode            Int
   allow_registrations Boolean
   rounds              Round[]
-  Guild               Guild?  @relation(fields: [Guild_id], references: [guild_id])
+  Guild               Guild?   @relation(fields: [Guild_id], references: [guild_id])
   Guild_id            String?
+  delete_warning      Boolean?
 }
 
 model User {
