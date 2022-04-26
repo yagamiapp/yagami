@@ -14,7 +14,10 @@ module.exports = {
 		if (tournaments == null) {
 			let embed = new MessageEmbed()
 				.setDescription("**Err**:No Tournaments Found")
-				.setColor("RED");
+				.setColor("RED")
+				.setFooter({
+					text: "You can create a tournament with tournament create",
+				});
 
 			await interaction.editReply({ embeds: [embed] });
 			return;

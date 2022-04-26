@@ -17,6 +17,16 @@ module.exports = {
 	async execute(interaction) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
+		if (!tournament) {
+			let embed = new MessageEmbed()
+				.setDescription(`**Err**: No active tournament found.`)
+				.setColor("RED")
+				.setFooter({
+					text: "You can set an active tournament with !tournament activate",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
 
 		// Replace data at acronym
 		let toggle = interaction.options.getBoolean("enabled");

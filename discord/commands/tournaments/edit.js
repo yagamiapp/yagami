@@ -61,13 +61,28 @@ module.exports = {
 
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
+		if (!tournament) {
+			let embed = new MessageEmbed()
+				.setDescription("**Err**: No Active Tournament Found")
+				.setColor("RED")
+				.setFooter({
+					text: "You can create a tournament with /tournament create",
+				});
+
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		// In case registration is enabled
 		if (tournament.allow_registrations) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Err**: You cannot edit tournament settings while registration is allowed."
 				)
-				.setColor("RED");
+				.setColor("RED")
+				.setFooter({
+					text: "You can disable registration with /tournament registration",
+				});
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -81,7 +96,8 @@ module.exports = {
 				.setDescription(
 					"**Err**: The icon url you provided is not a valid image."
 				)
-				.setColor("RED");
+				.setColor("RED")
+				.setFooter({ text: "The url must lead to an image" });
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -96,7 +112,10 @@ module.exports = {
 				.setDescription(
 					"**Err**: The color you provided is not a valid hex color."
 				)
-				.setColor("RED");
+				.setColor("RED")
+				.setFooter({
+					text: "The color must be in the following format: #0eB8b9",
+				});
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
