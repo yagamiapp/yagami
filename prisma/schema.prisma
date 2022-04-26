@@ -12,51 +12,52 @@ datasource db {
 
 model Map {
   id                   Int            @id @default(autoincrement())
-  identifier           String         @unique
-  mods                 String
-  approved             String
-  approved_date        DateTime
-  artist               String
-  artist_unicode       String
-  audio_unavailable    Int
-  beatmap_id           String
-  beatmapset_id        String
-  bpm                  Int
-  count_normal         Int
-  count_slider         Int
-  count_spinner        Int
-  creator              String
-  creator_id           String
-  diff_aim             Int
-  diff_approach        Int
-  diff_drain           Int
-  diff_overall         Int
-  diff_size            Int
-  difficultyrating     Float
-  download_unavailable Int
-  favorite_count       Int
-  file_md5             String
-  genre_id             String
-  hit_length           Int
-  language_id          Int
-  last_update          DateTime
-  max_combo            Int
-  mode                 Int
-  packs                String
-  passcount            Int
-  playcount            Int
-  rating               Int
-  source               String
-  storyboard           Int
-  submit_date          DateTime
-  tags                 String
-  title                String
-  title_unicode        String
-  total_length         Int
-  version              String
-  video                Int
-  Round                Round          @relation(fields: [roundId], references: [id])
-  roundId              Int
+  identifier           String?
+  mods                 String?
+  approved             String?
+  approved_date        DateTime?
+  artist               String?
+  artist_unicode       String?
+  audio_unavailable    String?
+  beatmap_id           String?
+  beatmapset_id        String?
+  bpm                  String?
+  count_normal         String?
+  count_slider         String?
+  count_spinner        String?
+  creator              String?
+  creator_id           String?
+  diff_aim             String?
+  diff_speed           String?
+  diff_approach        String?
+  diff_drain           String?
+  diff_overall         String?
+  diff_size            String?
+  difficultyrating     String?
+  download_unavailable String?
+  favourite_count      String?
+  file_md5             String?
+  genre_id             String?
+  hit_length           String?
+  language_id          String?
+  last_update          DateTime?
+  max_combo            String?
+  mode                 String?
+  packs                String?
+  passcount            String?
+  playcount            String?
+  rating               String?
+  source               String?
+  storyboard           String?
+  submit_date          DateTime?
+  tags                 String?
+  title                String?
+  title_unicode        String?
+  total_length         String?
+  version              String?
+  video                String?
+  Round                Round?         @relation(fields: [roundId], references: [id])
+  roundId              Int?
   GlobalMappool        GlobalMappool? @relation(fields: [globalMappoolId], references: [id])
   globalMappoolId      Int?
 }
@@ -71,6 +72,7 @@ model Round {
   tournament     Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId   Int
   delete_warning String?
+  show_mappool   Boolean
 }
 
 model Tournament {

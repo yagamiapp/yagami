@@ -1,41 +1,23 @@
-const { getData } = require("../../firebase");
 let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
+const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
 	data: new MessageButton().setCustomId("round_list"),
 	async execute(interaction, command) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			"active_tournament"
-		);
-
-		let tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			active_tournament
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
+		let rounds = await prisma.round.findMany({
+			where: { tournamentId: tournament.id },
+		});
 
 		// In case there are no rounds
-		if (tournament.rounds.length == 0) {
+		if (rounds == []) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: There are no rounds in this tournament."
-				)
+				.setDescription("**Err**: There are no rounds in this tournament.")
 				.setColor("RED");
 			await interaction.reply({ embeds: [embed] });
 			return;
-		}
-
-		// Put rounds in array
-		let rounds = [];
-		for (const key in tournament.rounds) {
-			const element = tournament.rounds[key];
-			element.identifier = key;
-			rounds.push(element);
 		}
 
 		let index = parseInt(command.options.index);
@@ -43,14 +25,12 @@ module.exports = {
 		// Select first round and build embed
 		let round = rounds[index];
 		let poolString = "";
-		if (round.pool != null) {
-			round.pool.forEach((element) => {
-				poolString += `**[${element.identifier}]**: ${element.data.artist} - ${element.data.title} [${element.data.version}]\n`;
-			});
-		} else {
-			poolString = "No pool";
-		}
+		let pool = await prisma.map.findMany({ where: { roundId: round.id } });
 
+		pool.forEach((element) => {
+			poolString += `**[${element.identifier}]**: ${element.artist} - ${element.title} [${element.version}]\n`;
+		});
+		if (poolString == "") poolString = "No maps";
 		// Build buttons to scroll to other rounds
 		let components = new MessageActionRow().addComponents(
 			new MessageButton()
@@ -77,8 +57,8 @@ module.exports = {
 		}
 
 		let embed = new MessageEmbed()
-			.setColor(tournament.settings.color)
-			.setTitle(`${round.identifier}: ${round.name}`)
+			.setColor(tournament.color)
+			.setTitle(`${round.acronym}: ${round.name}`)
 			.setDescription(
 				stripIndents`
                 **Best of:** ${round.best_of}
@@ -86,7 +66,7 @@ module.exports = {
             `
 			)
 			.addField("Mappool", poolString)
-			.setThumbnail(tournament.settings.icon_url);
+			.setThumbnail(tournament.icon_url);
 
 		if (interaction.isCommand()) {
 			await interaction.editReply({
