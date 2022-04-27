@@ -1,5 +1,4 @@
 const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
-const commandUpdate = require("./deploy-commands");
 const fs = require("fs");
 const join = require("./join");
 require("dotenv").config();

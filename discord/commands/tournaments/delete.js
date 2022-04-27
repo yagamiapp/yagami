@@ -1,7 +1,7 @@
 const { stripIndents } = require("common-tags/lib");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const { fetchGuild, prisma } = require("../../../prisma");
+const { prisma } = require("../../../prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("delete")
