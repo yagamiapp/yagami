@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { Permissions, MessageEmbed } = require("discord.js");
 const fs = require("fs");
 
 // Subcommand Handler

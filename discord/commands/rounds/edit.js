@@ -1,7 +1,7 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { getData, setData } = require("../../../firebase");
 let { MessageEmbed } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
+const { fetchGuild, prisma } = require("../../../prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -38,22 +38,13 @@ module.exports = {
 				)
 		),
 	async execute(interaction) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			"active_tournament"
-		);
-
-		let tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			active_tournament
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 
 		let acronym = interaction.options.getString("acronym").toUpperCase();
-		let round = tournament?.rounds?.[acronym];
+		let round = await prisma.round.findFirst({
+			where: { acronym: acronym, tournamentId: tournament.id },
+		});
 		let options = interaction.options.data[0].options;
 
 		// In case the round doesn't exist
@@ -69,22 +60,16 @@ module.exports = {
 
 		options.forEach((element) => {
 			let prop = element.name;
-			if (prop == "acronym") return;
 			round[prop] = element.value;
 		});
 
-		await setData(
-			round,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament,
-			"rounds",
-			acronym
-		);
+		await prisma.round.update({
+			where: { id: round.id },
+			data: round,
+		});
 
 		let embed = new MessageEmbed()
-			.setColor(tournament.settings.color)
+			.setColor(tournament.color)
 			.setTitle("Settings Updated")
 			.setDescription(
 				stripIndents`
@@ -94,7 +79,7 @@ module.exports = {
 				Mappool Visible: **${round.show_mappool}**
             `
 			)
-			.setThumbnail(tournament.settings.icon_url);
+			.setThumbnail(tournament.icon_url);
 		await interaction.editReply({ embeds: [embed] });
 	},
 };

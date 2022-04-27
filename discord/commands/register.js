@@ -1,27 +1,16 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const { setData, getData, updateUser } = require("../../firebase");
+const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("register")
 		.setDescription("Make a new team and register to the tournament"),
 	async execute(interaction) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 
-		let currentTournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
-
-		if (!currentTournament.allow_registration) {
+		if (!tournament.allow_registrations) {
 			let embed = new MessageEmbed()
 				.setDescription("**Err**: Registrations are closed.")
 				.setColor("RED");
@@ -29,7 +18,18 @@ module.exports = {
 			return;
 		}
 
-		if (currentTournament.users?.[interaction.user.id] != null) {
+		let duplicateCheck = await prisma.team.findFirst({
+			where: {
+				tournamentId: tournament.id,
+				members: {
+					some: {
+						discord_id: interaction.user.id,
+					},
+				},
+			},
+		});
+
+		if (duplicateCheck) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You are already registered to the tournament!\n\nUse \`/deregister\` to deregister.`
@@ -39,31 +39,33 @@ module.exports = {
 			return;
 		}
 
-		let user = await updateUser(interaction);
-
-		// user.access_token = null;
-		// user.last_profile_update = null;
+		let user = await prisma.user.findFirst({
+			where: {
+				discord_id: interaction.user.id,
+			},
+		});
 
 		let team = {
-			name: user.osu.username + "'s team",
-			members: [interaction.user.id],
-			icon_url: "https://s.ppy.sh/a/" + user.osu.id,
+			name: user.osu_username + "'s team",
+			icon_url: "https://s.ppy.sh/a/" + user.osu_id,
+			color: "#F88000",
+			tournamentId: tournament.id,
 		};
 
-		if (currentTournament.settings.team_size == 1)
-			team.name = user.osu.username;
+		if (tournament.team_size == 1) team.name = user.osu_username;
 
-		await setData(
-			team,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament,
-			"users",
-			interaction.user.id
-		);
+		let teamObject = await prisma.team.create({
+			data: team,
+		});
 
-		if (currentTournament.settings.team_size == 1) {
+		await prisma.userInTeam.create({
+			data: {
+				discord_id: interaction.user.id,
+				team_id: teamObject.id,
+			},
+		});
+
+		if (tournament.team_size == 1) {
 			let embed = new MessageEmbed()
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)

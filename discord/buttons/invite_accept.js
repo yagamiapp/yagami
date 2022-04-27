@@ -1,5 +1,5 @@
-const { MessageButton, MessageActionRow, MessageEmbed } = require("discord.js");
-const { getData, setData } = require("../../firebase");
+const { MessageButton, MessageEmbed } = require("discord.js");
+const { prisma } = require("../../prisma");
 
 module.exports = {
 	data: new MessageButton()
@@ -7,38 +7,46 @@ module.exports = {
 		.setLabel("Accept")
 		.setStyle("PRIMARY"),
 	async execute(interaction, command) {
-		let active_tournament = await getData(
-			"guilds",
-			command.options.guild,
-			"tournaments",
-			"active_tournament"
-		);
-		let tournament = await getData(
-			"guilds",
-			command.options.guild,
-			"tournaments",
-			active_tournament
-		);
+		let tournament = prisma.tournament.findFirst({
+			where: {
+				Guild_id: command.options.guild,
+			},
+		});
 
-		let userData = await getData("users", interaction.user.id);
+		let userData = await prisma.user.findFirst({
+			where: {
+				discord_id: interaction.user.id,
+			},
+		});
+		let team = await prisma.team.findFirst({
+			where: {
+				members: {
+					some: {
+						discord_id: command.options.user,
+					},
+				},
+			},
+		});
 
-		tournament.users[interaction.user.id] = {
-			memberOf: command.options.user,
-		};
-
-		tournament.users[command.options.user].members.push(interaction.user.id);
+		// tournament.users[interaction.user.id] = {
+		// 	memberOf: command.options.user,
+		// };
+		await prisma.userInTeam.create({
+			data: {
+				team_id: team.id,
+				discord_id: interaction.user.id,
+			},
+		});
 
 		let embed = new MessageEmbed()
 			.setTitle("✅ Invite Accepted ✅")
 			.setColor("GREEN");
 
-		await setData(
-			tournament,
-			"guilds",
-			command.options.guild,
-			"tournaments",
-			active_tournament
-		);
+		interaction.update({
+			content: null,
+			embeds: [embed],
+			components: [],
+		});
 
 		let tourneyGuild = await interaction.client.guilds.fetch(
 			command.options.guild
@@ -49,16 +57,10 @@ module.exports = {
 		let dmEmbed = new MessageEmbed()
 			.setTitle("🎉 Your invite was accepted! 🎉")
 			.setDescription(
-				` \`${userData.osu.username}\` accepted your invite to join your team!`
+				` \`${userData.osu_username}\` accepted your invite to join your team!`
 			)
-			.setColor(tournament.settings.color)
-			.setThumbnail(tournament.settings.icon_url);
+			.setColor(tournament.color)
+			.setThumbnail(tournament.icon_url);
 		await dm.send({ embeds: [dmEmbed] });
-
-		interaction.update({
-			content: null,
-			embeds: [embed],
-			components: [],
-		});
 	},
 };

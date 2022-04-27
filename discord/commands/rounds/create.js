@@ -1,7 +1,7 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { getData, setData } = require("../../../firebase");
 let { MessageEmbed } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
+const { fetchGuild, prisma } = require("../../../prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -31,70 +31,61 @@ module.exports = {
 				.setMaxValue(2)
 		),
 	async execute(interaction) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			"active_tournament"
-		);
-
-		let tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			active_tournament
-		);
-
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 		let acronym = interaction.options.getString("acronym").toUpperCase();
 
-		console.log("Creating a new round with the acronym: " + acronym);
+		if (!tournament) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Err**: There is no active tournament in this server."
+				)
+				.setColor("RED")
+				.setFooter({
+					text: "You can create a tournament with /tournament create",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
 
-		console.log("Checking if round Already Exists:");
-		let test = tournament?.rounds?.[acronym];
+		let test = await prisma.round.findFirst({
+			where: { acronym: acronym, tournamentId: tournament.id },
+		});
 
 		if (test) {
-			console.log("Test Failed");
-
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Err**: A round with the acronym `" +
 						acronym +
 						"` already exists in tournament: " +
-						active_tournament
+						tournament.name
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
-		console.log("Test passed! Writing data to database");
 
-		// Construct round object
-		let round = {
-			name: "New Round",
-			best_of: interaction.options.getInteger("best_of") ?? 11,
-			bans: interaction.options.getInteger("bans") ?? 2,
-			show_mappool: false,
-		};
-		await setData(
-			round,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament,
-			"rounds",
-			acronym
-		);
+		await prisma.round.create({
+			data: {
+				name: interaction.options.getString("name") ?? "New Round",
+				acronym: acronym,
+				best_of: interaction.options.getInteger("best_of") ?? 11,
+				bans: interaction.options.getInteger("bans") ?? 2,
+				tournamentId: tournament.id,
+				show_mappool: false,
+			},
+		});
 
 		let embed = new MessageEmbed()
-			.setColor(tournament.settings.color)
+			.setColor(tournament.color)
 			.setTitle("New round created!")
 			.setDescription(
 				stripIndents`
-                A new round with the acronym \`${acronym}\` has been created in the tournament: \`${tournament.settings.name}\`
+                A new round with the acronym \`${acronym}\` has been created in the tournament: \`${tournament.name}\`
                 To add a new map, use the command: \`/round \`
             `
 			)
-			.setThumbnail(tournament.settings.icon_url);
+			.setThumbnail(tournament.icon_url);
 		await interaction.editReply({ embeds: [embed] });
 	},
 };

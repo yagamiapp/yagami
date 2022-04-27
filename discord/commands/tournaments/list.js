@@ -1,4 +1,4 @@
-let firebase = require("../../../firebase");
+const { fetchGuild } = require("../../../prisma");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
 let { stripIndents } = require("common-tags");
@@ -8,51 +8,47 @@ module.exports = {
 		.setName("list")
 		.setDescription("Lists all tournaments in this guild"),
 	async execute(interaction) {
-		let tournaments = await firebase.getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments"
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournaments = guild.tournaments;
 
 		if (tournaments == null) {
 			let embed = new MessageEmbed()
 				.setDescription("**Err**:No Tournaments Found")
-				.setColor("RED");
+				.setColor("RED")
+				.setFooter({
+					text: "You can create a tournament with tournament create",
+				});
 
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 
-		let active_tournament = tournaments[tournaments.active_tournament];
+		let active_tournament = guild.active_tournament;
 
 		let embed = new MessageEmbed()
 			.setTitle("Tournaments in this server:")
-			.setColor(active_tournament.settings.color || "#F88000")
+			.setColor(active_tournament.color || "#F88000")
 			.setThumbnail(
-				active_tournament.settings.icon_url ||
+				active_tournament.icon_url ||
 					"https://yagami.clxxiii.dev/static/yagami%20var.png"
 			)
 			.setDescription(
 				stripIndents`
-				Active Tournament: **${active_tournament.settings.name}**
+				Active Tournament: **${active_tournament.name}**
 				\`\`\`
-				Name: ${active_tournament.settings.name}
-				Acronym: ${tournaments.active_tournament}
-				Score Mode: ${active_tournament.settings.score_mode}
-				Team Mode: ${active_tournament.settings.team_mode}
-				Force NF: ${active_tournament.settings.force_nf}
-				Team Size: ${active_tournament.settings.team_size}
+				Acronym: ${active_tournament.acronym}
+				Score Mode: ${active_tournament.score_mode}
+				Team Mode: ${active_tournament.team_mode}
+				Force NF: ${active_tournament.force_nf}
+				Team Size: ${active_tournament.team_size}
 				\`\`\`
 				`
 			);
 
 		let tourneyString = "";
-		for (const key in tournaments) {
-			if (key != tournaments.active_tournament && key != "active_tournament") {
-				const element = tournaments[key];
-
-				tourneyString += `**${key}:** ${element.settings?.name}\n`;
-			}
+		for (const tournament of tournaments) {
+			if (tournament.id != active_tournament.id)
+				tourneyString += `[${tournament.acronym}]: ${tournament.name}`;
 		}
 		if (!(tourneyString == "")) {
 			embed.addField("Other Tournaments", tourneyString);

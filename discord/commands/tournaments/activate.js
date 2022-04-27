@@ -1,6 +1,6 @@
 let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const firebase = require("../../../firebase");
+const { prisma } = require("../../../prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("activate")
@@ -14,18 +14,14 @@ module.exports = {
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
 
-		let tournaments = await firebase.getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments"
-		);
+		let tournament = await prisma.tournament.findFirst({
+			where: {
+				acronym: acro,
+				Guild_id: interaction.guildId,
+			},
+		});
 
-		let acroArray = [];
-		for (let key in tournaments) {
-			if (!(key == "active_tournament")) acroArray.push(key);
-		}
-
-		if (!acroArray.includes(acro)) {
+		if (!tournament) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: No tournament with the acronym \`${acro}\` found.`
@@ -35,19 +31,14 @@ module.exports = {
 			return;
 		}
 
-		let tournamentName = tournaments[acro].settings.name;
-
-		await firebase.setData(
-			acro,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
+		await prisma.guild.update({
+			where: { guild_id: interaction.guildId },
+			data: { active_tournament: tournament.id },
+		});
 
 		let embed = new MessageEmbed()
 			.setTitle("Active Tournament Updated!")
-			.setDescription(`Active tournament switched to \`${tournamentName}\``)
+			.setDescription(`Active tournament switched to \`${tournament.name}\``)
 			.setColor("GREEN");
 
 		await interaction.editReply({ embeds: [embed] });

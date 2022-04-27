@@ -1,7 +1,7 @@
 const { stripIndents } = require("common-tags/lib");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const firebase = require("../../../firebase");
+const { prisma } = require("../../../prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("delete")
@@ -14,14 +14,15 @@ module.exports = {
 		),
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
-		let tourney = await firebase.getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			acro
-		);
 
-		if (tourney == null) {
+		let tournament = await prisma.tournament.findFirst({
+			where: {
+				acronym: acro,
+				Guild_id: interaction.guildId,
+			},
+		});
+
+		if (tournament == null) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: No tournament with the acronym \`${acro}\` found.`
@@ -31,45 +32,25 @@ module.exports = {
 			return;
 		}
 
-		if (tourney?.delete_warning) {
-			await firebase.setData(
-				{},
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				acro
-			);
-			let tournaments = await firebase.getData(
-				"guilds",
-				interaction.guildId,
-				"tournaments"
-			);
+		if (tournament.delete_warning) {
+			await prisma.tournament.delete({
+				where: { id: tournament.id },
+			});
 
 			// Get last tournament in tourney list and set it to the active tournament
-			let latestTourney;
-			for (let key in tournaments) {
-				let element = tournaments[key];
-				if (!(element == acro) && !(key == "active_tournament")) {
-					latestTourney = key;
-				}
-			}
-
-			if (latestTourney == undefined) {
-				await firebase.setData(
-					null,
-					"guilds",
-					interaction.guildId,
-					"tournaments",
-					"active_tournament"
-				);
+			let newActive = await prisma.tournament.findFirst({
+				where: { Guild_id: interaction.guildId },
+			});
+			if (!newActive) {
+				await prisma.guild.update({
+					where: { guild_id: interaction.guildId },
+					data: { active_tournament: null },
+				});
 			} else {
-				await firebase.setData(
-					latestTourney,
-					"guilds",
-					interaction.guildId,
-					"tournaments",
-					"active_tournament"
-				);
+				await prisma.guild.update({
+					where: { guild_id: interaction.guildId },
+					data: { active_tournament: newActive?.id },
+				});
 			}
 
 			let embed = new MessageEmbed()
@@ -79,24 +60,20 @@ module.exports = {
 			return;
 		}
 
-		await firebase.setData(
-			true,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			acro,
-			"delete_warning"
-		);
+		await prisma.tournament.update({
+			where: { id: tournament.id },
+			data: { delete_warning: true },
+		});
 
-		setTimeout(() => {
-			firebase.setData(
-				{},
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				acro,
-				"delete_warning"
-			);
+		setTimeout(async () => {
+			try {
+				await prisma.tournament.update({
+					where: { id: tournament.id },
+					data: { delete_warning: null },
+				});
+			} catch (e) {
+				console.log("Tournament already deleted");
+			}
 		}, 60000);
 
 		let embed = new MessageEmbed().setColor("DARK_RED").setTitle("⚠ WARNING ⚠")

@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { deployCommands } = require("../deploy-commands");
 const { MessageEmbed } = require("discord.js");
-const { getData, setData } = require("../../firebase");
+const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -33,26 +32,20 @@ module.exports = {
 				.setDescription("Update guild commands and permissions")
 		),
 	async execute(interaction) {
-		let guild = await getData("guilds", interaction.guildId);
+		let guild = await fetchGuild(interaction.guildId);
 		let options = interaction.options.data;
 		let description = "";
 
 		for (let option of options) {
-			if (option.name === "update") {
-				await deployCommands(interaction.guild);
-				description += "Updated guild commands and permissions\n";
-			} else {
-				guild.settings[option.name] = option.value;
-				await setData(
-					option.value,
-					"guilds",
-					interaction.guildId,
-					"settings",
-					option.name
-				);
-				description += `**${option.name}**: ${option.value}\n`;
-			}
+			guild[option.name] = option.value;
+			description += `**${option.name}**: ${option.value}\n`;
 		}
+		await prisma.guild.update({
+			where: {
+				guild_id: interaction.guildId,
+			},
+			data: guild,
+		});
 
 		let embed = new MessageEmbed()
 			.setTitle("Settings Updated")
