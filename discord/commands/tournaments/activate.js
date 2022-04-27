@@ -1,7 +1,6 @@
 let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { fetchGuild, prisma } = require("../../../prisma");
-const firebase = require("../../../firebase");
+const { prisma } = require("../../../prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("activate")

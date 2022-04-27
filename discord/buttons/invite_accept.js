@@ -1,6 +1,5 @@
-const { MessageButton, MessageActionRow, MessageEmbed } = require("discord.js");
-const { getData, setData } = require("../../firebase");
-const { fetchGuild, prisma } = require("../../prisma");
+const { MessageButton, MessageEmbed } = require("discord.js");
+const { prisma } = require("../../prisma");
 
 module.exports = {
 	data: new MessageButton()
@@ -52,9 +51,7 @@ module.exports = {
 		let tourneyGuild = await interaction.client.guilds.fetch(
 			command.options.guild
 		);
-		let tourneyMember = await tourneyGuild.members.fetch(
-			command.options.user
-		);
+		let tourneyMember = await tourneyGuild.members.fetch(command.options.user);
 
 		let dm = await tourneyMember.createDM();
 		let dmEmbed = new MessageEmbed()

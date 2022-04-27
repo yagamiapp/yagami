@@ -28,6 +28,18 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
+		// In case there is no active tournament
+		if (!tournament) {
+			let embed = new MessageEmbed()
+				.setDescription("**Err**: No active tournament.")
+				.setColor("RED")
+				.setFooter({
+					text: "You can make a new tournament with /tournament create",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		let round = await prisma.round.findFirst({
 			where: {
 				tournamentId: tournament.id,
@@ -63,6 +75,12 @@ module.exports = {
 			}),
 		];
 
+		let matches = await prisma.match.findMany({
+			where: {
+				round_id: round.id,
+			},
+		});
+
 		// In case there is no tournament
 		if (!tournament) {
 			let embed = new MessageEmbed()
@@ -90,9 +108,7 @@ module.exports = {
 		// In case the team1 user is not on a team
 		if (!teams[0]) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: The user from team 1 is not on a team"
-				)
+				.setDescription("**Err**: The user from team 1 is not on a team")
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -104,9 +120,7 @@ module.exports = {
 		// In case the team 2 user is not on a team
 		if (!teams[1]) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: The user from team 2 is not on a team"
-				)
+				.setDescription("**Err**: The user from team 2 is not on a team")
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -125,6 +139,24 @@ module.exports = {
 				});
 			interaction.editReply({ embeds: [embed] });
 			return;
+		}
+
+		let match = await prisma.match.create({
+			data: {
+				id: matches.length + 1,
+				round_id: round.id,
+				state: 10,
+			},
+		});
+
+		for (let team of teams) {
+			await prisma.teamInMatch.create({
+				data: {
+					team_id: team.id,
+					match_id: match.id,
+					score: 0,
+				},
+			});
 		}
 
 		let embed = new MessageEmbed()

@@ -1,5 +1,4 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { getData, setData } = require("../../../firebase");
 let { MessageEmbed } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { fetchGuild, prisma } = require("../../../prisma");

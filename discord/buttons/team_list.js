@@ -1,4 +1,3 @@
-const { getData } = require("../../firebase");
 let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
@@ -16,9 +15,7 @@ module.exports = {
 		// In case there are no teams
 		if (teams.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: There are no teams in this tournament."
-				)
+				.setDescription("**Err**: There are no teams in this tournament.")
 				.setColor("RED");
 			await interaction.reply({ embeds: [embed] });
 			return;

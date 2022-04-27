@@ -73,6 +73,7 @@ model Round {
   tournamentId   Int
   delete_warning String?
   show_mappool   Boolean
+  Match          Match[]
 }
 
 model Tournament {
@@ -143,13 +144,14 @@ model Guild {
 }
 
 model Team {
-  id           Int          @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   name         String
   icon_url     String
   color        String
   members      UserInTeam[]
-  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament    @relation(fields: [tournamentId], references: [id])
   tournamentId Int
+  TeamInMatch  TeamInMatch[]
 }
 
 model UserInTeam {
@@ -160,4 +162,23 @@ model UserInTeam {
   delete_warning Boolean?
 
   @@id([discord_id, team_id])
+}
+
+model Match {
+  id       Int           @id
+  teams    TeamInMatch[]
+  round    Round         @relation(fields: [round_id], references: [id])
+  round_id Int
+  state    Int
+}
+
+model TeamInMatch {
+  team_id  Int
+  team     Team     @relation(fields: [team_id], references: [id])
+  match_id Int
+  match    Match    @relation(fields: [match_id], references: [id])
+  score    Int
+  winner   Boolean?
+
+  @@id([team_id, match_id])
 }

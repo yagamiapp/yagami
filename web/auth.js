@@ -1,4 +1,3 @@
-const firebase = require("../firebase");
 const axios = require("axios");
 const { MessageEmbed } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
