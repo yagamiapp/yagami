@@ -1,72 +1,83 @@
 const { getData } = require("../../firebase");
 let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
-const { stripIndents } = require("common-tags/lib");
+const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
 	data: new MessageButton().setCustomId("team_list"),
 	async execute(interaction, command) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			"active_tournament"
-		);
-
-		let tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			active_tournament
-		);
-
-		let users = await getData("users");
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
+		let teams = await prisma.team.findMany({
+			where: {
+				tournamentId: tournament.id,
+			},
+		});
 
 		// In case there are no teams
-		if (!tournament.users) {
+		if (teams.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no teams in this tournament.")
+				.setDescription(
+					"**Err**: There are no teams in this tournament."
+				)
 				.setColor("RED");
 			await interaction.reply({ embeds: [embed] });
 			return;
 		}
 
-		// Put teams into array
-		let teams = [];
-		for (let id in tournament.users) {
-			let user = tournament.users[id];
-			if (user.name) {
-				teams.push(user);
-			}
+		let users = await prisma.user.findMany({
+			where: {
+				in_teams: {
+					some: {
+						team: {
+							tournamentId: tournament.id,
+						},
+					},
+				},
+			},
+		});
+		// Add member objects to each team
+		for (const team of teams) {
+			let membersInTeam = await prisma.user.findMany({
+				where: {
+					in_teams: {
+						some: {
+							team_id: team.id,
+						},
+					},
+				},
+			});
+			team.members = membersInTeam;
 		}
 		// Sort teams by average rank
 		teams.sort((a, b) => {
 			let aAvg = 0;
 			let bAvg = 0;
+
 			for (let i = 0; i < a.members.length; i++) {
-				let user = users[a.members[i]];
-				if (user.osu.statistics.global_rank) {
-					aAvg += user.osu.statistics.global_rank;
+				let user = a.members[i];
+				if (user.osu_pp_rank) {
+					aAvg += user.osu_pp_rank;
 				}
 			}
+
 			for (let i = 0; i < b.members.length; i++) {
-				let user = users[b.members[i]];
-				if (user.osu.statistics.global_rank) {
-					bAvg += user.osu.statistics.global_rank;
+				let user = b.members[i];
+				if (user.osu_pp_rank) {
+					bAvg += user.osu_pp_rank;
 				}
 			}
 
 			aAvg /= a.members.length;
 			bAvg /= b.members.length;
+			console.log(`${bAvg} - ${aAvg}`);
 			return aAvg - bAvg;
 		});
-
 		// Group elements into groups of 3
 		let groups = [];
 		let groupSize = 3;
 		for (let i = 0; i < teams.length; i += groupSize) {
 			groups.push(teams.slice(i, i + groupSize));
 		}
-
 		let index = parseInt(command.options.index);
 
 		// Select first round and build embed
@@ -99,17 +110,25 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setTitle("Teams")
-			.setColor(tournament.settings.color || "#F88000")
-			.setThumbnail(tournament.settings.icon_url);
+			.setColor(tournament.color || "#F88000")
+			.setThumbnail(tournament.icon_url);
 
 		for (let i = 0; i < group.length; i++) {
 			let team = group[i];
 			let teamString = "";
+			let members = await prisma.user.findMany({
+				where: {
+					in_teams: {
+						some: {
+							team_id: team.id,
+						},
+					},
+				},
+			});
 
-			for (let i = 0; i < team.members.length; i++) {
-				let member = team.members[i];
-				let memberData = await getData("users", member);
-				let rank = memberData.osu.statistics.global_rank;
+			for (let i = 0; i < members.length; i++) {
+				let member = members[i];
+				let rank = member.osu_pp_rank;
 				if (rank == null) {
 					rank = "Unranked";
 				} else {
@@ -117,8 +136,8 @@ module.exports = {
 				}
 
 				teamString += `
-				:flag_${memberData.osu.country_code.toLowerCase()}: ${
-					memberData.osu.username
+				:flag_${member.osu_country_code.toLowerCase()}: ${
+					member.osu_username
 				} (#${rank})`;
 				if (i == 0) {
 					teamString += " **(c)**";

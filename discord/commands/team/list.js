@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { getData } = require("../../../firebase");
+const { fetchGuild, prisma } = require("../../../prisma");
 let { MessageEmbed } = require("discord.js");
 let { execute } = require("../../buttons/team_list");
 
@@ -8,19 +8,13 @@ module.exports = {
 		.setName("list")
 		.setDescription("List the teams"),
 	async execute(interaction) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			"active_tournament"
-		);
-
-		let tournament = await getData(
-			"guilds",
-			interaction.guild.id,
-			"tournaments",
-			active_tournament
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
+		let teams = await prisma.team.findMany({
+			where: {
+				tournamentId: tournament.id,
+			},
+		});
 
 		// In case there is no tournament
 		if (!tournament) {
@@ -32,7 +26,7 @@ module.exports = {
 		}
 
 		// In case there are no teams
-		if (!tournament.users) {
+		if (!teams) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Err**: There are no teams in this tournament."
