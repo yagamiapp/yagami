@@ -1,93 +1,109 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const { setData, getData, pushData, updateUser } = require("../../firebase");
+const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("deregister")
 		.setDescription("Deregister from the tournament"),
 	async execute(interaction) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
-		let currentTournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 
-		// In case the user is not registered
-		if (currentTournament?.users?.[interaction.user.id]?.name == null) {
+		let team = await prisma.team.findFirst({
+			where: {
+				members: {
+					some: {
+						discord_id: interaction.user.id,
+					},
+				},
+			},
+		});
+
+		if (!team) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					`**Err**: You cannot deregister unless you are the owner of the team`
+					`**Err**: You cannot deregister unless you are in a team.`
 				)
 				.setColor("RED");
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
+		let members = await prisma.user.findMany({
+			where: {
+				in_teams: {
+					some: {
+						team_id: team.id,
+					},
+				},
+			},
+		});
+
+		let userInTeam = await prisma.userInTeam.findFirst({
+			where: {
+				discord_id: interaction.user.id,
+			},
+		});
+
 		// In case the user's team has more than one member
-		if (
-			currentTournament.users[interaction.user.id].members.length > 1 &&
-			!currentTournament.users[interaction.user.id].delete_warning
-		) {
-			await setData(
-				true,
-				"guilds",
-				interaction.guildId,
-				"tournaments",
-				active_tournament,
-				"users",
-				interaction.user.id,
-				"delete_warning"
-			);
+		if (members.length > 1 && !userInTeam.delete_warning) {
+			await prisma.userInTeam.update({
+				where: {
+					discord_id: interaction.user.id,
+				},
+				data: {
+					delete_warning: true,
+				},
+			});
 
 			setTimeout(async () => {
-				await setData(
-					null,
-					"guilds",
-					interaction.guildId,
-					"tournaments",
-					active_tournament,
-					"users",
-					interaction.user.id,
-					"delete_warning"
-				);
+				try {
+					await prisma.userInTeam.update({
+						where: {
+							discord_id: interaction.user.id,
+						},
+						data: {
+							delete_warning: null,
+						},
+					});
+				} catch (e) {}
 			}, 30 * 1000);
 
 			let embed = new MessageEmbed()
 				.setTitle("⚠ Warning ⚠")
 				.setDescription(
-					`If you deregister when you have more than one member in your team will result in the team being deleted, and will leave your members without a team.\n\nUse \`/deregister\` again to confirm you deregister.`
+					`You are about to leave your team. You will need an invite to join back. Type \`/deregister\` again to confirm.`
 				)
 				.setColor("DARK_RED");
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
-		currentTournament.users[interaction.user.id].members.forEach(
-			async (member) => {
-				await setData(
-					{},
-					"guilds",
-					interaction.guildId,
-					"tournaments",
-					active_tournament,
-					"users",
-					member
-				);
-			}
-		);
+		let teamMemberLength = await prisma.userInTeam.count({
+			where: {
+				team_id: team.id,
+			},
+		});
+
+		await prisma.userInTeam.delete({
+			where: {
+				discord_id: interaction.user.id,
+			},
+		});
+
+		if (teamMemberLength <= 1) {
+			await prisma.team.delete({
+				where: {
+					id: team.id,
+				},
+			});
+		}
 
 		let embed = new MessageEmbed()
 			.setTitle("See you next time!")
 			.setDescription(`Successfully deregistered to the tournament!`)
-			.setColor("#F88000")
+			.setColor(tournament.color)
 			.setThumbnail(
-				currentTournament.settings.icon_url ||
+				tournament.icon_url ||
 					"https://yagami.clxxiii.dev/static/yagami%20var.png"
 			);
 
