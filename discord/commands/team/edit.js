@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const { getData, setData } = require("../../../firebase");
+const { fetchGuild, prisma } = require("../../../prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -17,27 +17,37 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
+				.setDescription(
+					"Set a custom color for your tournament e.g.(#0EB8B9)"
+				)
 		),
 	async execute(interaction) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
-
-		let currentTournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 
 		let options = interaction.options.data[0].options;
+		let team = await prisma.team.findFirst({
+			where: {
+				members: {
+					some: {
+						discord_id: interaction.user.id,
+					},
+				},
+			},
+		});
 
+		// In case the user is not in a team
+		if (!team) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: You cannot edit your team unless you are the owner of the team`
+				)
+				.setColor("RED");
+			interaction.editReply({ embeds: [embed] });
+			return;
+		}
 		// In case registration is disabled
-		if (!currentTournament.allow_registration) {
+		if (!tournament.allow_registrations) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Err**: You cannot edit your team while registration is closed."
@@ -47,23 +57,13 @@ module.exports = {
 			return;
 		}
 		// In case the team size is 1
-		if (currentTournament.settings.team_size == 1) {
+		if (tournament.team_size == 1) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: You cannot edit your team if the team size is 1.`
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
-			return;
-		}
-		// In case the user does not own a team
-		if (!currentTournament.users[interaction.user.id]?.name) {
-			let embed = new MessageEmbed()
-				.setDescription(
-					`**Err**: You cannot edit your team unless you are the owner of the team`
-				)
-				.setColor("RED");
-			interaction.editReply({ embeds: [embed] });
 			return;
 		}
 		// In case the icon_url does not lead to an image
@@ -96,38 +96,36 @@ module.exports = {
 			return;
 		}
 
-		let team = currentTournament.users[interaction.user.id];
-
 		options.forEach((element) => {
 			let prop = element.name;
-			if (prop == "acronym") {
-				acronym = element.value.toUpperCase();
-			} else {
-				team[prop] = element.value;
-			}
+			team[prop] = element.value;
 		});
 
-		currentTournament.users[interaction.user.id] = team;
-
-		await setData(
-			currentTournament,
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
+		await prisma.team.update({
+			where: {
+				id: team.id,
+			},
+			data: team,
+		});
 
 		let embed = new MessageEmbed()
 			.setTitle("Settings updated")
-			.setColor(team.color || "GREEN");
-		if (team.icon_url) {
-			embed.setThumbnail(team.icon_url);
-		}
+			.setColor(team.color || "GREEN")
+			.setThumbnail(team.icon_url);
+
+		let members = await prisma.user.findMany({
+			where: {
+				in_teams: {
+					some: {
+						team_id: team.id,
+					},
+				},
+			},
+		});
 		let teamString = "";
-		for (let i = 0; i < team.members.length; i++) {
-			let member = team.members[i];
-			let memberData = await getData("users", member);
-			let rank = memberData.osu.statistics.global_rank;
+		for (let i = 0; i < members.length; i++) {
+			let member = members[i];
+			let rank = member.osu_pp_rank;
 			if (rank == null) {
 				rank = "Unranked";
 			} else {
@@ -135,8 +133,8 @@ module.exports = {
 			}
 
 			teamString += `
-			:flag_${memberData.osu.country_code.toLowerCase()}: ${
-				memberData.osu.username
+			:flag_${member.osu_country_code.toLowerCase()}: ${
+				member.osu_username
 			} (#${rank})`;
 			if (i == 0) {
 				teamString += " **(c)**";

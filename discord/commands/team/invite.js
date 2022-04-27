@@ -1,7 +1,6 @@
 const { stripIndents } = require("common-tags/lib");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
-const { getData } = require("../../../firebase");
 const { fetchGuild, prisma } = require("../../../prisma");
 
 module.exports = {
