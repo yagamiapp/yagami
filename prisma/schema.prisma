@@ -91,10 +91,11 @@ model Tournament {
   Guild               Guild?   @relation(fields: [Guild_id], references: [guild_id])
   Guild_id            String?
   delete_warning      Boolean?
+  Team                Team[]
 }
 
 model User {
-  discord_id               String  @id
+  discord_id               String       @id
   discord_avatar           String
   discord_avatarURL        String
   discord_bot              Boolean
@@ -123,6 +124,7 @@ model User {
   token_expires_in         Int
   token_refresh_token      String
   token_type               String
+  in_teams                 UserInTeam[]
 }
 
 model GlobalMappool {
@@ -134,8 +136,26 @@ model GlobalMappool {
 model Guild {
   guild_id          String       @id
   change_nickname   Boolean
-  linked_role       String
-  player_role       String
+  linked_role       String?
+  player_role       String?
   tournaments       Tournament[]
   active_tournament Int?
+}
+
+model Team {
+  id           Int          @id @default(autoincrement())
+  name         String
+  icon_url     String
+  color        String
+  members      UserInTeam[]
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+}
+
+model UserInTeam {
+  discord_id     String   @id
+  user           User     @relation(fields: [discord_id], references: [discord_id])
+  team           Team     @relation(fields: [team_id], references: [id])
+  team_id        Int
+  delete_warning Boolean?
 }
