@@ -35,38 +35,40 @@ module.exports.deployCommands = async (guild) => {
 		)
 		.catch(console.error);
 
-	/*
-	 * 	PERMISSION HANDLING
-	 */
+	// I probably don't need this anymore but I'm leaving it here for now
 
-	// Get roles with admin perms & owner
-	let commandIDs = await rest.get(
-		Routes.applicationGuildCommands(process.env.clientId, guild.id)
-	);
+	// /*
+	//  * 	PERMISSION HANDLING
+	//  */
 
-	let adminRoles = [];
-	for (let role of guild.roles.cache) {
-		if (role[1].permissions.has("ADMINISTRATOR")) adminRoles.push(role[0]);
-	}
-	let adminPerms = [];
-	adminRoles.forEach((role) => {
-		adminPerms.push({
-			id: role,
-			type: "ROLE",
-			permission: true,
-		});
-	});
-	let owner = guild.ownerId;
-	if (owner) adminPerms.push({ id: owner, type: "USER", permission: true });
+	// // Get roles with admin perms & owner
+	// let commandIDs = await rest.get(
+	// 	Routes.applicationGuildCommands(process.env.clientId, guild.id)
+	// );
 
-	// Assemble full perms object
-	let fullPermissions = [];
-	for (let command of commandIDs) {
-		if (!command.default_permission) {
-			let id = command.id;
-			fullPermissions.push({ id, permissions: adminPerms });
-		}
-	}
+	// let adminRoles = [];
+	// for (let role of guild.roles.cache) {
+	// 	if (role[1].permissions.has("ADMINISTRATOR")) adminRoles.push(role[0]);
+	// }
+	// let adminPerms = [];
+	// adminRoles.forEach((role) => {
+	// 	adminPerms.push({
+	// 		id: role,
+	// 		type: "ROLE",
+	// 		permission: true,
+	// 	});
+	// });
+	// let owner = guild.ownerId;
+	// if (owner) adminPerms.push({ id: owner, type: "USER", permission: true });
 
-	await guild.commands.permissions.set({ fullPermissions });
+	// // Assemble full perms object
+	// let fullPermissions = [];
+	// for (let command of commandIDs) {
+	// 	if (!command.default_permission) {
+	// 		let id = command.id;
+	// 		fullPermissions.push({ id, permissions: adminPerms });
+	// 	}
+	// }
+
+	// await guild.commands.permissions.set({ fullPermissions });
 };
