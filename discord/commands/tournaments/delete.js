@@ -14,7 +14,6 @@ module.exports = {
 		),
 	async execute(interaction) {
 		let acro = interaction.options.getString("acronym").toUpperCase();
-		let guild = await fetchGuild(interaction.guildId);
 
 		let tournament = await prisma.tournament.findFirst({
 			where: {

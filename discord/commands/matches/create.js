@@ -81,18 +81,6 @@ module.exports = {
 			},
 		});
 
-		// In case there is no tournament
-		if (!tournament) {
-			let embed = new MessageEmbed()
-				.setDescription("**Err**: There is no active tournament")
-				.setColor("RED")
-				.setFooter({
-					text: "You can create a tournament with /tournament create",
-				});
-			interaction.editReply({ embeds: [embed] });
-			return;
-		}
-
 		// In case the given acronym is not valid
 		if (!round) {
 			let embed = new MessageEmbed()
