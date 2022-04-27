@@ -1,6 +1,6 @@
 let { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
-let { setData, getData } = require("../../../firebase");
+let { fetchGuild, prisma } = require("../../../prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -25,22 +25,15 @@ module.exports = {
 				.setRequired(true)
 		),
 	async execute(interaction) {
-		let active_tournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			"active_tournament"
-		);
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 
-		let tournament = await getData(
-			"guilds",
-			interaction.guildId,
-			"tournaments",
-			active_tournament
-		);
-
-		let roundAcronym = interaction.options.getString("round").toUpperCase();
-		let round = tournament.rounds?.[roundAcronym];
+		let round = await prisma.round.findFirst({
+			where: {
+				tournamentId: tournament.id,
+				acronym: interaction.options.getString("round").toUpperCase(),
+			},
+		});
 
 		let users = [
 			interaction.options.getUser("team1"),
@@ -48,10 +41,26 @@ module.exports = {
 		];
 
 		let teams = [
-			tournament.users?.[users[0].id]?.memberOf ||
-				tournament.users?.[users[0].id],
-			tournament.users?.[users[1].id]?.memberOf ||
-				tournament.users?.[users[1].id],
+			await prisma.team.findFirst({
+				where: {
+					tournamentId: tournament.id,
+					members: {
+						some: {
+							discord_id: users[0].id,
+						},
+					},
+				},
+			}),
+			await prisma.team.findFirst({
+				where: {
+					tournamentId: tournament.id,
+					members: {
+						some: {
+							discord_id: users[1].id,
+						},
+					},
+				},
+			}),
 		];
 
 		// In case there is no tournament
@@ -81,7 +90,9 @@ module.exports = {
 		// In case the team1 user is not on a team
 		if (!teams[0]) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: The user from team 1 is not on a team")
+				.setDescription(
+					"**Err**: The user from team 1 is not on a team"
+				)
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -93,7 +104,9 @@ module.exports = {
 		// In case the team 2 user is not on a team
 		if (!teams[1]) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: The user from team 2 is not on a team")
+				.setDescription(
+					"**Err**: The user from team 2 is not on a team"
+				)
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -103,7 +116,7 @@ module.exports = {
 		}
 
 		// In case the teams are the same
-		if (teams[0] === teams[1]) {
+		if (teams[0].id == teams[1].id) {
 			let embed = new MessageEmbed()
 				.setDescription("**Err**: The teams are the same")
 				.setColor("RED")
@@ -114,29 +127,27 @@ module.exports = {
 			return;
 		}
 
-		// Add osu IDs to teams
-		for (let team of teams) {
-			let teamsOsuIDs = [];
-			for (let member of team.members) {
-				let user = await getData("users", member);
-				teamsOsuIDs.push(user.osu.id);
-			}
-			team.user_ids = teamsOsuIDs;
-		}
-
 		let embed = new MessageEmbed()
 			.setTitle("Matchup created")
 			.setDescription("The matchup has been created")
-			.setColor(tournament.settings.color)
-			.setThumbnail(tournament.settings.icon_url);
+			.setColor(tournament.color)
+			.setThumbnail(tournament.icon_url);
 
 		// Construct team strings
 		for (let team of teams) {
 			let teamString = "";
-			for (let i = 0; i < team.members.length; i++) {
-				let member = team.members[i];
-				let memberData = await getData("users", member);
-				let rank = memberData.osu.statistics.global_rank;
+			let members = await prisma.user.findMany({
+				where: {
+					in_teams: {
+						some: {
+							team_id: team.id,
+						},
+					},
+				},
+			});
+			for (let i = 0; i < members.length; i++) {
+				let member = members[i];
+				let rank = member.osu_pp_rank;
 				if (rank == null) {
 					rank = "Unranked";
 				} else {
@@ -144,8 +155,8 @@ module.exports = {
 				}
 
 				teamString += `
-                    :flag_${memberData.osu.country_code.toLowerCase()}: ${
-					memberData.osu.username
+                    :flag_${member.osu_country_code.toLowerCase()}: ${
+					member.osu_username
 				} (#${rank})`;
 				if (i == 0) {
 					teamString += " **(c)**";

@@ -54,16 +54,16 @@ module.exports = {
 			return;
 		}
 
-		// Construct round object
-		let round = {
-			name: interaction.options.getString("name") ?? "New Round",
-			acronym: acronym,
-			best_of: interaction.options.getInteger("best_of") ?? 11,
-			bans: interaction.options.getInteger("bans") ?? 2,
-			tournamentId: tournament.id,
-			show_mappool: false,
-		};
-		await prisma.round.create({ data: round });
+		await prisma.round.create({
+			data: {
+				name: interaction.options.getString("name") ?? "New Round",
+				acronym: acronym,
+				best_of: interaction.options.getInteger("best_of") ?? 11,
+				bans: interaction.options.getInteger("bans") ?? 2,
+				tournamentId: tournament.id,
+				show_mappool: false,
+			},
+		});
 
 		let embed = new MessageEmbed()
 			.setColor(tournament.color)

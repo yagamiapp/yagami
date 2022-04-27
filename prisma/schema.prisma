@@ -153,9 +153,11 @@ model Team {
 }
 
 model UserInTeam {
-  discord_id     String   @id
+  discord_id     String
   user           User     @relation(fields: [discord_id], references: [discord_id])
   team           Team     @relation(fields: [team_id], references: [id])
   team_id        Int
   delete_warning Boolean?
+
+  @@id([discord_id, team_id])
 }
