@@ -21,17 +21,6 @@ module.exports = {
 			return;
 		}
 
-		let users = await prisma.user.findMany({
-			where: {
-				in_teams: {
-					some: {
-						team: {
-							tournamentId: tournament.id,
-						},
-					},
-				},
-			},
-		});
 		// Add member objects to each team
 		for (const team of teams) {
 			let membersInTeam = await prisma.user.findMany({

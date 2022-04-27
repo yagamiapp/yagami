@@ -35,13 +35,24 @@ module.exports = {
 		let tournament = guild.active_tournament;
 		let acronym = interaction.options.getString("acronym").toUpperCase();
 
+		if (!tournament) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Err**: There is no active tournament in this server."
+				)
+				.setColor("RED")
+				.setFooter({
+					text: "You can create a tournament with /tournament create",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		let test = await prisma.round.findFirst({
 			where: { acronym: acronym, tournamentId: tournament.id },
 		});
 
 		if (test) {
-			console.log("Test Failed");
-
 			let embed = new MessageEmbed()
 				.setDescription(
 					"**Err**: A round with the acronym `" +
