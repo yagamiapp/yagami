@@ -77,16 +77,24 @@ module.exports = {
 				}
 				await command.execute(interaction);
 			} catch (error) {
-				console.error(error);
+				console.log(error);
 				let embed = new MessageEmbed()
 					.setColor("#ff0000")
 					.setDescription(
 						"**Err**: There was an error while executing this command!"
 					);
-				await interaction.editReply({
-					embeds: [embed],
-					ephemeral: true,
-				});
+
+				if (interaction.replied) {
+					await interaction.editReply({
+						embeds: [embed],
+						ephemeral: true,
+					});
+				} else {
+					await interaction.reply({
+						embeds: [embed],
+						ephemeral: true,
+					});
+				}
 			}
 		});
 		// Button Handler
@@ -123,16 +131,23 @@ module.exports = {
 			try {
 				await button.execute(interaction, command);
 			} catch (error) {
-				console.error(error);
+				console.log(error);
 				let embed = new MessageEmbed()
 					.setColor("#ff0000")
 					.setDescription(
 						"**Err**: There was an error while executing this button!"
 					);
-				await interaction.reply({
-					embeds: [embed],
-					ephemeral: true,
-				});
+				if (interaction.replied) {
+					await interaction.editReply({
+						embeds: [embed],
+						ephemeral: true,
+					});
+				} else {
+					await interaction.reply({
+						embeds: [embed],
+						ephemeral: true,
+					});
+				}
 			}
 		});
 
