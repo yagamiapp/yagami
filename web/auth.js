@@ -88,16 +88,13 @@ module.exports.authUser = async (query, req, res) => {
 		token_type: authResponse.token_type,
 	};
 
-	await prisma.user
-		.upsert({
-			where: {
-				discord_id: user.id,
-			},
-			create: userPayload,
-			update: userPayload,
-		})
-		.then(console.log)
-		.catch(console.log);
+	await prisma.user.upsert({
+		where: {
+			discord_id: user.id,
+		},
+		create: userPayload,
+		update: userPayload,
+	});
 	// Cancel timeout message
 	clearInterval(interval);
 
