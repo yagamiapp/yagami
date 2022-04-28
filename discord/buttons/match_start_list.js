@@ -8,7 +8,10 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		let round = await prisma.round.findFirst({
-			where: { tournamentId: tournament.id, acronym: command.options.round },
+			where: {
+				tournamentId: tournament.id,
+				acronym: command.options.round,
+			},
 		});
 		let matches = await prisma.match.findMany({
 			where: { round_id: round.id },
@@ -22,6 +25,18 @@ module.exports = {
 		let groupSize = 2;
 		for (let i = 0; i < matches.length; i += groupSize) {
 			groups.push(matches.slice(i, i + groupSize));
+		}
+
+		// In case there are no matches
+		if (groups.length == 0) {
+			let embed = new MessageEmbed()
+				.setDescription("**Err**: There are no matches")
+				.setColor("RED")
+				.setFooter({
+					text: "You can create a match with /matches create",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
 		}
 
 		// Select group and build embed
@@ -92,12 +107,16 @@ module.exports = {
 				`${teams[0].name} vs ${teams[1].name}`,
 				true
 			);
-			startButtons.addComponents([
-				new MessageButton()
-					.setLabel("Start match " + match.round_id)
-					.setCustomId("start_match?id=" + match.id + "&index=" + index)
-					.setStyle("SUCCESS"),
-			]);
+			let startButton = new MessageButton()
+				.setLabel("Start match " + match.round_id)
+				.setCustomId("start_match?id=" + match.id + "&index=" + index)
+				.setStyle("SUCCESS");
+			if (match.state != 10) {
+				startButton
+					.setLabel("Started match " + match.round_id)
+					.setDisabled(true);
+			}
+			startButtons.addComponents([startButton]);
 			viewButtons.addComponents([
 				new MessageButton()
 					.setLabel("View match " + match.round_id)
