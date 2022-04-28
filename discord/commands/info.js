@@ -14,6 +14,19 @@ module.exports = {
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
 	async execute(interaction) {
+		let uptime = Date.now() - start_time;
+		let uptimeSplits = {
+			days: Math.floor(uptime / (1000 * 60 * 60 * 24)),
+			hours: Math.floor((uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+			mins: Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60)),
+			secs: Math.floor((uptime % (1000 * 60)) / 1000),
+		};
+		let uptimeString =
+			(uptimeSplits.days != 0 ? `${uptimeSplits.days} days, ` : "") +
+			(uptimeSplits.hours != 0 ? `${uptimeSplits.hours} hrs, ` : "") +
+			(uptimeSplits.mins != 0 ? `${uptimeSplits.mins} mins, ` : "") +
+			(uptimeSplits.secs != 0 ? `${uptimeSplits.secs} secs` : "");
+
 		let embed = new MessageEmbed()
 			.setColor("#F88000")
 			.setTitle("Yagami")
@@ -24,7 +37,7 @@ module.exports = {
 					> Response Time ➣ **${Date.now() - interaction.createdTimestamp}ms**
 					> API Latency ➣ **${Math.round(interaction.client.ws.ping)} ms**
 					> Host ➣ **DigitalOcean**
-					> Boot-up ➣ **<t:${Math.round(start_time / 1000)}:R>**
+					> Uptime ➣ **${uptimeString}**
 					> Node Version ➣ **${process.versions.node}**
 					> DJS Version ➣ **${djs}**
 					> Servers ➣ **${interaction.client.guilds.cache.size}**
