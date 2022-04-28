@@ -46,6 +46,18 @@ module.exports = {
 			},
 		});
 
+		// In case the user hasn't linked their account
+		if (!user) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: You must link your account before you can register.`
+				)
+				.setFooter({ text: "You can link your account by using /link" })
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		let team = {
 			name: user.osu_username + "'s team",
 			icon_url: "https://s.ppy.sh/a/" + user.osu_id,
