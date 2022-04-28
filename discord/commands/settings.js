@@ -30,6 +30,13 @@ module.exports = {
 			option
 				.setName("update")
 				.setDescription("Update guild commands and permissions")
+		)
+		.addChannelOption((option) =>
+			option
+				.setName("match_results_channel")
+				.setDescription(
+					"The channel in which match messages will be posted"
+				)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
@@ -41,6 +48,8 @@ module.exports = {
 			guild[option.name] = option.value;
 			description += `**${option.name}**: ${option.value}\n`;
 		}
+		guild.active_tournament = guild.active_tournament.id;
+		delete guild.tournaments;
 		await prisma.guild.update({
 			where: {
 				guild_id: interaction.guildId,
