@@ -39,6 +39,8 @@ module.exports = {
 		let messageChannel = interaction.guild.channels.cache.find(
 			(channel) => channel.id == guild.match_results_channel
 		);
+
+		messageChannel = messageChannel || interaction.channel;
 		let players = await prisma.user.findMany({
 			where: {
 				in_teams: {
@@ -65,9 +67,7 @@ module.exports = {
 			},
 		});
 		let matchEmbed = new MessageEmbed()
-			.setTitle(
-				`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
-			)
+			.setTitle(`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`)
 			.setColor(tournament.color)
 			.setThumbnail(tournament.icon_url)
 			.setDescription(
@@ -100,7 +100,8 @@ module.exports = {
 				stripIndents`
                 Get the link to your match and paste it into the \`/match addlink\` command in this server
                 \`\`\`
-                /match addlink link:https://osu.ppy.sh/
+                /match addlink link:https://osu.ppy.sh/...
+				\`\`\`
             `
 			);
 		let playerString = "";
