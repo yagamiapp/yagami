@@ -11,12 +11,12 @@ module.exports = {
 	async onGuildJoin(guild) {
 		deploy.deployCommands(guild);
 
-		let tournament = await prisma.guild.findMany({
+		let guildObj = await prisma.guild.findMany({
 			where: {
 				guild_id: guild.id,
 			},
 		});
-		if (!tournament[0]) {
+		if (!guildObj[0]) {
 			prisma.guild
 				.create({
 					data: {
@@ -74,7 +74,7 @@ module.exports = {
 				channel.permissionsFor(guild.me).has("SEND_MESSAGES")
 		);
 		channel = guild.systemChannel || channel;
-		channel.send({ embeds: [embed, permissionsEmbed] });
+		await channel.send({ embeds: [embed, permissionsEmbed] });
 	},
 	/**
 	 *
