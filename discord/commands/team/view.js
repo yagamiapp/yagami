@@ -10,7 +10,7 @@ module.exports = {
 			option.setName("user").setDescription("Select a user to view the team of")
 		),
 	async execute(interaction) {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		let user = interaction.options.getUser("user") || interaction.user;
 
 		let team = await prisma.team.findFirst({

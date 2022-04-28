@@ -8,7 +8,7 @@ module.exports = {
 		.setName("list")
 		.setDescription("List the teams"),
 	async execute(interaction) {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		let teams = await prisma.team.findMany({

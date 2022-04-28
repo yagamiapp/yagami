@@ -32,7 +32,7 @@ module.exports = {
 				.setDescription("Update guild commands and permissions")
 		),
 	async execute(interaction) {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		let guild = await fetchGuild(interaction.guildId);
 		let options = interaction.options.data;
 		let description = "";

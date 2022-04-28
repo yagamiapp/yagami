@@ -8,7 +8,7 @@ module.exports = {
 		.setName("list")
 		.setDescription("Lists all tournaments in this guild"),
 	async execute(interaction) {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		let guild = await fetchGuild(interaction.guildId);
 		let tournaments = guild.tournaments;
 

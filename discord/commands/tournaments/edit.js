@@ -57,7 +57,7 @@ module.exports = {
 				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
 		),
 	async execute(interaction) {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		let options = interaction.options.data[0].options;
 
 		let guild = await fetchGuild(interaction.guildId);

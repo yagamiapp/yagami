@@ -13,7 +13,7 @@ module.exports = {
 				.setRequired(true)
 		),
 	async execute(interaction) {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		let acro = interaction.options.getString("acronym").toUpperCase();
 
 		let tournament = await prisma.tournament.findFirst({

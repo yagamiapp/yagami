@@ -9,7 +9,7 @@ module.exports = {
 		.setName("link")
 		.setDescription("Links your osu! account to your Discord Account"),
 	async execute(interaction) {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		var id = crypto.randomBytes(5).toString("hex");
 		let user = interaction.user.toJSON();
 
