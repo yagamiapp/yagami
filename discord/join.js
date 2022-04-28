@@ -43,10 +43,7 @@ module.exports = {
 				`
 			)
 			.addField("Set up your server settings:", `\`\`\`/settings\`\`\``)
-			.addField(
-				"Link your account to your osu! account:",
-				`\`\`\`/link\`\`\``
-			)
+			.addField("Link your account to your osu! account:", `\`\`\`/link\`\`\``)
 			.addField(
 				"Set up your first tournament:",
 				`\`\`\`/tournaments create\`\`\``
@@ -67,6 +64,16 @@ module.exports = {
 			.addField(
 				"To change slash command settings:",
 				"Go into your server settings, select integrations, and then click on Yagami to edit settings."
+			)
+			.addField(
+				"The following commands should be restricted to admins only:",
+				`
+				> \`/settings\`
+				> \`/tournaments\`
+				> \`/rounds\`
+				> \`/teams\`
+				> \`/matches\`
+			`
 			);
 		let channel = guild.channels.cache.find(
 			(channel) =>
@@ -98,13 +105,7 @@ module.exports = {
 
 		let linkedRoleObj = member.guild.roles.cache.get(linkedRole);
 		if (!linkedRoleObj)
-			await setData(
-				null,
-				"guilds",
-				member.guild.id,
-				"settings",
-				"linked_role"
-			);
+			await setData(null, "guilds", member.guild.id, "settings", "linked_role");
 		else await member.roles.add(linkedRoleObj);
 	},
 };
