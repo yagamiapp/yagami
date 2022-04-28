@@ -3,6 +3,8 @@ const discord = require("./discord");
 const bancho = require("./bancho");
 require("dotenv").config();
 
+module.exports.start_time = Date.now();
+
 if (!process.env.disableWeb) {
 	web.init();
 }
