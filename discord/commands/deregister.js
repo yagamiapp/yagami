@@ -87,7 +87,10 @@ module.exports = {
 
 		await prisma.userInTeam.delete({
 			where: {
-				discord_id: interaction.user.id,
+				discord_id_team_id: {
+					discord_id: interaction.user.id,
+					team_id: team.id,
+				},
 			},
 		});
 
