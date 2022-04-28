@@ -20,7 +20,9 @@ module.exports = {
 		let uptime = Date.now() - start_time;
 		let uptimeSplits = {
 			days: Math.floor(uptime / (1000 * 60 * 60 * 24)),
-			hours: Math.floor((uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+			hours: Math.floor(
+				(uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+			),
 			mins: Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60)),
 			secs: Math.floor((uptime % (1000 * 60)) / 1000),
 		};
@@ -50,7 +52,10 @@ module.exports = {
 				},
 			],
 			Statistics: [
-				{ name: "Servers", value: interaction.client.guilds.cache.size },
+				{
+					name: "Servers",
+					value: interaction.client.guilds.cache.size,
+				},
 				{ name: "Tournaments", value: tournaments },
 			],
 		};
@@ -68,30 +73,24 @@ module.exports = {
 			.addField(
 				"Version",
 				stripIndents`
-				\`\`\`js
-					➣ Bot Version    ${version}
-					➣ Node Version   ${process.versions.node}
-					➣ DJS Version    ${djs}
-				\`\`\`
+					> ➣ Bot Version: **${version}**
+					> ➣ Node Version: **${process.versions.node}**
+					> ➣ DJS Version: **${djs}**
 				`
 			)
 			.addField(
 				"Latency",
 				stripIndents`
-				\`\`\`js
-					➣ Uptime         ${uptimeString}
-					➣ Response Time  ${Date.now() - interaction.createdTimestamp} ms
-					➣ API Latency    ${Math.round(interaction.client.ws.ping)} ms
-					\`\`\`
+					> ➣ Uptime: **${uptimeString}**
+					> ➣ Response Time: **${Date.now() - interaction.createdTimestamp} ms**
+					> ➣ API Latency: **${Math.round(interaction.client.ws.ping)} ms**
 					`
 			)
 			.addField(
 				"Statistics",
 				stripIndents`
-				\`\`\`js
-					➣ Servers        ${interaction.client.guilds.cache.size}
-					➣ Tournaments    ${tournaments}
-				\`\`\`
+					> ➣ Servers:  **${interaction.client.guilds.cache.size}**
+					> ➣ Tournaments: **${tournaments}**
 				`
 			);
 		embed
