@@ -135,12 +135,13 @@ model GlobalMappool {
 }
 
 model Guild {
-  guild_id          String       @id
-  change_nickname   Boolean
-  linked_role       String?
-  player_role       String?
-  tournaments       Tournament[]
-  active_tournament Int?
+  guild_id              String       @id
+  change_nickname       Boolean
+  linked_role           String?
+  player_role           String?
+  match_results_channel String?
+  tournaments           Tournament[]
+  active_tournament     Int?
 }
 
 model Team {
@@ -165,11 +166,12 @@ model UserInTeam {
 }
 
 model Match {
-  id       Int           @id
-  teams    TeamInMatch[]
-  round    Round         @relation(fields: [round_id], references: [id])
-  round_id Int
-  state    Int
+  id         Int           @id
+  teams      TeamInMatch[]
+  message_id String?
+  round      Round         @relation(fields: [round_id], references: [id])
+  round_id   Int
+  state      Int
 }
 
 model TeamInMatch {
