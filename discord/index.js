@@ -84,7 +84,7 @@ module.exports = {
 						"**Err**: There was an error while executing this command!"
 					);
 
-				if (interaction.replied) {
+				if (interaction.replied || interaction.deferred) {
 					await interaction.editReply({
 						embeds: [embed],
 						ephemeral: true,
@@ -137,7 +137,7 @@ module.exports = {
 					.setDescription(
 						"**Err**: There was an error while executing this button!"
 					);
-				if (interaction.replied) {
+				if (interaction.replied || interaction.deferred) {
 					await interaction.editReply({
 						embeds: [embed],
 						ephemeral: true,
