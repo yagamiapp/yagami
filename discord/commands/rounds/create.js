@@ -31,6 +31,7 @@ module.exports = {
 				.setMaxValue(2)
 		),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		let acronym = interaction.options.getString("acronym").toUpperCase();

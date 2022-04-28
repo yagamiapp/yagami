@@ -25,6 +25,4 @@ module.exports = {
 		let file = subcommands[subcommand];
 		await file.execute(interaction);
 	},
-	ephemeral: true,
-	defer: true,
 };

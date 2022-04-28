@@ -7,6 +7,7 @@ module.exports = {
 		.setName("register")
 		.setDescription("Make a new team and register to the tournament"),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
@@ -86,6 +87,4 @@ module.exports = {
 
 		await interaction.editReply({ embeds: [embed] });
 	},
-	ephemeral: true,
-	defer: true,
 };

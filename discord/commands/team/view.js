@@ -7,11 +7,10 @@ module.exports = {
 		.setName("view")
 		.setDescription("A summary of your team, or someone elses")
 		.addUserOption((option) =>
-			option
-				.setName("user")
-				.setDescription("Select a user to view the team of")
+			option.setName("user").setDescription("Select a user to view the team of")
 		),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let user = interaction.options.getUser("user") || interaction.user;
 
 		let team = await prisma.team.findFirst({
@@ -28,9 +27,7 @@ module.exports = {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: ${
-						interaction.options.getUser("user")
-							? "That user is"
-							: "You are"
+						interaction.options.getUser("user") ? "That user is" : "You are"
 					} not in a team`
 				)
 				.setColor("RED");

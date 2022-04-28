@@ -8,6 +8,7 @@ module.exports = {
 		.setName("list")
 		.setDescription("List the rounds"),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		let rounds = await prisma.round.findMany({

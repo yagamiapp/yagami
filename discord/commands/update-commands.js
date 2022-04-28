@@ -15,6 +15,4 @@ module.exports = {
 			.setDescription("Updated guild commands and permissions");
 		await interaction.editReply({ embeds: [embed] });
 	},
-	ephemeral: false,
-	defer: false,
 };

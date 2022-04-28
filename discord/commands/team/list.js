@@ -8,6 +8,7 @@ module.exports = {
 		.setName("list")
 		.setDescription("List the teams"),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		let teams = await prisma.team.findMany({
@@ -28,9 +29,7 @@ module.exports = {
 		// In case there are no teams
 		if (!teams) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: There are no teams in this tournament."
-				)
+				.setDescription("**Err**: There are no teams in this tournament.")
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;

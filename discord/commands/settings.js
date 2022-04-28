@@ -32,6 +32,7 @@ module.exports = {
 				.setDescription("Update guild commands and permissions")
 		),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let guild = await fetchGuild(interaction.guildId);
 		let options = interaction.options.data;
 		let description = "";
@@ -53,6 +54,4 @@ module.exports = {
 			.setColor("#AAAAAA");
 		await interaction.editReply({ embeds: [embed] });
 	},
-	ephemeral: true,
-	defer: true,
 };

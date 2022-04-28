@@ -17,11 +17,10 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription(
-					"Set a custom color for your tournament e.g.(#0EB8B9)"
-				)
+				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
 		),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 

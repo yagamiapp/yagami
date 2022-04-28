@@ -12,6 +12,4 @@ module.exports = {
 			.setDescription("🏓 Pong!");
 		await interaction.reply({ embeds: [embed] });
 	},
-	ephemeral: false,
-	defer: false,
 };

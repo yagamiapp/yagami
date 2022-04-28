@@ -65,6 +65,7 @@ module.exports = {
 				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
 		),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let acronym = interaction.options.getString("acronym");
 		acronym = acronym.toUpperCase();
 

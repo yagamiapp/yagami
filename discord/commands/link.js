@@ -9,6 +9,7 @@ module.exports = {
 		.setName("link")
 		.setDescription("Links your osu! account to your Discord Account"),
 	async execute(interaction) {
+		await interaction.deferReply();
 		var id = crypto.randomBytes(5).toString("hex");
 		let user = interaction.user.toJSON();
 
@@ -45,6 +46,4 @@ module.exports = {
 	clearData(id) {
 		delete this[id];
 	},
-	ephemeral: true,
-	defer: true,
 };

@@ -7,6 +7,7 @@ module.exports = {
 		.setName("deregister")
 		.setDescription("Deregister from the tournament"),
 	async execute(interaction) {
+		await interaction.deferReply();
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
@@ -110,6 +111,4 @@ module.exports = {
 		await interaction.editReply({ embeds: [embed] });
 		return;
 	},
-	ephemeral: true,
-	defer: true,
 };
