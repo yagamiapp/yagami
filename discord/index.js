@@ -174,7 +174,5 @@ module.exports = {
 			console.log(`Current Guilds: ${guildString}`);
 		});
 	},
-	getBot() {
-		return bot;
-	},
+	bot,
 };

@@ -67,7 +67,9 @@ module.exports = {
 			},
 		});
 		let matchEmbed = new MessageEmbed()
-			.setTitle(`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`)
+			.setTitle(
+				`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
+			)
 			.setColor(tournament.color)
 			.setThumbnail(tournament.icon_url)
 			.setDescription(
@@ -119,6 +121,7 @@ module.exports = {
 			},
 			data: {
 				message_id: message.id,
+				channel_id: message.channelId,
 			},
 		});
 

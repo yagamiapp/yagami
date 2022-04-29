@@ -1,25 +1,34 @@
 const { BanchoClient } = require("bancho.js");
 require("dotenv").config();
-const { pmHandler } = require("./pmHandler");
+const { msgHandler } = require("./msgHandler");
 
-module.exports.init = () => {
-	let credentials = {
-		username: process.env.banchoUsername,
-		password: process.env.banchoPassword,
-		apiKey: process.env.banchoAPIKey,
-	};
+let credentials = {
+	username: process.env.banchoUsername,
+	password: process.env.banchoPassword,
+	apiKey: process.env.banchoAPIKey,
+};
+const client = new BanchoClient(credentials);
 
-	const client = new BanchoClient(credentials);
-
-	client
-		.connect()
-		.then(async () => {
-			console.log("Connected to Bancho!");
-			client.on("PM", (msg) => {
-				console.log(`${msg.user.ircUsername} >> ${msg.message}`);
-				pmHandler(msg);
-				module.exports.client = client;
-			});
-		})
-		.catch(console.error);
+module.exports = {
+	client,
+	init() {
+		client
+			.connect()
+			.then(async () => {
+				console.log("Connected to Bancho!");
+				client.on("PM", (msg) => {
+					msgHandler(msg);
+				});
+			})
+			.catch(console.error);
+	},
+	/**
+	 *
+	 * @param {String} link A link to the match
+	 */
+	fetchChannel(link) {
+		let id = link.match(/\d*$/g);
+		let channel = client.getChannel(`#mp_${id[0]}`);
+		return channel;
+	},
 };

@@ -169,6 +169,9 @@ model Match {
   id         Int           @id
   teams      TeamInMatch[]
   message_id String?
+  channel_id String?
+  mp_link    String?
+  waiting_on Int? // Index of team in teams array
   round      Round         @relation(fields: [round_id], references: [id])
   round_id   Int
   state      Int
