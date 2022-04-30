@@ -1,7 +1,6 @@
 const axios = require("axios");
 const { MessageEmbed } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
-const { request, response } = require("express");
 const { stripIndents } = require("common-tags/lib");
 const { prisma } = require("../prisma");
 require("dotenv").config();
@@ -9,8 +8,8 @@ require("dotenv").config();
 /**
  *
  * @param {object} query
- * @param {request} req
- * @param {response} res
+ * @param {import("express").Request} req
+ * @param {import('express').Response} res
  */
 module.exports.authUser = async (query, req, res) => {
 	console.log("Authorizing...");

@@ -1,11 +1,10 @@
 const { REST } = require("@discordjs/rest");
-const { Guild } = require("discord.js");
 const { Routes } = require("discord-api-types/v9");
 const fs = require("fs");
 require("dotenv").config();
 /**
  *
- * @param {Guild} guild
+ * @param {import("discord.js").Guild} guild
  */
 module.exports.deployCommands = async (guild) => {
 	let guildCommands = [];
@@ -14,15 +13,15 @@ module.exports.deployCommands = async (guild) => {
 		.filter((file) => file.endsWith(".js"))
 		.forEach((file) => {
 			let fileModule = require("./commands/" + file);
-			if (!fileModule.dontPushByDefault) guildCommands.push(fileModule.data);
+			if (!fileModule.dontPushByDefault)
+				guildCommands.push(fileModule.data);
 		});
 
 	const rest = new REST({ version: "9" }).setToken(process.env.discordToken);
 
-	rest
-		.put(Routes.applicationGuildCommands(process.env.clientId, guild.id), {
-			body: guildCommands,
-		})
+	rest.put(Routes.applicationGuildCommands(process.env.clientId, guild.id), {
+		body: guildCommands,
+	})
 		.then(() =>
 			console.log(
 				"Registered command(s) to " +

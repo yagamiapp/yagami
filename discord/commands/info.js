@@ -33,37 +33,7 @@ module.exports = {
 			(uptimeSplits.secs != 0 ? `${uptimeSplits.secs} secs` : "");
 
 		// TODO: Right align text
-		let tournaments = await prisma.tournament.count({});
-		let info = {
-			Version: [
-				{ name: "Bot Version", value: version },
-				{ name: "Node Version", value: process.versions.node },
-				{ name: "DJS Version", value: djs },
-			],
-			Latency: [
-				{ name: "Uptime", value: uptimeString },
-				{
-					name: "Response Time",
-					value: Date.now() - interaction.createdTimestamp + " ms",
-				},
-				{
-					name: "API Latency",
-					value: Math.round(interaction.client.ws.ping) + " ms",
-				},
-			],
-			Statistics: [
-				{
-					name: "Servers",
-					value: interaction.client.guilds.cache.size,
-				},
-				{ name: "Tournaments", value: tournaments },
-			],
-		};
-
-		let maxLength = 48;
-		for (const key in info) {
-			const element = info[key];
-		}
+		let tournaments = await prisma.tournament.count();
 
 		let embed = new MessageEmbed()
 			.setColor("#F88000")
