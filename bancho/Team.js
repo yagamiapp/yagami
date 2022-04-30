@@ -43,23 +43,24 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.users.forEach((player) => {
-			outputString +=
-				player.user.ircUsername + ": " + player.score + "; ";
+			outputString += player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}
 
 	getUser(pos) {
-		return users[pos];
+		return this.users[pos];
 	}
 
 	getUserPos(id) {
-		for (let user of this.users) {
+		for (let i = 0; i < this.users.length; i++) {
+			let user = this.users[i];
+			console.log(`${user.osu_id} == ${id}`);
 			if (user.osu_id == id) {
-				return user;
+				return i;
 			}
 		}
-		return null;
+		// return null;
 	}
 	/**
 	 *	Adds a player to the player array

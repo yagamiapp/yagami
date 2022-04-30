@@ -121,15 +121,17 @@ class Match {
 		let user;
 		let team;
 		for (let teamTest of this.teams) {
-			let userTest = teamTest.getUserPos(event.player.user.id);
-			if (userTest) {
+			let userTest = teamTest.getUserPos(event.player.user._id);
+			console.log(userTest);
+			if (userTest != null) {
 				user = teamTest.getUser(userTest);
 				team = teamTest;
 				team.addPlayer(event.player);
+				console.log(user);
 			}
 		}
 		if (!user) {
-			this.channel.lobby.kick(event.player.user.username);
+			this.channel.lobby.kickPlayer(event.player.user.username);
 		}
 	}
 
@@ -189,7 +191,8 @@ class Match {
 		let embed = new MessageEmbed()
 			.setTitle(oldembed.title)
 			.setColor(oldembed.color)
-			.setThumbnail(oldembed.thumbnail?.url);
+			.setThumbnail(oldembed.thumbnail?.url)
+			.setFooter({ text: "Current phase: " + states[this.state] });
 
 		if (this.state >= 0 || this.state <= 2 || this.state == 4) {
 			embed.setImage(

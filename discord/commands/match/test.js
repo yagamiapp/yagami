@@ -8,10 +8,7 @@ module.exports = {
 		.setDescription("Quick test of message editing"),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
-		let match = new Match(
-			1,
-			"https://osu.ppy.sh/community/matches/100200315"
-		);
+		let match = new Match(1, "https://osu.ppy.sh/mp/100204924");
 		try {
 			await match.init();
 		} catch (e) {
