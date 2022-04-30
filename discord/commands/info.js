@@ -4,7 +4,8 @@ const { stripIndents } = require("common-tags/lib");
 const { MessageEmbed, version: djs } = require("discord.js");
 const { version } = require("../../package.json");
 const { prisma } = require("../../prisma");
-const { start_time } = require("../../index");
+
+const start_time = Date.now();
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,9 +20,7 @@ module.exports = {
 		let uptime = Date.now() - start_time;
 		let uptimeSplits = {
 			days: Math.floor(uptime / (1000 * 60 * 60 * 24)),
-			hours: Math.floor(
-				(uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-			),
+			hours: Math.floor((uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
 			mins: Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60)),
 			secs: Math.floor((uptime % (1000 * 60)) / 1000),
 		};
