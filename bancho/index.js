@@ -1,9 +1,10 @@
 const client = require("./client");
-const MatchManager = require("./MatchManager");
+const { recover } = require("./recovery");
 
 module.exports = {
 	init() {
-		client.init();
-		MatchManager.recoverMatches();
+		client.init().then(() => {
+			recover();
+		});
 	},
 };

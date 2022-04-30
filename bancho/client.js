@@ -11,13 +11,12 @@ const client = new BanchoClient(credentials);
 
 module.exports = {
 	client,
-	init() {
-		client.connect().then(async () => {
-			console.log("Connected to Bancho!");
+	async init() {
+		await client.connect();
+		console.log("Connected to Bancho!");
 
-			client.on("PM", (msg) => {
-				msgHandler(msg);
-			});
+		client.on("PM", (msg) => {
+			msgHandler(msg);
 		});
 	},
 	/**

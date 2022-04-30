@@ -43,8 +43,7 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.users.forEach((player) => {
-			outputString +=
-				player.user.ircUsername + ": " + player.score + "; ";
+			outputString += player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}
@@ -56,7 +55,6 @@ class Team {
 	getUserPos(id) {
 		for (let i = 0; i < this.users.length; i++) {
 			let user = this.users[i];
-			console.log(`${user.osu_id} == ${id}`);
 			if (user.osu_id == id) {
 				return i;
 			}
@@ -68,12 +66,8 @@ class Team {
 	 * @param {import("bancho.js").BanchoLobbyPlayer} player
 	 */
 	addPlayer(player) {
-		for (let i = 0; i < this.users; i++) {
-			let user = this.users[i];
-			if (user.osu_id == player.user.id) {
-				this.players[i] = player;
-			}
-		}
+		this.players.push(player);
+		console.log(this.players);
 	}
 }
 
