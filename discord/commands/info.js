@@ -1,10 +1,9 @@
 //@ts-check
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { stripIndents } = require("common-tags/lib");
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, version: djs } = require("discord.js");
 const { version } = require("../../package.json");
 const { prisma } = require("../../prisma");
-const { "discord.js": djs } = require("../../package.json").dependencies;
 const { start_time } = require("../../index");
 
 module.exports = {
