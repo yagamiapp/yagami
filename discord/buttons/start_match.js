@@ -72,6 +72,8 @@ module.exports = {
 			)
 			.setColor(tournament.color)
 			.setThumbnail(tournament.icon_url)
+			.setAuthor({ name: tournament.name, iconURL: tournament.icon_url })
+			.setFooter({ text: "Current Phase: Waiting for MP Link" })
 			.setDescription(
 				`
             Your match will start in 15 minutes!

@@ -1,5 +1,5 @@
 const { prisma } = require("../prisma");
-const { fetchChannel } = require("./index");
+const { fetchChannel } = require("./client");
 const { bot: discord } = require("../discord");
 const { MessageEmbed } = require("discord.js");
 const { Team } = require("./Team");
@@ -191,6 +191,7 @@ class Match {
 		let embed = new MessageEmbed()
 			.setTitle(oldembed.title)
 			.setColor(oldembed.color)
+			.setAuthor(oldembed.author)
 			.setThumbnail(oldembed.thumbnail?.url)
 			.setFooter({ text: "Current phase: " + states[this.state] });
 

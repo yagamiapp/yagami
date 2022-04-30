@@ -1,16 +1,16 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const { Match } = require("../../../bancho/Match");
+const manager = require("../../../bancho/MatchManager");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
-		.setName("test")
+		.setName("addlink")
 		.setDescription("Quick test of message editing"),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
-		let match = new Match(1, "https://osu.ppy.sh/mp/100204924");
+
 		try {
-			await match.init();
+			manager.createMatch();
 		} catch (e) {
 			console.log(e);
 			let embed = new MessageEmbed()

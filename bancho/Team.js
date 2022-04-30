@@ -26,10 +26,10 @@ class Team {
 		let thisTeamScore = 0;
 		let otherTeamScore = 0;
 
-		this.users.forEach((player) => {
+		this.players.forEach((player) => {
 			thisTeamScore += player.score;
 		});
-		team.users.forEach((player) => {
+		team.players.forEach((player) => {
 			thisTeamScore += player.score;
 		});
 
@@ -43,7 +43,8 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.users.forEach((player) => {
-			outputString += player.user.ircUsername + ": " + player.score + "; ";
+			outputString +=
+				player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}
