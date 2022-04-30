@@ -20,12 +20,10 @@ let states = {
 	10: "Not Started",
 };
 
-/**
- * @prop {Team[]} Match.teams
- */
-module.exports.Match = class Match {
+class Match {
 	/**
 	 *
+	 * @constructor
 	 * @param {number} id ID of the match
 	 * @param {string} mp The link to the match
 	 */
@@ -45,6 +43,7 @@ module.exports.Match = class Match {
 		this.message_id = match.message_id;
 		this.channel_id = match.channel_id;
 		this.state = match.state;
+		this.waiting_on = match.waiting_on;
 
 		await this.channel.join();
 		this.tournament = await prisma.tournament.findFirst({
@@ -106,8 +105,13 @@ module.exports.Match = class Match {
 			async (beatmap) => await this.beatmapHandler(beatmap)
 		);
 		// Start Warmups
-		this.updateState(4);
-		this.warmup();
+		if (this.state == 3) {
+			this.updateState(4);
+			this.warmup();
+			return;
+		}
+
+		this.recover();
 	}
 	/**
 	 *
@@ -136,6 +140,12 @@ module.exports.Match = class Match {
 		this.updateMessage();
 	}
 
+	/**
+	 * Updates the state of the match
+	 * @function
+	 * @private
+	 * @param {number} state
+	 */
 	async updateState(state) {
 		this.state = state;
 
@@ -151,6 +161,21 @@ module.exports.Match = class Match {
 		console.log(`Match ${this.id} state updated to ${states[state]}`);
 	}
 
+	async warmup() {
+		console.log("Warming Up");
+	}
+
+	async recover() {
+		if (this.state == 4) {
+			this.warmup();
+		}
+	}
+
+	/**
+	 * Updates the log message
+	 * @function
+	 * @private
+	 */
 	async updateMessage() {
 		while (!this.channel_id) {
 			await new Promise((resolve) => setTimeout(resolve, 250));
@@ -174,7 +199,6 @@ module.exports.Match = class Match {
 
 		await message.edit({ embeds: [embed] });
 	}
-	async warmup() {
-		console.log("Warming Up");
-	}
-};
+}
+
+module.exports.Match = Match;
