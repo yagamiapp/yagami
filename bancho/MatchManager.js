@@ -3,7 +3,7 @@ const { bot: discord } = require("../discord");
 const { MessageEmbed } = require("discord.js");
 const { Team } = require("./Team");
 const { msgHandler } = require("./msgHandler");
-const { fetchChannel } = require("./client");
+const { fetchChannel, fetchUser } = require("./client");
 
 // State Enumeration
 let states = {
@@ -30,6 +30,7 @@ class MatchManager {
 	constructor(id, mp) {
 		this.id = id;
 		this.mp = mp;
+		module.exports[`match_${id}`] = this;
 	}
 
 	async createMatch() {
@@ -38,7 +39,20 @@ class MatchManager {
 		 * @type {import("bancho.js").BanchoLobby}
 		 */
 		this.lobby = this.channel.lobby;
-		this.channel.join();
+		try {
+			await this.channel.join();
+		} catch (e) {
+			console.log(`${this.mp} no longer exists`);
+			await prisma.match.update({
+				where: {
+					id: this.id,
+				},
+				data: {
+					mp_link: null,
+				},
+			});
+		}
+		await this.lobby.clearHost();
 
 		// Get match from DB and assign values
 		let match = await prisma.match.findFirst({
@@ -50,7 +64,6 @@ class MatchManager {
 		this.channel_id = match.channel_id;
 		this.state = match.state;
 		this.waiting_on = match.waiting_on || 0;
-
 		// Update db object
 		await prisma.match.update({
 			where: {
@@ -60,6 +73,7 @@ class MatchManager {
 				mp_link: this.lobby.getHistoryUrl(),
 			},
 		});
+		this.mp = this.lobby.getHistoryUrl();
 
 		// Setup lobby
 		this.tournament = await prisma.tournament.findFirst({
@@ -93,6 +107,8 @@ class MatchManager {
 				},
 			},
 		});
+
+		// Create teams and invite absent players
 		/**
 		 * @type {Team[]}
 		 */
@@ -108,6 +124,28 @@ class MatchManager {
 				},
 			});
 			this.teams.push(new Team(team, users));
+		}
+
+		// Do onJoin for players currently in the lobby
+		let players = this.lobby.slots;
+		for (let player of players) {
+			if (!player) continue;
+			this.joinHandler({ player });
+		}
+
+		// Send invites to players outside of the lobby
+		let invitesToIgnore = players
+			.filter((player) => player)
+			.map((player) => player.user.username);
+
+		for (const team of this.teams) {
+			let users = team.users;
+
+			for (const user of users) {
+				if (!invitesToIgnore.includes(user.osu_username)) {
+					await this.invitePlayer(user.osu_username);
+				}
+			}
 		}
 
 		// Setup event handlers
@@ -151,6 +189,13 @@ class MatchManager {
 			this.channel.lobby.kickPlayer(event.player.user.username);
 			return;
 		}
+
+		if (team == this.teams[0]) {
+			console.log("Team 0");
+		}
+		if (team == this.teams[1]) {
+			console.log("Team 1");
+		}
 	}
 
 	async readyHandler() {
@@ -184,9 +229,8 @@ class MatchManager {
 	}
 
 	async warmup() {
-		if (this.waiting_on == 0) {
-			this.updateWaitingOn(1);
-		}
+		let hosts = this.teams[this.waiting_on].players;
+		let slots = this.lobby.slots;
 	}
 
 	async recover() {
@@ -195,9 +239,24 @@ class MatchManager {
 		}
 	}
 
+	async invitePlayer(name) {
+		let user = await fetchUser(name);
+		user.sendMessage(
+			"Here is your invite to the match. If you do not recieve the invite, use !invite to get a new one."
+		);
+		this.lobby.invitePlayer(user.ircUsername);
+	}
+	/**
+	 * Moves a player to a different slot, or swaps their position with the player in that slot
+	 * @param {import("bancho.js").BanchoLobbyPlayer} player
+	 * @param {number} slot
+	 */
+	async swapPlayer(player, slot) {}
+
 	/**
 	 *
 	 * @param {number} num The team that you're waiting on
+	 * @private
 	 */
 	async updateWaitingOn(num) {
 		this.waiting_on = num;
@@ -252,6 +311,7 @@ class MatchManager {
 			.setColor(oldembed.color)
 			.setAuthor(oldembed.author)
 			.setThumbnail(oldembed.thumbnail?.url)
+			.setURL(this.mp)
 			.setFooter({ text: "Current phase: " + states[this.state] });
 
 		if (this.state >= 0 || this.state <= 2) {

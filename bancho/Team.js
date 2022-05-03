@@ -42,7 +42,7 @@ class Team {
 	 */
 	toString() {
 		let outputString = "";
-		this.users.forEach((player) => {
+		this.players.forEach((player) => {
 			outputString += player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
@@ -67,7 +67,6 @@ class Team {
 	 */
 	addPlayer(player) {
 		this.players.push(player);
-		console.log(this.players);
 	}
 }
 
