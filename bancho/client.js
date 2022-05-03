@@ -28,4 +28,7 @@ module.exports = {
 		let channel = client.getChannel(`#mp_${id[0]}`);
 		return channel;
 	},
+	async fetchUser(name) {
+		return client.getUser(name);
+	},
 };
