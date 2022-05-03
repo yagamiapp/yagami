@@ -14,7 +14,7 @@ module.exports = {
 			},
 		});
 		let matches = await prisma.match.findMany({
-			where: { round_id: round.id },
+			where: { round_id: round.id, OR: [{ state: 3 }, { state: 10 }] },
 		});
 		for (let i = 0; i < matches.length; i++) {
 			matches[i].round_id = i + 1;
@@ -30,7 +30,7 @@ module.exports = {
 		// In case there are no matches
 		if (groups.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no matches")
+				.setDescription("**Err**: There are no matches to start")
 				.setColor("RED")
 				.setFooter({
 					text: "You can create a match with /matches create",
@@ -42,6 +42,7 @@ module.exports = {
 		// Select group and build embed
 		let index = parseInt(command.options.index);
 		let group = groups[index];
+		if (!group) group = groups[0];
 
 		// Build buttons to scroll to other rounds
 		let pages = new MessageActionRow().addComponents(

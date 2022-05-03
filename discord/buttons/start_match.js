@@ -1,5 +1,5 @@
 const { stripIndents } = require("common-tags/lib");
-const { MessageButton, MessageEmbed } = require("discord.js");
+const { MessageButton, MessageEmbed, MessageActionRow } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 const { execute } = require("./match_start_list");
 require("dotenv").config();
@@ -11,18 +11,26 @@ module.exports = {
 		.setStyle("PRIMARY"),
 	/**
 	 *
-	 * @param {import("discord.js").CommandInteraction} interaction
+	 * @param {import("discord.js").ButtonInteraction} interaction
 	 * @param {*} command
 	 */
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
-		let match = await prisma.match.update({
+		// Get the teams in the match
+		let teams = await prisma.team.findMany({
+			where: {
+				TeamInMatch: {
+					some: {
+						match_id: parseInt(command.options.id),
+					},
+				},
+			},
+		});
+
+		let match = await prisma.match.findFirst({
 			where: {
 				id: parseInt(command.options.id),
-			},
-			data: {
-				state: 3,
 			},
 		});
 
@@ -35,10 +43,63 @@ module.exports = {
 				},
 			},
 		});
+
+		// Check that the team is not already in a running match
+		let duplicateCheck = await prisma.match.findFirst({
+			where: {
+				teams: {
+					some: {
+						OR: [
+							{
+								team_id: teams[0].id,
+							},
+							{
+								team_id: teams[1].id,
+							},
+						],
+					},
+				},
+				state: {
+					lte: 7,
+				},
+			},
+		});
+		if (duplicateCheck) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Err**: One of the teams is in a match that is currently running"
+				)
+				.setColor("RED")
+				.setFooter({
+					text: "Make sure the match is not already running",
+				});
+
+			let button = new MessageActionRow().addComponents([
+				new MessageButton()
+					.setCustomId(
+						`match_start_list?round=${round.acronym}&index=${command.options.index}`
+					)
+					.setLabel("Back")
+					.setStyle("DANGER"),
+			]);
+
+			await interaction.update({ embeds: [embed], components: [button] });
+			return;
+		}
+
 		// Create match message
 		let messageChannel = interaction.guild.channels.cache.find(
 			(channel) => channel.id == guild.match_results_channel
 		);
+
+		await prisma.match.update({
+			where: {
+				id: match.id,
+			},
+			data: {
+				state: 3,
+			},
+		});
 
 		messageChannel = messageChannel || interaction.channel;
 		let players = await prisma.user.findMany({
@@ -57,19 +118,8 @@ module.exports = {
 			},
 		});
 
-		let teams = await prisma.team.findMany({
-			where: {
-				TeamInMatch: {
-					some: {
-						match_id: match.id,
-					},
-				},
-			},
-		});
 		let matchEmbed = new MessageEmbed()
-			.setTitle(
-				`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
-			)
+			.setTitle(`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`)
 			.setColor(tournament.color)
 			.setThumbnail(tournament.icon_url)
 			.setAuthor({ name: tournament.name, iconURL: tournament.icon_url })
