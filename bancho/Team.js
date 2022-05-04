@@ -1,14 +1,23 @@
+const { prisma } = require("../prisma");
+
 /**
  * A collection of BanchoLobbyUser objects
  */
 class Team {
 	/**
 	 *
+	 * @param {import("./MatchManager").MatchManager} match
 	 * @param {import("@prisma/client").Team} team
 	 * @param {import("@prisma/client").User[]} users
 	 */
-	constructor(team, users) {
-		this.team = team;
+	constructor(match, team, users) {
+		this.match = match;
+		this.color = team.color;
+		this.icon_url = team.icon_url;
+		this.id = team.id;
+		this.score = undefined;
+		this.name = team.name;
+		this.tournamentId = team.tournamentId;
 		this.users = users;
 		/**
 		 * @type {import("bancho.js").BanchoLobbyPlayer[]}
@@ -67,6 +76,36 @@ class Team {
 	 */
 	addPlayer(player) {
 		this.players.push(player);
+	}
+
+	async setScore(num) {
+		this.score = num;
+		await prisma.teamInMatch.update({
+			where: {
+				team_id_match_id: {
+					team_id: this.id,
+					match_id: this.match.id,
+				},
+			},
+			data: {
+				score: this.score,
+			},
+		});
+	}
+
+	async addScore() {
+		this.score++;
+		await prisma.teamInMatch.update({
+			where: {
+				team_id_match_id: {
+					team_id: this.id,
+					match_id: this.match.id,
+				},
+			},
+			data: {
+				score: this.score,
+			},
+		});
 	}
 }
 

@@ -20,14 +20,6 @@ module.exports = {
 	 */
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
-		let embed = new MessageEmbed();
-		embed
-			.setTitle("Loading match")
-			.setDescription(
-				"<a:loading:970406520124764200> We're currently setting up your match..."
-			)
-			.setColor("#F88000");
-		interaction.editReply({ embeds: [embed] });
 
 		let matchId = await prisma.match.findFirst({
 			where: {
@@ -45,16 +37,25 @@ module.exports = {
 				state: 3,
 			},
 		});
-		matchId = matchId.id;
+		matchId = matchId?.id;
 
 		if (!matchId) {
-			embed
+			let embed = new MessageEmbed()
 				.setDescription(
 					"**Err**: You are not in a match that requires an MP link."
 				)
 				.setColor("RED");
 			return interaction.editReply({ embeds: [embed] });
 		}
+
+		let embed = new MessageEmbed();
+		embed
+			.setTitle("Loading match")
+			.setDescription(
+				"<a:loading:970406520124764200> We're currently setting up your match..."
+			)
+			.setColor("#F88000");
+		await interaction.editReply({ embeds: [embed] });
 
 		let match = new MatchManager(
 			matchId,
@@ -88,7 +89,7 @@ module.exports = {
 
 		embed = new MessageEmbed()
 			.setTitle(oldembed.title)
-			.setColor(oldembed.color)
+			.setColor("GREEN")
 			.setAuthor(oldembed.author)
 			.setThumbnail(oldembed.thumbnail?.url)
 			.setURL(match.mp)
