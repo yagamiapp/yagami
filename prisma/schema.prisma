@@ -183,6 +183,7 @@ model TeamInMatch {
   match_id Int
   match    Match    @relation(fields: [match_id], references: [id])
   score    Int
+  roll     Int?
   winner   Boolean?
 
   @@id([team_id, match_id])

@@ -231,6 +231,8 @@ class MatchManager {
 			}
 			if (this.waiting_on == 1) {
 				await this.updateState(5);
+				await this.lobby.clearHost();
+				await this.lobby.updateSettings();
 				this.roll();
 				return;
 			}
@@ -274,15 +276,55 @@ class MatchManager {
 	}
 
 	async roll() {
-		await this.lobby.clearHost();
-		await this.lobby.updateSettings();
-		await this.channel.sendMessage(
-			"It's time to roll! I'll count the first roll from any player on each team."
-		);
-		this.channel.on("message", this.rollListener);
+		let teamRolls = await prisma.teamInMatch.findMany({
+			where: {
+				match_id: this.id,
+			},
+		});
+		teamRolls = teamRolls.map((team) => team.roll);
+		console.log(teamRolls);
+		// If both rolls are null
+		if (teamRolls.filter((team) => team).length == 0) {
+			await this.channel.sendMessage(
+				"It's time to roll! I'll count the first roll from any player on each team."
+			);
+			this.channel.on("message", async (msg) => {
+				await this.rollListener(msg);
+			});
+			await this.updateMessage();
+			return;
+		}
+
+		if (!teamRolls.includes(null)) {
+			console.log("Checking rolls");
+			await this.updateMessage();
+
+			// Check if all elements in array are the same
+			let rolls = [...new Set(teamRolls)];
+			if (rolls.length == 1) {
+				await this.channel.sendMessage(`Wow, a roll tie! Let's try again.`);
+				await prisma.teamInMatch.updateMany({
+					where: {
+						match_id: this.id,
+					},
+					data: {
+						roll: null,
+					},
+				});
+				this.roll();
+				return;
+			}
+
+			let winner = teamRolls.indexOf(Math.max(...teamRolls));
+			let team = this.teams[winner];
+			await this.updateWaitingOn(winner);
+			await this.updateState(6);
+			await this.channel.sendMessage(`${team.name} has won the roll!`);
+			await this.chooseOrder();
+		}
 	}
 
-	async rollListener(msg) {}
+	async chooseOrder() {}
 
 	async recover() {
 		if (this.state == 4) {
@@ -291,6 +333,11 @@ class MatchManager {
 		}
 		if (this.state == 5) {
 			this.roll();
+			return;
+		}
+
+		if (this.state == 6) {
+			this.chooseOrder();
 			return;
 		}
 	}
@@ -309,6 +356,56 @@ class MatchManager {
 	 * @param {number} slot
 	 */
 	async swapPlayer(player, slot) {}
+
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async rollListener(msg) {
+		if (this.state != 5) return;
+		if (msg.user.ircUsername != "BanchoBot") return;
+
+		let content = msg.content;
+		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
+		if (roll) {
+			let teamInMatch = await prisma.teamInMatch.findFirst({
+				where: {
+					team: {
+						members: {
+							some: {
+								user: {
+									osu_username: roll.groups.user,
+								},
+							},
+						},
+					},
+				},
+			});
+			if (!teamInMatch.roll) {
+				await prisma.teamInMatch.update({
+					where: {
+						team_id_match_id: {
+							team_id: teamInMatch.team_id,
+							match_id: this.id,
+						},
+					},
+					data: {
+						roll: parseInt(roll.groups.roll),
+					},
+				});
+				let team = await prisma.team.findFirst({
+					where: {
+						id: teamInMatch.team_id,
+					},
+				});
+
+				await this.channel.sendMessage(
+					`${team.name} rolled a ${roll.groups.roll}`
+				);
+				await this.roll();
+			}
+		}
+	}
 
 	/**
 	 *
@@ -369,6 +466,31 @@ class MatchManager {
 			.setURL(this.mp)
 			.setFooter({ text: "Current phase: " + states[this.state] });
 
+		if (this.state <= 2 || (this.state >= 5 && this.state <= 7)) {
+			description += `
+				**Score:**
+				:red_square: ${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} :blue_square:\n`;
+		}
+
+		if (this.state >= 5 && this.state <= 7) {
+			let teamsInMatch = await prisma.teamInMatch.findMany({
+				where: {
+					match_id: this.id,
+				},
+			});
+			description += "\n";
+
+			for (const teamInMatch of teamsInMatch) {
+				if (!teamInMatch.roll) return;
+				let team = await prisma.team.findFirst({
+					where: {
+						id: teamInMatch.team_id,
+					},
+				});
+
+				description += `**${team.name}** rolled a **${teamInMatch.roll}**\n`;
+			}
+		}
 		if (this.state >= 0 || this.state <= 2) {
 			embed.setImage(
 				`https://assets.ppy.sh/beatmaps/${this.beatmap?.setId}/covers/cover.jpg`
@@ -430,12 +552,7 @@ class MatchManager {
 			}
 		}
 
-		if (this.state <= 2 || (this.state >= 5 && this.state <= 7)) {
-			description += `
-			**Score:**
-			:red_square: ${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} :blue_square:`;
-		}
-		if (!(description = "")) {
+		if (!(description == "")) {
 			embed.setDescription(description);
 		}
 		await message.edit({ embeds: [embed] });
