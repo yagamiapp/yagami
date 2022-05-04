@@ -247,7 +247,14 @@ class MatchManager {
 	}
 
 	async warmup() {
-		if (this.lobby.getHost() || this.lobby.playing) return;
+		console.log(this.lobby.playing);
+		let host = this.lobby.getHost()?.user?.username;
+		let teamList = this.teams[this.waiting_on].players.map(
+			(player) => player.user.username
+		);
+		console.log(host);
+		console.log(teamList);
+		if (teamList.includes(host) || this.lobby.playing) return;
 
 		if (!this.waiting_on) {
 			await this.updateWaitingOn(0);
@@ -259,6 +266,7 @@ class MatchManager {
 		for (const player of team.players) {
 			let slotMap = slots.map((slot) => slot?.user?.username);
 			if (slotMap.includes(player.user.username)) {
+				await this.lobby.setMods("Freemod");
 				await this.lobby.setHost(player.user.username);
 				await this.channel.sendMessage(
 					`${player.user.username} has been selected to choose the warmup. Use !skip to skip your warmup`
