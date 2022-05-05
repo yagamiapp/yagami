@@ -1,6 +1,6 @@
 const { BanchoClient } = require("bancho.js");
 require("dotenv").config();
-const { msgHandler } = require("./msgHandler");
+const { pmHandler } = require("./pmHandler");
 
 let credentials = {
 	username: process.env.banchoUsername,
@@ -16,7 +16,7 @@ module.exports = {
 		console.log("Connected to Bancho!");
 
 		client.on("PM", (msg) => {
-			msgHandler(msg);
+			pmHandler(msg);
 		});
 	},
 	/**

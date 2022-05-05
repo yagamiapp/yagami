@@ -3,8 +3,6 @@ const fs = require("fs");
 module.exports = {
 	name: "help",
 	desc: "Shows this menu",
-	dm: true,
-	mp: true,
 	usage: "!help (command)",
 	/**
 	 * The execute function

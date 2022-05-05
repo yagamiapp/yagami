@@ -52,7 +52,8 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.players.forEach((player) => {
-			outputString += player.user.ircUsername + ": " + player.score + "; ";
+			outputString +=
+				player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}
@@ -104,6 +105,34 @@ class Team {
 			},
 			data: {
 				score: this.score,
+			},
+		});
+	}
+	async setPickOrder(num) {
+		this.pick_order = num;
+		await prisma.teamInMatch.update({
+			where: {
+				team_id_match_id: {
+					team_id: this.id,
+					match_id: this.match.id,
+				},
+			},
+			data: {
+				pick_order: num,
+			},
+		});
+	}
+	async setBanOrder(num) {
+		this.ban_order = num;
+		await prisma.teamInMatch.update({
+			where: {
+				team_id_match_id: {
+					team_id: this.id,
+					match_id: this.match.id,
+				},
+			},
+			data: {
+				ban_order: num,
 			},
 		});
 	}

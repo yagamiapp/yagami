@@ -60,6 +60,9 @@ model Map {
   roundId              Int?
   GlobalMappool        GlobalMappool? @relation(fields: [globalMappoolId], references: [id])
   globalMappoolId      Int?
+  PickedMatch          Match?         @relation(fields: [matchId], references: [id], name: "pick")
+  matchId              Int?
+  BannedMatch          Match?         @relation(fields: [matchId], references: [id], name: "ban")
 }
 
 model Round {
@@ -174,17 +177,21 @@ model Match {
   waiting_on Int? // Index of team in teams array
   round      Round         @relation(fields: [round_id], references: [id])
   round_id   Int
+  picks      Map[]         @relation("pick")
+  bans       Map[]         @relation("ban")
   state      Int
 }
 
 model TeamInMatch {
-  team_id  Int
-  team     Team     @relation(fields: [team_id], references: [id])
-  match_id Int
-  match    Match    @relation(fields: [match_id], references: [id])
-  score    Int
-  roll     Int?
-  winner   Boolean?
+  team_id    Int
+  team       Team     @relation(fields: [team_id], references: [id])
+  match_id   Int
+  match      Match    @relation(fields: [match_id], references: [id])
+  score      Int
+  roll       Int?
+  pick_order Int?
+  ban_order  Int?
+  winner     Boolean?
 
   @@id([team_id, match_id])
 }

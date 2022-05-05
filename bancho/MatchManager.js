@@ -3,7 +3,6 @@ const { bot: discord } = require("../discord");
 const { MessageEmbed } = require("discord.js");
 const { Team } = require("./Team");
 const { stripIndents } = require("common-tags");
-const { msgHandler } = require("./msgHandler");
 const { fetchChannel, fetchUser } = require("./client");
 
 // State Enumeration
@@ -58,6 +57,26 @@ class MatchManager {
 							},
 						},
 					},
+				},
+			},
+		});
+
+		// Get tound from DB
+		this.round = await prisma.round.findFirst({
+			where: {
+				Match: {
+					some: {
+						id: this.id,
+					},
+				},
+			},
+		});
+
+		// Get mappool from DB
+		this.mappool = await prisma.map.findMany({
+			where: {
+				Round: {
+					id: this.round.id,
 				},
 			},
 		});
@@ -161,13 +180,12 @@ class MatchManager {
 		}
 
 		// Setup event handlers
-		this.channel.on("message", (msg) => msgHandler(msg));
-		this.lobby.on("playerJoined", async (event) => {
-			await this.joinHandler(event);
-		});
-		this.lobby.on("allPlayersReady", async () => {
-			await this.readyHandler();
-		});
+		this.channel.on("message", async (msg) => await this.msgHandler(msg));
+		this.lobby.on(
+			"playerJoined",
+			async (event) => await this.joinHandler(event)
+		);
+		this.lobby.on("allPlayersReady", async () => await this.readyHandler());
 		this.lobby.on("matchFinished", async () => await this.finishHandler());
 		this.lobby.on(
 			"beatmap",
@@ -177,7 +195,6 @@ class MatchManager {
 		this.init = true;
 		if (this.state == 3) {
 			await this.updateState(4);
-			await this.warmup();
 			return;
 		}
 
@@ -247,18 +264,16 @@ class MatchManager {
 	}
 
 	async warmup() {
-		console.log(this.lobby.playing);
+		if (!this.waiting_on) {
+			await this.updateWaitingOn(0);
+		}
+		// Don't warmup if current host is on the correct team or
+		// if the lobby is in progress
 		let host = this.lobby.getHost()?.user?.username;
 		let teamList = this.teams[this.waiting_on].players.map(
 			(player) => player.user.username
 		);
-		console.log(host);
-		console.log(teamList);
 		if (teamList.includes(host) || this.lobby.playing) return;
-
-		if (!this.waiting_on) {
-			await this.updateWaitingOn(0);
-		}
 
 		let team = this.teams[this.waiting_on];
 		let slots = this.lobby.slots.filter((slot) => slot);
@@ -310,7 +325,9 @@ class MatchManager {
 			// Check if all elements in array are the same
 			let rolls = [...new Set(teamRolls)];
 			if (rolls.length == 1) {
-				await this.channel.sendMessage(`Wow, a roll tie! Let's try again.`);
+				await this.channel.sendMessage(
+					`Wow, a roll tie! Let's try again.`
+				);
 				await prisma.teamInMatch.updateMany({
 					where: {
 						match_id: this.id,
@@ -332,7 +349,18 @@ class MatchManager {
 		}
 	}
 
-	async chooseOrder() {}
+	async chooseOrder() {
+		let team = this.teams[this.waiting_on];
+		if (team.pick_order && team.ban_order) {
+			this.updateState(7);
+			// Ban Phase Method
+			return;
+		}
+
+		await this.channel.sendMessage(
+			`${team.name}, it is your turn to pick! Use !choose [first|second] [pick|ban] to choose your order`
+		);
+	}
 
 	async recover() {
 		if (this.state == 4) {
@@ -417,6 +445,17 @@ class MatchManager {
 
 	/**
 	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 * @returns
+	 */
+	async chooseListener(msg) {
+		if (this.state != 6) return;
+		let command = msg.content.match(/!choose (?<order>\w+) (?<type>\w+)/);
+		console.log(command);
+	}
+
+	/**
+	 *
 	 * @param {number} num The team that you're waiting on
 	 * @private
 	 */
@@ -451,6 +490,45 @@ class MatchManager {
 		});
 
 		console.log(`Match ${this.id} state updated to ${states[state]}`);
+	}
+
+	async msgHandler(msg) {
+		if (msg.self) return;
+		console.log(
+			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
+		);
+
+		if (this.state == 5) {
+			this.rollListener(msg);
+			return;
+		}
+
+		/*
+		 *	Command Handling
+		 */
+		let stateCommands = {
+			6: ["choose"],
+		};
+		let commandRegex = /^!\w+/g;
+		/**
+		 * @type {string}
+		 */
+		let message = msg.message;
+
+		if (message.match(commandRegex)) {
+			message = message.substring(1);
+			let args = message.split(" ");
+			let command = args[0];
+
+			if (command == "!mp") return;
+			if (!command) return;
+			let options = args.splice(1, 1);
+			try {
+			} catch (e) {
+				console.log(e);
+				msg.user.sendMessage("We encountered an error: " + e);
+			}
+		}
 	}
 
 	/**
@@ -548,7 +626,9 @@ class MatchManager {
 		if (this.state == 4) {
 			if (this.beatmap == null) {
 				let host = this.lobby.getHost();
-				embed.setDescription(`${host.user.username} is picking a warmup`);
+				embed.setDescription(
+					`${host.user.username} is picking a warmup`
+				);
 				embed.setThumbnail(`https://s.ppy.sh/a/${host.user.id}`);
 			} else {
 				embed.setDescription(
