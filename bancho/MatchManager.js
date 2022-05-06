@@ -325,9 +325,7 @@ class MatchManager {
 			// Check if all elements in array are the same
 			let rolls = [...new Set(teamRolls)];
 			if (rolls.length == 1) {
-				await this.channel.sendMessage(
-					`Wow, a roll tie! Let's try again.`
-				);
+				await this.channel.sendMessage(`Wow, a roll tie! Let's try again.`);
 				await prisma.teamInMatch.updateMany({
 					where: {
 						match_id: this.id,
@@ -399,11 +397,15 @@ class MatchManager {
 	 */
 	async rollListener(msg) {
 		if (this.state != 5) return;
+		if (msg.content.toLowerCase() == "!roll") {
+			this.rollVerification[msg.user.ircUsername] = true;
+		}
+
 		if (msg.user.ircUsername != "BanchoBot") return;
 
 		let content = msg.content;
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
-		if (roll) {
+		if (roll && this.rollVerification[roll.groups.user]) {
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
 					team: {
@@ -438,6 +440,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`${team.name} rolled a ${roll.groups.roll}`
 				);
+				this.rollVerification[msg.user.ircUsername] = null;
 				await this.roll();
 			}
 		}
@@ -626,9 +629,7 @@ class MatchManager {
 		if (this.state == 4) {
 			if (this.beatmap == null) {
 				let host = this.lobby.getHost();
-				embed.setDescription(
-					`${host.user.username} is picking a warmup`
-				);
+				embed.setDescription(`${host.user.username} is picking a warmup`);
 				embed.setThumbnail(`https://s.ppy.sh/a/${host.user.id}`);
 			} else {
 				embed.setDescription(
