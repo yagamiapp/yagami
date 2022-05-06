@@ -2,6 +2,15 @@ let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { fetchGuild, prisma } = require("../../prisma");
 
+let modIcon = {
+	NM: "<:NM:972256928757592144>",
+	HD: "<:HD:972256986357964801>",
+	HR: "<:HR:972256992380993616>",
+	DT: "<:DT:972256999305781298>",
+	FM: "<:FM:972257023297204325>",
+	TB: "<:TB:972257028502339595>",
+};
+
 module.exports = {
 	data: new MessageButton().setCustomId("round_list"),
 	async execute(interaction, command) {
@@ -14,9 +23,7 @@ module.exports = {
 		// In case there are no rounds
 		if (rounds.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					"**Err**: There are no rounds in this tournament."
-				)
+				.setDescription("**Err**: There are no rounds in this tournament.")
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
@@ -30,7 +37,13 @@ module.exports = {
 		let pool = await prisma.map.findMany({ where: { roundId: round.id } });
 
 		pool.forEach((element) => {
-			poolString += `**[${element.identifier}]**: ${element.artist} - ${element.title} [${element.version}]\n`;
+			let mapString = `${element.artist} - ${element.title} \\[${element.version}\\]`;
+			let identifier = modIcon[element.identifier.substring(0, 2)];
+
+			if (element.identifier.substring(2)) {
+				identifier += ` **${element.identifier.substring(2)}**`;
+			}
+			poolString += `${identifier} [${mapString}](https://osu.ppy.sh/b/${element.beatmap_id})\n`;
 		});
 		if (poolString == "") poolString = "No maps";
 		// Build buttons to scroll to other rounds
@@ -61,13 +74,14 @@ module.exports = {
 		let embed = new MessageEmbed()
 			.setColor(tournament.color)
 			.setTitle(`${round.acronym}: ${round.name}`)
-			.setDescription(
+			.addField(
+				"Statistics",
 				stripIndents`
-                **Best of:** ${round.best_of}
-                **Bans:** ${round.bans}
-            `
+			    **Best of:** ${round.best_of}
+			    **Bans:** ${round.bans}
+			`
 			)
-			.addField("Mappool", poolString)
+			.setDescription("**Mappool** \n" + poolString)
 			.setThumbnail(tournament.icon_url);
 
 		if (interaction.isCommand()) {
