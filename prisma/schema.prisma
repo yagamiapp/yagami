@@ -62,7 +62,9 @@ model Map {
   globalMappoolId      Int?
   PickedMatch          Match?         @relation(fields: [matchId], references: [id], name: "pick")
   matchId              Int?
-  BannedMatch          Match?         @relation(fields: [matchId], references: [id], name: "ban")
+  BannedMatch          TeamInMatch?   @relation(fields: [teamInMatchTeam_id, teamInMatchMatch_id], references: [team_id, match_id], name: "ban")
+  teamInMatchTeam_id   Int?
+  teamInMatchMatch_id  Int?
 }
 
 model Round {
@@ -95,6 +97,8 @@ model Tournament {
   Guild               Guild?   @relation(fields: [Guild_id], references: [guild_id])
   Guild_id            String?
   delete_warning      Boolean?
+  double_pick         Int      @default(1) // 0: No double picking; 1: Only double picking NM; 2 Double Picking allowed
+  double_ban          Int      @default(1) // 0: No double picking; 1: Only double picking NM; 2 Double Picking allowed
   Team                Team[]
 }
 
@@ -178,7 +182,6 @@ model Match {
   round      Round         @relation(fields: [round_id], references: [id])
   round_id   Int
   picks      Map[]         @relation("pick")
-  bans       Map[]         @relation("ban")
   state      Int
 }
 
@@ -191,6 +194,7 @@ model TeamInMatch {
   roll       Int?
   pick_order Int?
   ban_order  Int?
+  bans       Map[]    @relation("ban")
   winner     Boolean?
 
   @@id([team_id, match_id])

@@ -16,13 +16,34 @@ class Team {
 		this.icon_url = team.icon_url;
 		this.id = team.id;
 		this.score = undefined;
+		this.pick_order = undefined;
+		this.ban_order = undefined;
 		this.name = team.name;
 		this.tournamentId = team.tournamentId;
 		this.users = users;
+		this.bans = [];
 		/**
 		 * @type {import("bancho.js").BanchoLobbyPlayer[]}
 		 */
 		this.players = [];
+	}
+	/**
+	 *
+	 * @param {import("@prisma/client").TeamInMatch} team
+	 */
+	async setTeamInMatch(team) {
+		this.roll = team.roll;
+		this.ban_order = team.ban_order;
+		this.pick_order = team.pick_order;
+		this.score = team.score;
+		let bans = await prisma.map.findMany({
+			where: {
+				teamInMatchTeam_id: this.id,
+				teamInMatchMatch_id: this.match.id,
+			},
+		});
+		bans = bans.map((map) => map.id);
+		this.bans = bans;
 	}
 	/**
 	 * Compares one team to another based on the score mode
@@ -52,8 +73,7 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.players.forEach((player) => {
-			outputString +=
-				player.user.ircUsername + ": " + player.score + "; ";
+			outputString += player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}
@@ -77,6 +97,21 @@ class Team {
 	 */
 	addPlayer(player) {
 		this.players.push(player);
+	}
+
+	async setRoll(num) {
+		this.roll = num;
+		await prisma.teamInMatch.update({
+			where: {
+				team_id_match_id: {
+					team_id: this.id,
+					match_id: this.match.id,
+				},
+			},
+			data: {
+				roll: num,
+			},
+		});
 	}
 
 	async setScore(num) {
@@ -133,6 +168,24 @@ class Team {
 			},
 			data: {
 				ban_order: num,
+			},
+		});
+	}
+	async addBan(id) {
+		this.bans.push(id);
+		await prisma.teamInMatch.update({
+			where: {
+				team_id_match_id: {
+					team_id: this.id,
+					match_id: this.match.id,
+				},
+			},
+			data: {
+				bans: {
+					connect: {
+						id: id,
+					},
+				},
 			},
 		});
 	}

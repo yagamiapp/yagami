@@ -113,7 +113,7 @@ class MatchManager {
 				},
 			});
 			let newTeam = new Team(this, team, users);
-			await newTeam.setScore(teamInMatch.score);
+			await newTeam.setTeamInMatch(teamInMatch);
 			this.teams.push(newTeam);
 		}
 
@@ -326,14 +326,7 @@ class MatchManager {
 			let rolls = [...new Set(teamRolls)];
 			if (rolls.length == 1) {
 				await this.channel.sendMessage(`Wow, a roll tie! Let's try again.`);
-				await prisma.teamInMatch.updateMany({
-					where: {
-						match_id: this.id,
-					},
-					data: {
-						roll: null,
-					},
-				});
+				this.teams.forEach((team) => team.setRoll(null));
 				this.roll();
 				return;
 			}
@@ -350,13 +343,35 @@ class MatchManager {
 	async chooseOrder() {
 		let team = this.teams[this.waiting_on];
 		if (team.pick_order && team.ban_order) {
+			if (team.ban_order == 1) {
+				this.updateWaitingOn(this.teams.indexOf(team));
+			} else {
+				this.updateWaitingOn(1 - this.teams.indexOf(team));
+			}
 			this.updateState(7);
-			// Ban Phase Method
+			this.banPhase();
 			return;
 		}
 
 		await this.channel.sendMessage(
-			`${team.name}, it is your turn to pick! Use !choose [first|second] [pick|ban] to choose your order`
+			`${team.name}, it is your turn to pick! Use !choose [first|second] [pick|ban] to choose the order`
+		);
+	}
+
+	async banPhase() {
+		let team = this.teams[this.waiting_on];
+		if (team.bans.length >= this.round.bans) {
+			this.updateState(8);
+			this.pickPhase();
+			return;
+		}
+		await this.channel.sendMessage(
+			`${team.name}, It's your turn to ban. Use !ban [map] to ban a map`
+		);
+		await this.channel.sendMessage(
+			`You have ${this.round.bans - team.bans.length} ${
+				this.round.bans - team.bans.length == 1 ? "ban" : "bans"
+			} left, Use !list to see the available bans`
 		);
 	}
 
@@ -374,22 +389,12 @@ class MatchManager {
 			this.chooseOrder();
 			return;
 		}
-	}
 
-	async invitePlayer(name) {
-		let user = await fetchUser(name);
-		await user.sendMessage(
-			"Here is your invite to the match. If you do not recieve the invite, use !invite to get a new one."
-		);
-		this.lobby.invitePlayer(user.ircUsername);
+		if (this.state == 7) {
+			this.banPhase();
+			return;
+		}
 	}
-	/**
-	 * Moves a player to a different slot, or swaps their
-	 * position with the player in that slot
-	 * @param {import("bancho.js").BanchoLobbyPlayer} player
-	 * @param {number} slot
-	 */
-	async swapPlayer(player, slot) {}
 
 	/**
 	 *
@@ -452,11 +457,135 @@ class MatchManager {
 	 * @returns
 	 */
 	async chooseListener(msg) {
-		if (this.state != 6) return;
-		let command = msg.content.match(/!choose (?<order>\w+) (?<type>\w+)/);
-		console.log(command);
+		let team = this.teams[this.waiting_on];
+		let user = team.getUserPos(msg.user.id);
+		user = team.getUser(user);
+		if (!user) return;
+		let command = msg.content.match(
+			/!choose (?<order>first|second) (?<type>pick|ban)/
+		);
+		if (!command && msg.content.startsWith("!choose")) {
+			await this.channel.sendMessage(
+				"Invalid command usage! Correct Usage: !choose [first|second] [pick|ban]"
+			);
+		}
+
+		if (!command) return;
+
+		if (command.groups.type.toLowerCase() == "pick") {
+			if (team.pick_order) {
+				await this.channel.sendMessage(
+					`The pick order has already been chosen`
+				);
+				return;
+			}
+			if (command.groups.order.toLowerCase() == "first") {
+				team.setPickOrder(1);
+				let otherTeam = this.teams[1 - this.waiting_on];
+				otherTeam.setPickOrder(2);
+			}
+			if (command.groups.order.toLowerCase() == "second") {
+				team.setPickOrder(2);
+				let otherTeam = this.teams[1 - this.waiting_on];
+				otherTeam.setPickOrder(1);
+			}
+			this.updateWaitingOn(1 - this.waiting_on);
+			await this.chooseOrder();
+		}
+
+		if (command.groups.type.toLowerCase() == "ban") {
+			if (team.ban_order) {
+				await this.channel.sendMessage(`The ban order has already been chosen`);
+				return;
+			}
+			if (command.groups.order.toLowerCase() == "first") {
+				team.setBanOrder(1);
+				let otherTeam = this.teams[1 - this.waiting_on];
+				otherTeam.setBanOrder(2);
+			}
+			if (command.groups.order.toLowerCase() == "second") {
+				team.setBanOrder(2);
+				let otherTeam = this.teams[1 - this.waiting_on];
+				otherTeam.setBanOrder(1);
+			}
+			this.updateWaitingOn(1 - this.waiting_on);
+			await this.chooseOrder();
+		}
 	}
 
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 * @returns
+	 */
+	async banListener(msg) {
+		let team = this.teams[this.waiting_on];
+		let user = team.getUserPos(msg.user.id);
+		user = team.getUser(user);
+		if (!user) return;
+		let command = msg.content.match(/!ban (?<map>\w+)/);
+
+		let map = await prisma.map.findFirst({
+			where: {
+				identifier: command.groups.map,
+				roundId: this.round.id,
+			},
+		});
+		if (!map) {
+			await this.channel.sendMessage(`Map ${command.groups.map} not found`);
+			return;
+		}
+
+		// Check for double bans
+		let otherBanMods = [];
+		for (const ban of team.bans) {
+			let map = await prisma.map.findFirst({
+				where: {
+					id: ban,
+				},
+			});
+			otherBanMods.push(map.mods);
+		}
+		if (
+			(this.tournament.double_ban == 1 && map.mods != "") ||
+			this.tournament.double_ban == 0
+		) {
+			if (otherBanMods.includes(map.mods)) {
+				await this.channel.sendMessage(
+					`You cannot ban from the same modpool more than once.`
+				);
+				return;
+			}
+		}
+
+		// If the map is already banned
+		if (team.bans.includes(map.id)) {
+			await this.channel.sendMessage(`Map ${map.identifier} is already banned`);
+			return;
+		}
+
+		team.addBan(map.id);
+		await this.channel.sendMessage(
+			`${team.name} choosed to ban ${map.identifier}`
+		);
+		await this.updateWaitingOn(1 - this.waiting_on);
+		await this.chooseOrder();
+	}
+
+	async invitePlayer(name) {
+		let user = await fetchUser(name);
+		await user.sendMessage(
+			"Here is your invite to the match. If you do not recieve the invite, use !invite to get a new one."
+		);
+		this.lobby.invitePlayer(user.ircUsername);
+	}
+	/**
+	 * Moves a player to a different slot, or swaps their
+	 * position with the player in that slot
+	 * @param {import("bancho.js").BanchoLobbyPlayer} player
+	 * @param {number} slot
+	 */
+	async swapPlayer(player, slot) {}
 	/**
 	 *
 	 * @param {number} num The team that you're waiting on
@@ -506,31 +635,14 @@ class MatchManager {
 			return;
 		}
 
-		/*
-		 *	Command Handling
-		 */
-		let stateCommands = {
-			6: ["choose"],
-		};
-		let commandRegex = /^!\w+/g;
-		/**
-		 * @type {string}
-		 */
-		let message = msg.message;
+		if (this.state == 6) {
+			this.chooseListener(msg);
+			return;
+		}
 
-		if (message.match(commandRegex)) {
-			message = message.substring(1);
-			let args = message.split(" ");
-			let command = args[0];
-
-			if (command == "!mp") return;
-			if (!command) return;
-			let options = args.splice(1, 1);
-			try {
-			} catch (e) {
-				console.log(e);
-				msg.user.sendMessage("We encountered an error: " + e);
-			}
+		if (this.state == 7) {
+			this.banListener(msg);
+			return;
 		}
 	}
 

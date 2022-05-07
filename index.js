@@ -7,7 +7,7 @@ if (!process.env.disableWeb) {
 	web.init();
 }
 if (!process.env.disableDiscord) {
-	discord.init();
+	// discord.init();
 }
 if (!process.env.disableBancho) {
 	bancho.init();
