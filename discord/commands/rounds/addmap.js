@@ -2,7 +2,7 @@ const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
 const { convertAcronymToEnum } = require("../../../bancho/modEnum");
 const { fetchGuild, prisma } = require("../../../prisma");
-let axios = require("axios").default;
+let nodesu = require("nodesu");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -38,10 +38,15 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
-		let identifier = interaction.options.getString("identifier").toUpperCase();
+		let client = new nodesu.Client(process.env.banchoAPIKey);
+
+		let identifier = interaction.options
+			.getString("identifier")
+			.toUpperCase();
 		let acronym = interaction.options.getString("acronym").toUpperCase();
 		let mods =
-			interaction.options.getString("mods") || identifier.match(/\w{2}/)[0];
+			interaction.options.getString("mods") ||
+			identifier.match(/\w{2}/)[0];
 		let modEnum = convertAcronymToEnum(mods);
 		let round = await prisma.round.findFirst({
 			where: { tournamentId: tournament.id },
@@ -54,7 +59,9 @@ module.exports = {
 					`**Err**: A round with the acronym ${acronym} does not exist.`
 				)
 				.setColor("RED")
-				.setFooter({ text: "You can create a round using /rounds create" });
+				.setFooter({
+					text: "You can create a round using /rounds create",
+				});
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -77,8 +84,11 @@ module.exports = {
 			case "NM":
 				mods = "";
 				break;
+			case "FM":
+				mods = "Freemod";
+				break;
 			case "TB":
-				mods = "FM";
+				mods = "Freemod";
 				break;
 			default:
 				break;
@@ -88,11 +98,9 @@ module.exports = {
 
 		if (modEnum == 8 || modEnum == 9) modEnum = 0;
 
-		let req_url = `https://osu.ppy.sh/api/get_beatmaps?k=${process.env.banchoAPIKey}&b=${mapID}&mods=${modEnum}`;
-		let map = await axios.get(req_url);
-		console.log(req_url);
+		let map = await client.beatmaps.getByBeatmapId(mapID);
 
-		map = map.data[0];
+		map = map[0];
 		map.identifier = identifier;
 		map.mods = mods;
 		map.approved_date = new Date(map.approved_date);
