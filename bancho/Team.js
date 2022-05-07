@@ -1,8 +1,10 @@
 const { prisma } = require("../prisma");
 
-/**
- * A collection of BanchoLobbyUser objects
- */
+// There's currently a bug with local SQLite
+// Databases, where too many requests in
+// Succession will crash prisma.
+let prismaTimeout = 500;
+
 class Team {
 	/**
 	 *
@@ -73,7 +75,8 @@ class Team {
 	toString() {
 		let outputString = "";
 		this.players.forEach((player) => {
-			outputString += player.user.ircUsername + ": " + player.score + "; ";
+			outputString +=
+				player.user.ircUsername + ": " + player.score + "; ";
 		});
 		return outputString;
 	}
@@ -101,6 +104,7 @@ class Team {
 
 	async setRoll(num) {
 		this.roll = num;
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				team_id_match_id: {
@@ -116,6 +120,7 @@ class Team {
 
 	async setScore(num) {
 		this.score = num;
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				team_id_match_id: {
@@ -131,6 +136,7 @@ class Team {
 
 	async addScore() {
 		this.score++;
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				team_id_match_id: {
@@ -145,6 +151,7 @@ class Team {
 	}
 	async setPickOrder(num) {
 		this.pick_order = num;
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				team_id_match_id: {
@@ -159,6 +166,7 @@ class Team {
 	}
 	async setBanOrder(num) {
 		this.ban_order = num;
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				team_id_match_id: {
@@ -173,6 +181,7 @@ class Team {
 	}
 	async addBan(id) {
 		this.bans.push(id);
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				team_id_match_id: {

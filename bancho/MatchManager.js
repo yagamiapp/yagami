@@ -20,6 +20,11 @@ let states = {
 	10: "Not Started",
 };
 
+// There's currently a bug with local SQLite
+// Databases, where too many requests in
+// Succession will crash prisma.
+let prismaTimeout = 500;
+
 class MatchManager {
 	/**
 	 *
@@ -325,7 +330,9 @@ class MatchManager {
 			// Check if all elements in array are the same
 			let rolls = [...new Set(teamRolls)];
 			if (rolls.length == 1) {
-				await this.channel.sendMessage(`Wow, a roll tie! Let's try again.`);
+				await this.channel.sendMessage(
+					`Wow, a roll tie! Let's try again.`
+				);
 				this.teams.forEach((team) => team.setRoll(null));
 				this.roll();
 				return;
@@ -361,8 +368,8 @@ class MatchManager {
 	async banPhase() {
 		let team = this.teams[this.waiting_on];
 		if (team.bans.length >= this.round.bans) {
-			this.updateState(8);
-			this.pickPhase();
+			await this.updateState(8);
+			await this.pickPhase();
 			return;
 		}
 		await this.channel.sendMessage(
@@ -495,7 +502,9 @@ class MatchManager {
 
 		if (command.groups.type.toLowerCase() == "ban") {
 			if (team.ban_order) {
-				await this.channel.sendMessage(`The ban order has already been chosen`);
+				await this.channel.sendMessage(
+					`The ban order has already been chosen`
+				);
 				return;
 			}
 			if (command.groups.order.toLowerCase() == "first") {
@@ -525,6 +534,7 @@ class MatchManager {
 		if (!user) return;
 		let command = msg.content.match(/!ban (?<map>\w+)/);
 
+		if (!command) return;
 		let map = await prisma.map.findFirst({
 			where: {
 				identifier: command.groups.map,
@@ -532,7 +542,9 @@ class MatchManager {
 			},
 		});
 		if (!map) {
-			await this.channel.sendMessage(`Map ${command.groups.map} not found`);
+			await this.channel.sendMessage(
+				`Map ${command.groups.map} not found`
+			);
 			return;
 		}
 
@@ -558,18 +570,28 @@ class MatchManager {
 			}
 		}
 
+		// If the team tried to ban the TB
+		if (command.groups.map.substring(0, 2).toLowerCase() == "tb") {
+			await this.channel.sendMessage(
+				`Silly goose! The tiebreaker is unbannable.`
+			);
+			return;
+		}
+
 		// If the map is already banned
 		if (team.bans.includes(map.id)) {
-			await this.channel.sendMessage(`Map ${map.identifier} is already banned`);
+			await this.channel.sendMessage(
+				`${map.identifier} has already been chosen as a ban`
+			);
 			return;
 		}
 
 		team.addBan(map.id);
 		await this.channel.sendMessage(
-			`${team.name} choosed to ban ${map.identifier}`
+			`${team.name} chose to ban ${map.identifier}`
 		);
 		await this.updateWaitingOn(1 - this.waiting_on);
-		await this.chooseOrder();
+		await this.banPhase();
 	}
 
 	async invitePlayer(name) {
@@ -593,6 +615,7 @@ class MatchManager {
 	 */
 	async updateWaitingOn(num) {
 		this.waiting_on = num;
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
 				id: this.id,
@@ -612,6 +635,7 @@ class MatchManager {
 	async updateState(state) {
 		this.state = state;
 
+		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
 				id: this.id,
@@ -741,7 +765,9 @@ class MatchManager {
 		if (this.state == 4) {
 			if (this.beatmap == null) {
 				let host = this.lobby.getHost();
-				embed.setDescription(`${host.user.username} is picking a warmup`);
+				embed.setDescription(
+					`${host.user.username} is picking a warmup`
+				);
 				embed.setThumbnail(`https://s.ppy.sh/a/${host.user.id}`);
 			} else {
 				embed.setDescription(
