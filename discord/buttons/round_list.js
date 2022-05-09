@@ -23,7 +23,9 @@ module.exports = {
 		// In case there are no rounds
 		if (rounds.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no rounds in this tournament.")
+				.setDescription(
+					"**Err**: There are no rounds in this tournament."
+				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
@@ -34,17 +36,40 @@ module.exports = {
 		// Select first round and build embed
 		let round = rounds[index];
 		let poolString = "";
-		let pool = await prisma.map.findMany({ where: { roundId: round.id } });
-
-		pool.forEach((element) => {
-			let mapString = `${element.artist} - ${element.title} \\[${element.version}\\]`;
-			let identifier = modIcon[element.identifier.substring(0, 2)];
-
-			if (element.identifier.substring(2)) {
-				identifier += ` **${element.identifier.substring(2)}**`;
-			}
-			poolString += `${identifier} [${mapString}](https://osu.ppy.sh/b/${element.beatmap_id})\n`;
+		let pool = await prisma.mapInPool.findMany({
+			where: {
+				Mappool: {
+					Round: {
+						id: round.id,
+					},
+				},
+			},
 		});
+
+		// TODO: Order pool by identifier in this order: NM, HD, HR, DT, EZ, FL, FM, TB
+		let alphabet = ["NM", "HD", "HR", "DT", "EZ", "FL", "FM", "TB"];
+
+		for (const map of pool) {
+			console.log(map);
+			let data = await prisma.map.findFirst({
+				where: {
+					in_pools: {
+						some: {
+							mappoolId: map.mappoolId,
+						},
+					},
+					beatmap_id: map.mapId,
+				},
+			});
+
+			let mapString = `${data.artist} - ${data.title} \\[${data.version}\\]`;
+			let identifier = modIcon[map.identifier.substring(0, 2)];
+
+			if (map.identifier.substring(2)) {
+				identifier += ` **${map.identifier.substring(2)}**`;
+			}
+			poolString += `${identifier} [${mapString}](https://osu.ppy.sh/b/${data.beatmap_id})\n`;
+		}
 		if (poolString == "") poolString = "No maps";
 		// Build buttons to scroll to other rounds
 		let components = new MessageActionRow().addComponents(

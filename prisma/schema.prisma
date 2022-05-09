@@ -11,15 +11,13 @@ datasource db {
 }
 
 model Map {
-  id                   Int            @id @default(autoincrement())
-  identifier           String?
-  mods                 String?
+  beatmap_id           String      @id
+  fetch_time           DateTime    @default(now())
   approved             String?
   approved_date        DateTime?
   artist               String?
   artist_unicode       String?
   audio_unavailable    String?
-  beatmap_id           String?
   beatmapset_id        String?
   bpm                  String?
   count_normal         String?
@@ -56,15 +54,30 @@ model Map {
   total_length         String?
   version              String?
   video                String?
-  Round                Round?         @relation(fields: [roundId], references: [id])
-  roundId              Int?
-  GlobalMappool        GlobalMappool? @relation(fields: [globalMappoolId], references: [id])
-  globalMappoolId      Int?
-  PickedMatch          Match?         @relation(fields: [matchId], references: [id], name: "pick")
-  matchId              Int?
-  BannedMatch          TeamInMatch?   @relation(fields: [teamInMatchTeam_id, teamInMatchMatch_id], references: [team_id, match_id], name: "ban")
-  teamInMatchTeam_id   Int?
-  teamInMatchMatch_id  Int?
+  in_pools             MapInPool[]
+}
+
+model MapInPool {
+  identifier          String // NM1, NM2 etc.
+  mods                String
+  Map                 Map          @relation(fields: [mapId], references: [beatmap_id])
+  mapId               String
+  Mappool             Mappool      @relation(fields: [mappoolId], references: [id])
+  mappoolId           Int
+  TeamInMatch         TeamInMatch? @relation(fields: [teamInMatchTeam_id, teamInMatchMatch_id], references: [team_id, match_id])
+  teamInMatchTeam_id  Int?
+  teamInMatchMatch_id Int?
+  Match               Match?       @relation(fields: [matchId], references: [id])
+  matchId             Int?
+
+  @@id([identifier, mappoolId])
+}
+
+model Mappool {
+  id     Int         @id @default(autoincrement())
+  maps   MapInPool[]
+  global Boolean     @default(false)
+  Round  Round?
 }
 
 model Round {
@@ -73,12 +86,13 @@ model Round {
   name           String
   bans           Int
   best_of        Int
-  maps           Map[]
-  tournament     Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId   Int
   delete_warning String?
   show_mappool   Boolean
   Match          Match[]
+  tournament     Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId   Int
+  mappool        Mappool?   @relation(fields: [mappoolId], references: [id])
+  mappoolId      Int?       @unique
 }
 
 model Tournament {
@@ -135,12 +149,6 @@ model User {
   in_teams                 UserInTeam[]
 }
 
-model GlobalMappool {
-  id   Int    @id @default(autoincrement())
-  Name String
-  maps Map[]
-}
-
 model Guild {
   guild_id              String       @id
   change_nickname       Boolean
@@ -181,20 +189,20 @@ model Match {
   waiting_on Int? // Index of team in teams array
   round      Round         @relation(fields: [round_id], references: [id])
   round_id   Int
-  picks      Map[]         @relation("pick")
+  picks      MapInPool[]
   state      Int
 }
 
 model TeamInMatch {
   team_id    Int
-  team       Team     @relation(fields: [team_id], references: [id])
+  team       Team        @relation(fields: [team_id], references: [id])
   match_id   Int
-  match      Match    @relation(fields: [match_id], references: [id])
+  match      Match       @relation(fields: [match_id], references: [id])
   score      Int
   roll       Int?
   pick_order Int?
   ban_order  Int?
-  bans       Map[]    @relation("ban")
+  bans       MapInPool[]
   winner     Boolean?
 
   @@id([team_id, match_id])

@@ -66,6 +66,10 @@ module.exports = {
 			return;
 		}
 
+		let mappool = await prisma.mappool.create({
+			data: {},
+		});
+
 		await prisma.round.create({
 			data: {
 				name: interaction.options.getString("name") ?? "New Round",
@@ -74,6 +78,7 @@ module.exports = {
 				bans: interaction.options.getInteger("bans") ?? 2,
 				tournamentId: tournament.id,
 				show_mappool: false,
+				mappoolId: mappool.id,
 			},
 		});
 
