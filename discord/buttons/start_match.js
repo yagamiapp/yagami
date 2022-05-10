@@ -2,7 +2,6 @@ const { stripIndents } = require("common-tags/lib");
 const { MessageButton, MessageEmbed, MessageActionRow } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 const { execute } = require("./match_start_list");
-require("dotenv").config();
 
 module.exports = {
 	data: new MessageButton()
@@ -119,7 +118,9 @@ module.exports = {
 		});
 
 		let matchEmbed = new MessageEmbed()
-			.setTitle(`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`)
+			.setTitle(
+				`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
+			)
 			.setColor(tournament.color)
 			.setThumbnail(tournament.icon_url)
 			.setAuthor({ name: tournament.name, iconURL: tournament.icon_url })

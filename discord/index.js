@@ -1,7 +1,6 @@
 const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
 const fs = require("fs");
 const join = require("./join");
-require("dotenv").config();
 
 const bot = new Client({
 	intents: [

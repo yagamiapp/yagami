@@ -1,7 +1,6 @@
 let ids = require("./ids.json");
 let axios = require("axios").default;
 let fs = require("fs");
-require("dotenv").config();
 
 let i = 0;
 let interval = setInterval(repeat, 1000);

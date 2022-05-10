@@ -1,6 +1,5 @@
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
-require("dotenv").config();
 
 let guildId = "611064433623695370";
 

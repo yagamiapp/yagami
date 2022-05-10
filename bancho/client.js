@@ -1,5 +1,5 @@
 const { BanchoClient } = require("bancho.js");
-require("dotenv").config();
+
 const { pmHandler } = require("./pmHandler");
 
 let credentials = {

@@ -3,7 +3,6 @@ let { MessageEmbed } = require("discord.js");
 let { execute } = require("../../buttons/round_list");
 const { fetchGuild, prisma } = require("../../../prisma");
 const { fetchMap } = require("../../../bancho/fetchMap");
-require("dotenv").config();
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()

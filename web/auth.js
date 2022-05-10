@@ -3,7 +3,6 @@ const { MessageEmbed } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { stripIndents } = require("common-tags/lib");
 const { prisma } = require("../prisma");
-require("dotenv").config();
 
 /**
  *

@@ -1,7 +1,7 @@
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const fs = require("fs");
-require("dotenv").config();
+
 /**
  *
  * @param {import("discord.js").Guild} guild
