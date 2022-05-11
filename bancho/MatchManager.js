@@ -66,7 +66,7 @@ class MatchManager {
 			},
 		});
 
-		// Get tound from DB
+		// Get round from DB
 		this.round = await prisma.round.findFirst({
 			where: {
 				Match: {
@@ -97,7 +97,7 @@ class MatchManager {
 			},
 		});
 
-		// Create teams and invite absent players
+		// Create teams and
 		/**
 		 * @type {Team[]}
 		 */
@@ -124,8 +124,7 @@ class MatchManager {
 
 		// Update state if no mp link
 		if (!this.mp) {
-			await this.updateState(3);
-			await this.updateMessage();
+			await this.updateMessage(3);
 			return;
 		}
 
@@ -139,8 +138,7 @@ class MatchManager {
 			await this.channel.join();
 		} catch (e) {
 			console.log(`${this.mp} no longer exists`);
-			await this.updateState(3);
-			await this.updateMessage();
+			await this.updateMessage(3);
 		}
 		await this.lobby.clearHost();
 
@@ -381,6 +379,17 @@ class MatchManager {
 			} left, Use !list to see the available bans`
 		);
 	}
+	async pickPhase() {
+		let team = this.teams[this.waiting_on];
+		await this.channel.sendMessage(
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // Next pick: ${team.name}`
+		);
+	}
+
+	async readyPhase() {
+		let team = this.teams[this.waiting_on];
+		// await this.channel.sendMessage(`${team.name} picked ${this.}`);
+	}
 
 	async recover() {
 		if (this.state == 4) {
@@ -594,6 +603,97 @@ class MatchManager {
 		await this.banPhase();
 	}
 
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async pickListener(msg) {
+		let team = this.teams[this.waiting_on];
+		let user = team.getUserPos(msg.user.id);
+		user = team.getUser(user);
+		if (!user) return;
+		let command = msg.content.match(/!pick (?<map>\w+)/);
+		if (!command) return;
+		let map = await prisma.map.findFirst({
+			where: {
+				in_pools: {
+					some: {
+						identifier: command.groups.map,
+						Mappool: {
+							Round: {
+								id: this.round.id,
+							},
+						},
+					},
+				},
+			},
+		});
+
+		let mapInPool = await prisma.mapInPool.findFirst({
+			where: {
+				mapId: map.beatmap_id,
+			},
+		});
+		if (!map) {
+			await this.channel.sendMessage("Invalid map name");
+			return;
+		}
+
+		// Check if banned
+		if (mapInPool.bannedByMatch_id == this.id) {
+			await this.channel.sendMessage(
+				`${mapInPool.identifier} was one of the bans`
+			);
+			return;
+		}
+
+		// Check for previous picks
+		if (mapInPool.pickedIn == this.id) {
+			await this.channel.sendMessage(
+				`${mapInPool.identifier} has already been picked`
+			);
+			return;
+		}
+
+		// Check for double picks
+		let picks = await prisma.mapInPool.findMany({
+			where: {
+				pickedIn: this.id,
+			},
+		});
+		let lastTeamPick = picks[picks.length - 2];
+		if (
+			(this.tournament.double_pick == 1 && lastTeamPick?.mods != "") ||
+			this.tournament.double_pick == 0
+		) {
+			if (lastTeamPick?.mods == map.mods) {
+				await this.channel.sendMessage(
+					`You cannot pick the same modpool twice.`
+				);
+				return;
+			}
+		}
+
+		// If the team tried to pick the TB
+		if (command.groups.map.substring(0, 2).toLowerCase() == "tb") {
+			await this.channel.sendMessage(
+				"Silly goose! The tiebreaker is unpickable."
+			);
+			return;
+		}
+
+		match.addPick(mapInPool.identifier);
+		await this.channel.sendMessage(
+			`${team.name} chose to pick ${mapInPool.identifier}`
+		);
+	}
+
+	/**
+	 * Picks a map in the lobby and adds it to the
+	 * @param {import("@prisma/client").MapInPool} map
+	 */
+	async addPick(map) {}
+
 	async invitePlayer(name) {
 		let user = await fetchUser(name);
 		await user.sendMessage(
@@ -645,6 +745,7 @@ class MatchManager {
 			},
 		});
 
+		await this.updateMessage();
 		console.log(`Match ${this.id} state updated to ${states[state]}`);
 	}
 
@@ -668,14 +769,20 @@ class MatchManager {
 			this.banListener(msg);
 			return;
 		}
+		if (this.state == 0) {
+			this.pickListener();
+		}
 	}
 
 	/**
 	 * Updates the log message
 	 * @function
+	 * @param {number} state Mimics the state of the match
 	 * @private
 	 */
-	async updateMessage() {
+	async updateMessage(state) {
+		state = state || this.state;
+
 		let channel = await discord.channels.fetch(this.channel_id);
 		/**
 		 * @type {import("discord.js").Message}
@@ -691,13 +798,13 @@ class MatchManager {
 			.setURL(this.mp)
 			.setFooter({ text: "Current phase: " + states[this.state] });
 
-		if (this.state <= 2 || (this.state >= 5 && this.state <= 7)) {
+		if (state <= 2 || (state >= 5 && state <= 7)) {
 			description += `
 				**Score:**
 				:red_square: ${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} :blue_square:\n`;
 		}
 
-		if (this.state >= 5 && this.state <= 7) {
+		if (state >= 5 && state <= 7) {
 			let teamsInMatch = await prisma.teamInMatch.findMany({
 				where: {
 					match_id: this.id,
@@ -716,13 +823,13 @@ class MatchManager {
 				description += `**${team.name}** rolled a **${teamInMatch.roll}**\n`;
 			}
 		}
-		if (this.state >= 0 || this.state <= 2) {
+		if (state >= 0 || state <= 2) {
 			embed.setImage(
 				`https://assets.ppy.sh/beatmaps/${this.beatmap?.setId}/covers/cover.jpg`
 			);
 		}
 
-		if (this.state == 3) {
+		if (state == 3) {
 			embed
 				.setColor("RED")
 				.setURL(null)
@@ -762,7 +869,7 @@ class MatchManager {
 				);
 		}
 
-		if (this.state == 4) {
+		if (state == 4) {
 			if (this.beatmap == null) {
 				let host = this.lobby.getHost();
 				embed.setDescription(

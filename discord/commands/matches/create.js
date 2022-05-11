@@ -97,7 +97,9 @@ module.exports = {
 		// In case the team1 user is not on a team
 		if (!teams[0]) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: The user from team 1 is not on a team")
+				.setDescription(
+					"**Err**: The user from team 1 is not on a team"
+				)
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -109,7 +111,9 @@ module.exports = {
 		// In case the team 2 user is not on a team
 		if (!teams[1]) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: The user from team 2 is not on a team")
+				.setDescription(
+					"**Err**: The user from team 2 is not on a team"
+				)
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -132,18 +136,39 @@ module.exports = {
 
 		let match = await prisma.match.create({
 			data: {
-				id: matches.length + 1,
 				round_id: round.id,
 				state: 10,
 			},
 		});
 
+		// Create teams in match
 		for (let team of teams) {
 			await prisma.teamInMatch.create({
 				data: {
 					team_id: team.id,
 					match_id: match.id,
 					score: 0,
+				},
+			});
+		}
+
+		// Create maps in match
+		let mappool = await prisma.mapInPool.findMany({
+			where: {
+				Mappool: {
+					Round: {
+						id: round.id,
+					},
+				},
+			},
+		});
+
+		for (let map of mappool) {
+			await prisma.mapInMatch.create({
+				data: {
+					matchId: this.id,
+					mapIdentifier: map.identifier,
+					matchId: match.id,
 				},
 			});
 		}
