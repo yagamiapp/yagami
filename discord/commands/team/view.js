@@ -7,7 +7,9 @@ module.exports = {
 		.setName("view")
 		.setDescription("A summary of your team, or someone elses")
 		.addUserOption((option) =>
-			option.setName("user").setDescription("Select a user to view the team of")
+			option
+				.setName("user")
+				.setDescription("Select a user to view the team of")
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
@@ -17,7 +19,7 @@ module.exports = {
 			where: {
 				members: {
 					some: {
-						discord_id: user.id,
+						discordId: user.id,
 					},
 				},
 			},
@@ -27,7 +29,9 @@ module.exports = {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: ${
-						interaction.options.getUser("user") ? "That user is" : "You are"
+						interaction.options.getUser("user")
+							? "That user is"
+							: "You are"
 					} not in a team`
 				)
 				.setColor("RED");
@@ -44,7 +48,7 @@ module.exports = {
 			where: {
 				in_teams: {
 					some: {
-						team_id: team.id,
+						teamId: team.id,
 					},
 				},
 			},

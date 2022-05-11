@@ -17,7 +17,9 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
+				.setDescription(
+					"Set a custom color for your tournament e.g.(#0EB8B9)"
+				)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
@@ -29,7 +31,7 @@ module.exports = {
 			where: {
 				members: {
 					some: {
-						discord_id: interaction.user.id,
+						discordId: interaction.user.id,
 					},
 				},
 			},
@@ -116,7 +118,7 @@ module.exports = {
 			where: {
 				in_teams: {
 					some: {
-						team_id: team.id,
+						teamId: team.id,
 					},
 				},
 			},

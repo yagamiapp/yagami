@@ -15,7 +15,7 @@ module.exports = {
 			where: {
 				members: {
 					some: {
-						discord_id: interaction.user.id,
+						discordId: interaction.user.id,
 					},
 				},
 			},
@@ -34,7 +34,7 @@ module.exports = {
 			where: {
 				in_teams: {
 					some: {
-						team_id: team.id,
+						teamId: team.id,
 					},
 				},
 			},
@@ -42,7 +42,7 @@ module.exports = {
 
 		let userInTeam = await prisma.userInTeam.findFirst({
 			where: {
-				discord_id: interaction.user.id,
+				discordId: interaction.user.id,
 			},
 		});
 
@@ -50,7 +50,10 @@ module.exports = {
 		if (members.length > 1 && !userInTeam.delete_warning) {
 			await prisma.userInTeam.update({
 				where: {
-					discord_id: interaction.user.id,
+					discordId_teamId: {
+						discordId: interaction.user.id,
+						teamId: team.id,
+					},
 				},
 				data: {
 					delete_warning: true,
@@ -61,7 +64,7 @@ module.exports = {
 				try {
 					await prisma.userInTeam.update({
 						where: {
-							discord_id: interaction.user.id,
+							discordId: interaction.user.id,
 						},
 						data: {
 							delete_warning: null,
@@ -81,15 +84,15 @@ module.exports = {
 		}
 		let teamMemberLength = await prisma.userInTeam.count({
 			where: {
-				team_id: team.id,
+				teamId: team.id,
 			},
 		});
 
 		await prisma.userInTeam.delete({
 			where: {
-				discord_id_team_id: {
-					discord_id: interaction.user.id,
-					team_id: team.id,
+				discordId_teamId: {
+					discordId: interaction.user.id,
+					teamId: team.id,
 				},
 			},
 		});

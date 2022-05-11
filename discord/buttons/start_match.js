@@ -16,12 +16,23 @@ module.exports = {
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
+
+		let round = await prisma.round.findFirst({
+			where: {
+				Match: {
+					some: {
+						id: parseInt(command.options.id),
+					},
+				},
+				tournamentId: tournament.id,
+			},
+		});
 		// Get the teams in the match
 		let teams = await prisma.team.findMany({
 			where: {
 				TeamInMatch: {
 					some: {
-						match_id: parseInt(command.options.id),
+						matchId: parseInt(command.options.id),
 					},
 				},
 			},
@@ -30,15 +41,8 @@ module.exports = {
 		let match = await prisma.match.findFirst({
 			where: {
 				id: parseInt(command.options.id),
-			},
-		});
-
-		let round = await prisma.round.findFirst({
-			where: {
-				Match: {
-					some: {
-						id: match.id,
-					},
+				Round: {
+					tournamentId: tournament.id,
 				},
 			},
 		});
@@ -50,10 +54,10 @@ module.exports = {
 					some: {
 						OR: [
 							{
-								team_id: teams[0].id,
+								teamId: teams[0].id,
 							},
 							{
-								team_id: teams[1].id,
+								teamId: teams[1].id,
 							},
 						],
 					},
@@ -66,11 +70,11 @@ module.exports = {
 		if (duplicateCheck) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					"**Err**: One of the teams is in a match that is currently running"
+					"**Err**: One or more of the teams is in a match that is currently running"
 				)
 				.setColor("RED")
 				.setFooter({
-					text: "Make sure the match is not already running",
+					text: "Make sure both teams are not in an active match",
 				});
 
 			let button = new MessageActionRow().addComponents([
@@ -93,7 +97,10 @@ module.exports = {
 
 		await prisma.match.update({
 			where: {
-				id: match.id,
+				id_roundId: {
+					id: match.id,
+					roundId: round.id,
+				},
 			},
 			data: {
 				state: 3,
@@ -105,10 +112,10 @@ module.exports = {
 			where: {
 				in_teams: {
 					some: {
-						team: {
+						Team: {
 							TeamInMatch: {
 								some: {
-									match_id: match.id,
+									matchId: match.id,
 								},
 							},
 						},
@@ -170,7 +177,10 @@ module.exports = {
 
 		await prisma.match.update({
 			where: {
-				id: match.id,
+				id_roundId: {
+					id: match.id,
+					roundId: round.id,
+				},
 			},
 			data: {
 				message_id: message.id,

@@ -59,7 +59,7 @@ module.exports = {
 					tournamentId: tournament.id,
 					members: {
 						some: {
-							discord_id: users[0].id,
+							discordId: users[0].id,
 						},
 					},
 				},
@@ -69,7 +69,7 @@ module.exports = {
 					tournamentId: tournament.id,
 					members: {
 						some: {
-							discord_id: users[1].id,
+							discordId: users[1].id,
 						},
 					},
 				},
@@ -78,7 +78,9 @@ module.exports = {
 
 		let matches = await prisma.match.findMany({
 			where: {
-				round_id: round.id,
+				Round: {
+					tournamentId: tournament.id,
+				},
 			},
 		});
 
@@ -136,7 +138,8 @@ module.exports = {
 
 		let match = await prisma.match.create({
 			data: {
-				round_id: round.id,
+				roundId: round.id,
+				id: matches.length + 1,
 				state: 10,
 			},
 		});
@@ -145,8 +148,19 @@ module.exports = {
 		for (let team of teams) {
 			await prisma.teamInMatch.create({
 				data: {
-					team_id: team.id,
-					match_id: match.id,
+					Team: {
+						connect: {
+							id: team.id,
+						},
+					},
+					match: {
+						connect: {
+							id_roundId: {
+								id: match.id,
+								roundId: match.roundId,
+							},
+						},
+					},
 					score: 0,
 				},
 			});
@@ -166,9 +180,22 @@ module.exports = {
 		for (let map of mappool) {
 			await prisma.mapInMatch.create({
 				data: {
-					matchId: this.id,
-					mapIdentifier: map.identifier,
-					matchId: match.id,
+					Map: {
+						connect: {
+							identifier_mappoolId: {
+								identifier: map.identifier,
+								mappoolId: map.mappoolId,
+							},
+						},
+					},
+					Match: {
+						connect: {
+							id_roundId: {
+								id: match.id,
+								roundId: match.roundId,
+							},
+						},
+					},
 				},
 			});
 		}
@@ -186,7 +213,7 @@ module.exports = {
 				where: {
 					in_teams: {
 						some: {
-							team_id: team.id,
+							teamId: team.id,
 						},
 					},
 				},

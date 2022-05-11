@@ -60,15 +60,12 @@ model Map {
 model MapInPool {
   identifier String // NM1, NM2 etc.
   mods       String
-  Map        Map     @relation(fields: [mapId], references: [beatmap_id])
+  Map        Map          @relation(fields: [mapId], references: [beatmap_id])
   mapId      String
-  Mappool    Mappool @relation(fields: [mappoolId], references: [id])
+  Mappool    Mappool      @relation(fields: [mappoolId], references: [id])
   mappoolId  Int
+  InMatches  MapInMatch[]
 
-  MapInMatch MapInMatch[]
-  Match      Match        @relation(fields: [matchId], references: [id])
-  matchId    Int
-  roundId    Int
   @@id([identifier, mappoolId])
 }
 
@@ -180,52 +177,54 @@ model UserInTeam {
 }
 
 model Match {
-  id         Int           @id @default(autoincrement())
-  teams      TeamInMatch[]
-  message_id String?
-  channel_id String?
-  mp_link    String?
-  waiting_on Int? // Index of team in teams array
-  Round      Round?        @relation(fields: [roundId], references: [id])
-  roundId    Int?
-  picks      MapInPool[]
-  state      Int
-  MapInMatch MapInMatch[]
+  id          Int
+  teams       TeamInMatch[]
+  message_id  String?
+  channel_id  String?
+  mp_link     String?
+  waiting_on  Int? // Index of team in teams array
+  Round       Round         @relation(fields: [roundId], references: [id])
+  roundId     Int
+  MapsInMatch MapInMatch[]
+  state       Int
 
-  // @@id([id, roundId])
+  @@id([id, roundId])
 }
 
 model TeamInMatch {
-  id         Int          @id @default(autoincrement())
+  matchId    Int
   teamId     Int
-  Team       Team         @relation(fields: [teamId], references: [id])
-  matchId    Int?
-  roundId    Int?
-  match      Match?       @relation(fields: [matchId], references: [id])
+  roundId    Int
+  match      Match        @relation(fields: [matchId, roundId], references: [id, roundId], onDelete: Cascade)
+  Team       Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
   score      Int
   roll       Int?
   pick_order Int?
   ban_order  Int?
   Bans       MapInMatch[] @relation("banned")
   Wins       MapInMatch[] @relation("won")
+  Picks      MapInMatch[] @relation("picked")
   winner     Boolean?
-  // @@id([teamId, matchId])
+
+  @@id([teamId, matchId])
 }
 
 model MapInMatch {
-  Map           MapInPool @relation(fields: [mapIdentifier, poolId], references: [identifier, mappoolId])
-  Match         Match     @relation(fields: [matchId], references: [id])
+  Map           MapInPool @relation(fields: [mapIdentifier, poolId], references: [identifier, mappoolId], onDelete: Cascade)
+  Match         Match     @relation(fields: [matchId, roundId], references: [id, roundId], onDelete: Cascade)
   matchId       Int
   roundId       Int
   mapIdentifier String
   poolId        Int
 
-  BannedByTeam     TeamInMatch? @relation(fields: [bannedByTeam_id], references: [id], name: "banned")
-  bannedByTeam_id  Int?
-  bannedByMatch_id Int?
-  picked           Boolean      @default(false)
-  won_by           TeamInMatch? @relation(fields: [wonByTeam_id], references: [id], name: "won")
-  wonByTeam_id     Int?
-  wonByMatchId     Int?
+  BannedByTeam    TeamInMatch? @relation(fields: [bannedByMatchId, bannedByTeamId], references: [matchId, teamId], name: "banned")
+  bannedByTeamId  Int?
+  bannedByMatchId Int?
+  PickedByTeam    TeamInMatch? @relation(fields: [pickedByMatchId, pickedByTeamId], references: [matchId, teamId], name: "picked")
+  pickedByTeamId  Int?
+  pickedByMatchId Int?
+  won_by          TeamInMatch? @relation(fields: [wonByMatchId, wonByTeamId], references: [matchId, teamId], name: "won")
+  wonByTeamId     Int?
+  wonByMatchId    Int?
   @@id([mapIdentifier, matchId])
 }

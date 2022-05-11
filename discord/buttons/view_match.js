@@ -9,13 +9,16 @@ module.exports = {
 		let tournament = guild.active_tournament;
 
 		let round = await prisma.round.findFirst({
-			where: { tournamentId: tournament.id, acronym: command.options.round },
+			where: {
+				tournamentId: tournament.id,
+				acronym: command.options.round,
+			},
 		});
 		let match = await prisma.match.findFirst({
-			where: { round_id: round.id, id: parseInt(command.options.id) },
+			where: { roundId: round.id, id: parseInt(command.options.id) },
 		});
 		let teams = await prisma.team.findMany({
-			where: { TeamInMatch: { some: { match_id: match.id } } },
+			where: { TeamInMatch: { some: { matchId: match.id } } },
 		});
 
 		let back = new MessageActionRow().addComponents([
@@ -42,7 +45,7 @@ module.exports = {
 				where: {
 					in_teams: {
 						some: {
-							team_id: team.id,
+							teamId: team.id,
 						},
 					},
 				},

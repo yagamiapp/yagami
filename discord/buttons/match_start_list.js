@@ -14,10 +14,10 @@ module.exports = {
 			},
 		});
 		let matches = await prisma.match.findMany({
-			where: { round_id: round.id, OR: [{ state: 3 }, { state: 10 }] },
+			where: { roundId: round.id, OR: [{ state: 3 }, { state: 10 }] },
 		});
 		for (let i = 0; i < matches.length; i++) {
-			matches[i].round_id = i + 1;
+			matches[i].roundId = i + 1;
 		}
 
 		// Group elements into groups of 2
@@ -97,30 +97,30 @@ module.exports = {
 				where: {
 					TeamInMatch: {
 						some: {
-							match_id: match.id,
+							matchId: match.id,
 						},
 					},
 				},
 			});
 
 			embed.addField(
-				"Match " + match.round_id,
+				"Match " + match.id,
 				`${teams[0].name} vs ${teams[1].name}`,
 				true
 			);
 			let startButton = new MessageButton()
-				.setLabel("Start match " + match.round_id)
+				.setLabel("Start match " + match.id)
 				.setCustomId("start_match?id=" + match.id + "&index=" + index)
 				.setStyle("SUCCESS");
 			if (match.state != 10) {
 				startButton
-					.setLabel("Started match " + match.round_id)
+					.setLabel("Started match " + match.id)
 					.setDisabled(true);
 			}
 			startButtons.addComponents([startButton]);
 			viewButtons.addComponents([
 				new MessageButton()
-					.setLabel("View match " + match.round_id)
+					.setLabel("View match " + match.id)
 					.setCustomId(
 						"view_match?id=" +
 							match.id +

@@ -47,10 +47,9 @@ module.exports = {
 		});
 
 		// TODO: Order pool by identifier in this order: NM, HD, HR, DT, EZ, FL, FM, TB
-		let alphabet = ["NM", "HD", "HR", "DT", "EZ", "FL", "FM", "TB"];
+		// let alphabet = ["NM", "HD", "HR", "DT", "EZ", "FL", "FM", "TB"];
 
 		for (const map of pool) {
-			console.log(map);
 			let data = await prisma.map.findFirst({
 				where: {
 					in_pools: {
