@@ -7,7 +7,7 @@ const { stripIndents } = require("common-tags/lib");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("addlink")
-		.setDescription("Quick test of message editing")
+		.setDescription("Add the link to your match")
 		.addStringOption((option) =>
 			option
 				.setName("link")
@@ -25,10 +25,10 @@ module.exports = {
 			where: {
 				teams: {
 					some: {
-						team: {
+						Team: {
 							members: {
 								some: {
-									discord_id: interaction.user.id,
+									discordId: interaction.user.id,
 								},
 							},
 						},

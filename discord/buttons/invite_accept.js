@@ -7,7 +7,7 @@ module.exports = {
 		.setLabel("Accept")
 		.setStyle("PRIMARY"),
 	async execute(interaction, command) {
-		let tournament = prisma.tournament.findFirst({
+		let tournament = await prisma.tournament.findFirst({
 			where: {
 				Guild_id: command.options.guild,
 			},

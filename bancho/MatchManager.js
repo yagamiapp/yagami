@@ -1,5 +1,6 @@
 const { prisma } = require("../prisma");
 const { bot: discord } = require("../discord");
+const { Client } = require("nodesu");
 const { MessageEmbed } = require("discord.js");
 const { Team } = require("./Team");
 const { stripIndents } = require("common-tags");
@@ -20,10 +21,12 @@ let states = {
 	10: "Not Started",
 };
 
+let nodesuClient = new Client(process.env.banchoAPIKey);
+
 // There's currently a bug with local SQLite
 // Databases, where too many requests in
 // Succession will crash prisma.
-let prismaTimeout = 500;
+let prismaTimeout = 200;
 
 class MatchManager {
 	/**
@@ -36,6 +39,7 @@ class MatchManager {
 		this.id = id;
 		this.mp = mp;
 		this.init = false;
+		this.rollVerification = {};
 		module.exports[`match_${id}`] = this;
 	}
 
@@ -78,11 +82,9 @@ class MatchManager {
 		});
 
 		// Get mappool from DB
-		this.mappool = await prisma.map.findMany({
+		this.mappool = await prisma.mapInMatch.findMany({
 			where: {
-				Round: {
-					id: this.round.id,
-				},
+				matchId: this.id,
 			},
 		});
 
@@ -91,7 +93,7 @@ class MatchManager {
 			where: {
 				TeamInMatch: {
 					some: {
-						match_id: this.id,
+						matchId: this.id,
 					},
 				},
 			},
@@ -107,14 +109,14 @@ class MatchManager {
 				where: {
 					in_teams: {
 						some: {
-							team_id: team.id,
+							teamId: team.id,
 						},
 					},
 				},
 			});
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
-					team_id: team.id,
+					teamId: team.id,
 				},
 			});
 			let newTeam = new Team(this, team, users);
@@ -145,7 +147,10 @@ class MatchManager {
 		// Update db object
 		await prisma.match.update({
 			where: {
-				id: this.id,
+				id_roundId: {
+					id: this.id,
+					roundId: this.round.id,
+				},
 			},
 			data: {
 				mp_link: this.lobby.getHistoryUrl(),
@@ -156,7 +161,7 @@ class MatchManager {
 		// Setup lobby settings
 		await this.lobby.setSettings(
 			this.tournament.team_mode,
-			this.tournament.score_mode,
+			this.tournament.score_mode == 4 ? 3 : this.tournament.score_mode,
 			this.tournament.XvX_mode * 2 + 1
 		);
 
@@ -200,6 +205,7 @@ class MatchManager {
 			await this.updateState(4);
 			return;
 		}
+		await this.updateMessage();
 
 		await this.recover();
 	}
@@ -240,22 +246,116 @@ class MatchManager {
 			await this.channel.sendMessage("All players ready!");
 			await this.lobby.startMatch(5);
 		}
+		if (this.state == 1) {
+			// Count Players
+			let lobbyCount = {};
+			for (const team of this.teams) {
+				let teamIndex = this.teams.indexOf(team);
+				for (const slot of this.lobby.slots) {
+					if (team.players.includes(slot)) {
+						lobbyCount[teamIndex] =
+							lobbyCount[teamIndex] == null
+								? 1
+								: lobbyCount[teamIndex] + 1;
+					}
+				}
+			}
+
+			let badTeams = [];
+			for (const key in lobbyCount) {
+				let teamCount = lobbyCount[key];
+				if (teamCount != this.tournament.XvX_mode) {
+					badTeams.push(key);
+				}
+			}
+
+			if (badTeams.length >= 1) {
+				let teamString = "";
+				for (const team of badTeams) {
+					teamString += this.teams[team].name + " ";
+				}
+				await this.channel.sendMessage(
+					`The following teams do not have the correct amount of players: ${teamString}`
+				);
+				return;
+			}
+
+			await this.updateState(2);
+			await this.lobby.startMatch(5);
+			await this.channel.sendMessage("glhf!");
+		}
 	}
 
 	async finishHandler() {
+		console.log("Match Finished!");
+		let matchNum = this.mp.match(/\d+/g);
+		let data = await nodesuClient.multi.getMatch(matchNum[0]);
+		let lastGame = data.games[data.games.length - 1];
+		this.lastGameData = lastGame;
+
 		if (this.state == 4) {
-			if (this.waiting_on == 0) {
-				await this.updateWaitingOn(1);
-				await this.warmup();
+			let team = this.teams[this.waiting_on];
+			await team.warmedUp(true);
+			await this.updateWaitingOn(1 - this.waiting_on);
+			await this.warmup();
+		}
+		if (this.state == 2) {
+			console.log("Comparing Scores:");
+			let compareScore = this.teams[0].compareTo(this.teams[1]);
+			if (compareScore == 0) {
+				await this.channel.sendMessage(
+					"Wow! A tie? That's happened X times so far, Let's try that again"
+				);
+				await this.updateState(1);
 				return;
 			}
-			if (this.waiting_on == 1) {
-				await this.updateState(5);
-				await this.lobby.clearHost();
-				await this.lobby.updateSettings();
-				this.roll();
-				return;
+
+			let lastMap = await prisma.mapInMatch.findFirst({
+				orderBy: {
+					pickNumber: "asc",
+				},
+				where: {
+					matchId: this.id,
+					pickNumber: {
+						not: null,
+					},
+				},
+			});
+
+			if (compareScore <= 0) {
+				let winner = this.teams[1];
+				winner.addScore();
+				winner.add(lastMap.mapIdentifier);
 			}
+
+			if (compareScore >= 0) {
+				let winner = this.teams[0];
+				winner.addScore();
+				winner.add(lastMap.mapIdentifier);
+			}
+
+			let scoreToWin = (this.round.best_of + 1) / 2;
+
+			for (const team of this.teams) {
+				if (team.score >= scoreToWin) {
+					await this.channel.sendMessage(
+						`${team.name} has won the match! GGWP!`
+					);
+					await this.updateState(8);
+					await this.channel.sendMessage(
+						`The lobby will be closed in 180 seconds`
+					);
+					await this.lobby.startTimer(180);
+					setTimeout(() => {
+						this.lobby.close();
+						this.updateState(9);
+					}, 180);
+					return;
+				}
+			}
+
+			await this.updateState(0);
+			await this.pickPhase();
 		}
 	}
 
@@ -279,6 +379,13 @@ class MatchManager {
 		if (teamList.includes(host) || this.lobby.playing) return;
 
 		let team = this.teams[this.waiting_on];
+
+		if (team.warmedUp) {
+			await this.updateState(5);
+			await this.lobby.clearHost();
+			await this.roll();
+			return;
+		}
 		let slots = this.lobby.slots.filter((slot) => slot);
 
 		for (const player of team.players) {
@@ -304,7 +411,7 @@ class MatchManager {
 	async roll() {
 		let teamRolls = await prisma.teamInMatch.findMany({
 			where: {
-				match_id: this.id,
+				matchId: this.id,
 			},
 		});
 		teamRolls = teamRolls.map((team) => team.roll);
@@ -314,9 +421,6 @@ class MatchManager {
 			await this.channel.sendMessage(
 				"It's time to roll! I'll count the first roll from any player on each team."
 			);
-			this.channel.on("message", async (msg) => {
-				await this.rollListener(msg);
-			});
 			await this.updateMessage();
 			return;
 		}
@@ -349,12 +453,12 @@ class MatchManager {
 		let team = this.teams[this.waiting_on];
 		if (team.pick_order && team.ban_order) {
 			if (team.ban_order == 1) {
-				this.updateWaitingOn(this.teams.indexOf(team));
+				await this.updateWaitingOn(this.teams.indexOf(team));
 			} else {
-				this.updateWaitingOn(1 - this.teams.indexOf(team));
+				await this.updateWaitingOn(1 - this.teams.indexOf(team));
 			}
-			this.updateState(7);
-			this.banPhase();
+			await this.updateState(7);
+			await this.banPhase();
 			return;
 		}
 
@@ -366,7 +470,11 @@ class MatchManager {
 	async banPhase() {
 		let team = this.teams[this.waiting_on];
 		if (team.bans.length >= this.round.bans) {
-			await this.updateState(8);
+			// If team 0 is the first picker, 1 - 1 = 0:
+			// If team 1 is the first picker, 2 - 1 = 1:
+			let firstPicker = this.teams[0].pick_order - 1;
+			this.updateWaitingOn(firstPicker);
+			await this.updateState(0);
 			await this.pickPhase();
 			return;
 		}
@@ -384,30 +492,31 @@ class MatchManager {
 		await this.channel.sendMessage(
 			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // Next pick: ${team.name}`
 		);
-	}
-
-	async readyPhase() {
-		let team = this.teams[this.waiting_on];
-		// await this.channel.sendMessage(`${team.name} picked ${this.}`);
+		await this.channel.sendMessage("Use !pick [map] to pick a map");
 	}
 
 	async recover() {
+		if (this.state == 0) {
+			await this.pickPhase();
+			return;
+		}
+
 		if (this.state == 4) {
-			this.warmup();
+			await this.warmup();
 			return;
 		}
 		if (this.state == 5) {
-			this.roll();
+			await this.roll();
 			return;
 		}
 
 		if (this.state == 6) {
-			this.chooseOrder();
+			await this.chooseOrder();
 			return;
 		}
 
 		if (this.state == 7) {
-			this.banPhase();
+			await this.banPhase();
 			return;
 		}
 	}
@@ -417,19 +526,21 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async rollListener(msg) {
-		if (this.state != 5) return;
 		if (msg.content.toLowerCase() == "!roll") {
 			this.rollVerification[msg.user.ircUsername] = true;
+			return;
 		}
 
 		if (msg.user.ircUsername != "BanchoBot") return;
 
 		let content = msg.content;
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
+
 		if (roll && this.rollVerification[roll.groups.user]) {
+			await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
-					team: {
+					Team: {
 						members: {
 							some: {
 								user: {
@@ -441,23 +552,32 @@ class MatchManager {
 				},
 			});
 			if (!teamInMatch.roll) {
+				await new Promise((resolve) =>
+					setTimeout(resolve, prismaTimeout)
+				);
 				await prisma.teamInMatch.update({
 					where: {
-						team_id_match_id: {
-							team_id: teamInMatch.team_id,
-							match_id: this.id,
+						teamId_matchId: {
+							teamId: teamInMatch.teamId,
+							matchId: this.id,
 						},
 					},
 					data: {
 						roll: parseInt(roll.groups.roll),
 					},
 				});
+				await new Promise((resolve) =>
+					setTimeout(resolve, prismaTimeout)
+				);
 				let team = await prisma.team.findFirst({
 					where: {
-						id: teamInMatch.team_id,
+						id: teamInMatch.teamId,
 					},
 				});
 
+				await new Promise((resolve) =>
+					setTimeout(resolve, prismaTimeout)
+				);
 				await this.channel.sendMessage(
 					`${team.name} rolled a ${roll.groups.roll}`
 				);
@@ -496,14 +616,14 @@ class MatchManager {
 				return;
 			}
 			if (command.groups.order.toLowerCase() == "first") {
-				team.setPickOrder(1);
+				await team.setPickOrder(1);
 				let otherTeam = this.teams[1 - this.waiting_on];
-				otherTeam.setPickOrder(2);
+				await otherTeam.setPickOrder(2);
 			}
 			if (command.groups.order.toLowerCase() == "second") {
-				team.setPickOrder(2);
+				await team.setPickOrder(2);
 				let otherTeam = this.teams[1 - this.waiting_on];
-				otherTeam.setPickOrder(1);
+				await otherTeam.setPickOrder(1);
 			}
 			this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
@@ -517,16 +637,16 @@ class MatchManager {
 				return;
 			}
 			if (command.groups.order.toLowerCase() == "first") {
-				team.setBanOrder(1);
+				await team.setBanOrder(1);
 				let otherTeam = this.teams[1 - this.waiting_on];
-				otherTeam.setBanOrder(2);
+				await otherTeam.setBanOrder(2);
 			}
 			if (command.groups.order.toLowerCase() == "second") {
-				team.setBanOrder(2);
+				await team.setBanOrder(2);
 				let otherTeam = this.teams[1 - this.waiting_on];
-				otherTeam.setBanOrder(1);
+				await otherTeam.setBanOrder(1);
 			}
-			this.updateWaitingOn(1 - this.waiting_on);
+			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
 		}
 	}
@@ -544,10 +664,10 @@ class MatchManager {
 		let command = msg.content.match(/!ban (?<map>\w+)/);
 
 		if (!command) return;
-		let map = await prisma.map.findFirst({
+		let map = await prisma.mapInMatch.findFirst({
 			where: {
-				identifier: command.groups.map,
-				roundId: this.round.id,
+				matchId: this.id,
+				mapIdentifier: command.groups.map,
 			},
 		});
 		if (!map) {
@@ -558,20 +678,33 @@ class MatchManager {
 		}
 
 		// Check for double bans
-		let otherBanMods = [];
+		let otherBans = [];
 		for (const ban of team.bans) {
-			let map = await prisma.map.findFirst({
+			let map = await prisma.mapInPool.findFirst({
 				where: {
-					id: ban,
+					identifier: ban,
 				},
 			});
-			otherBanMods.push(map.mods);
+			otherBans.push(map);
 		}
+		let otherBanMods = otherBans.map((ban) => ban.mods);
+
+		let mapMods = await prisma.mapInPool.findFirst({
+			where: {
+				InMatches: {
+					some: {
+						matchId: this.id,
+					},
+				},
+				identifier: map.mapIdentifier,
+			},
+		});
+		mapMods = mapMods.mods;
 		if (
-			(this.tournament.double_ban == 1 && map.mods != "") ||
+			(this.tournament.double_ban == 1 && mapMods != "") ||
 			this.tournament.double_ban == 0
 		) {
-			if (otherBanMods.includes(map.mods)) {
+			if (otherBanMods.includes(mapMods)) {
 				await this.channel.sendMessage(
 					`You cannot ban from the same modpool more than once.`
 				);
@@ -590,14 +723,14 @@ class MatchManager {
 		// If the map is already banned
 		if (team.bans.includes(map.id)) {
 			await this.channel.sendMessage(
-				`${map.identifier} has already been chosen as a ban`
+				`${map.mapIdentifier} has already been chosen as a ban`
 			);
 			return;
 		}
 
-		team.addBan(map.id);
+		await team.addBan(map.mapIdentifier);
 		await this.channel.sendMessage(
-			`${team.name} chose to ban ${map.identifier}`
+			`${team.name} chose to ban ${map.mapIdentifier}`
 		);
 		await this.updateWaitingOn(1 - this.waiting_on);
 		await this.banPhase();
@@ -614,33 +747,32 @@ class MatchManager {
 		if (!user) return;
 		let command = msg.content.match(/!pick (?<map>\w+)/);
 		if (!command) return;
-		let map = await prisma.map.findFirst({
+		let map = await prisma.mapInMatch.findFirst({
 			where: {
-				in_pools: {
-					some: {
-						identifier: command.groups.map,
-						Mappool: {
-							Round: {
-								id: this.round.id,
-							},
-						},
-					},
-				},
+				matchId: this.id,
+				mapIdentifier: command.groups.map,
 			},
 		});
+		console.log(map);
 
 		let mapInPool = await prisma.mapInPool.findFirst({
 			where: {
-				mapId: map.beatmap_id,
+				Mappool: {
+					Round: {
+						id: this.round.id,
+					},
+				},
+				identifier: map.mapIdentifier,
 			},
 		});
+
 		if (!map) {
 			await this.channel.sendMessage("Invalid map name");
 			return;
 		}
 
 		// Check if banned
-		if (mapInPool.bannedByMatch_id == this.id) {
+		if (map.bannedByTeamId) {
 			await this.channel.sendMessage(
 				`${mapInPool.identifier} was one of the bans`
 			);
@@ -648,7 +780,7 @@ class MatchManager {
 		}
 
 		// Check for previous picks
-		if (mapInPool.pickedIn == this.id) {
+		if (map.pickedByTeamId) {
 			await this.channel.sendMessage(
 				`${mapInPool.identifier} has already been picked`
 			);
@@ -656,17 +788,36 @@ class MatchManager {
 		}
 
 		// Check for double picks
-		let picks = await prisma.mapInPool.findMany({
+		let lastTeamPicks = await prisma.mapInMatch.findMany({
 			where: {
-				pickedIn: this.id,
+				pickedByTeamId: team.id,
+			},
+			orderBy: {
+				pickTeamNumber: "asc",
 			},
 		});
-		let lastTeamPick = picks[picks.length - 2];
+
+		let lastTeamPickMods = [];
+		for (const pick of lastTeamPicks) {
+			let map = await prisma.mapInPool.findFirst({
+				where: {
+					identifier: pick.mapIdentifier,
+					InMatches: {
+						some: {
+							matchId: this.id,
+						},
+					},
+				},
+			});
+			lastTeamPickMods.push(map.mods);
+		}
+
+		let lastTeamPick = lastTeamPickMods[lastTeamPicks.length - 1];
 		if (
 			(this.tournament.double_pick == 1 && lastTeamPick?.mods != "") ||
 			this.tournament.double_pick == 0
 		) {
-			if (lastTeamPick?.mods == map.mods) {
+			if (lastTeamPick == mapInPool.mods) {
 				await this.channel.sendMessage(
 					`You cannot pick the same modpool twice.`
 				);
@@ -682,9 +833,9 @@ class MatchManager {
 			return;
 		}
 
-		match.addPick(mapInPool.identifier);
+		this.addPick(mapInPool);
 		await this.channel.sendMessage(
-			`${team.name} chose to pick ${mapInPool.identifier}`
+			`${team.name} chose to pick ${map.mapIdentifier}`
 		);
 	}
 
@@ -692,7 +843,46 @@ class MatchManager {
 	 * Picks a map in the lobby and adds it to the
 	 * @param {import("@prisma/client").MapInPool} map
 	 */
-	async addPick(map) {}
+	async addPick(map) {
+		let team = this.teams[this.waiting_on];
+		await team.addPick(map.identifier);
+		let globalPicks = await prisma.mapInMatch.findMany({
+			where: {
+				matchId: this.id,
+				pickedByTeamId: {
+					not: null,
+				},
+			},
+		});
+		let teamPicks = await prisma.mapInMatch.findMany({
+			where: {
+				matchId: this.id,
+				pickedByTeamId: team.id,
+			},
+		});
+		await prisma.mapInMatch.update({
+			where: {
+				mapIdentifier_matchId: {
+					matchId: this.id,
+					mapIdentifier: map.identifier,
+				},
+			},
+			data: {
+				pickNumber: globalPicks.length,
+				pickTeamNumber: teamPicks.length,
+			},
+		});
+
+		await this.lobby.setMap(map.mapId);
+		if (this.tournament.force_nf) {
+			if (!map.mods.includes("NF")) {
+				map.mods += " NF";
+			}
+		}
+		await this.lobby.setMods(map.mods);
+		await this.updateState(1);
+		// Ready Phase Command
+	}
 
 	async invitePlayer(name) {
 		let user = await fetchUser(name);
@@ -718,7 +908,10 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id: this.id,
+				id_roundId: {
+					id: this.id,
+					roundId: this.round.id,
+				},
 			},
 			data: {
 				waiting_on: num,
@@ -738,7 +931,10 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id: this.id,
+				id_roundId: {
+					id: this.id,
+					roundId: this.round.id,
+				},
 			},
 			data: {
 				state: state,
@@ -756,21 +952,21 @@ class MatchManager {
 		);
 
 		if (this.state == 5) {
-			this.rollListener(msg);
+			await this.rollListener(msg);
 			return;
 		}
 
 		if (this.state == 6) {
-			this.chooseListener(msg);
+			await this.chooseListener(msg);
 			return;
 		}
 
 		if (this.state == 7) {
-			this.banListener(msg);
+			await this.banListener(msg);
 			return;
 		}
 		if (this.state == 0) {
-			this.pickListener();
+			await this.pickListener(msg);
 		}
 	}
 
@@ -782,6 +978,10 @@ class MatchManager {
 	 */
 	async updateMessage(state) {
 		state = state || this.state;
+
+		let emoteEnum = {};
+		emoteEnum[this.teams[0].id] = ":red_square:";
+		emoteEnum[this.teams[1].id] = ":blue_square:";
 
 		let channel = await discord.channels.fetch(this.channel_id);
 		/**
@@ -801,13 +1001,17 @@ class MatchManager {
 		if (state <= 2 || (state >= 5 && state <= 7)) {
 			description += `
 				**Score:**
-				:red_square: ${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} :blue_square:\n`;
+				${emoteEnum[this.teams[0].id]} ${this.teams[0].name} | ${
+				this.teams[0].score
+			} - ${this.teams[1].score} | ${this.teams[1].name} ${
+				emoteEnum[this.teams[1].id]
+			}\n`;
 		}
 
 		if (state >= 5 && state <= 7) {
 			let teamsInMatch = await prisma.teamInMatch.findMany({
 				where: {
-					match_id: this.id,
+					matchId: this.id,
 				},
 			});
 			description += "\n";
@@ -816,17 +1020,52 @@ class MatchManager {
 				if (!teamInMatch.roll) return;
 				let team = await prisma.team.findFirst({
 					where: {
-						id: teamInMatch.team_id,
+						id: teamInMatch.teamId,
 					},
 				});
 
 				description += `**${team.name}** rolled a **${teamInMatch.roll}**\n`;
 			}
 		}
-		if (state >= 0 || state <= 2) {
+		if (this.beatmap) {
 			embed.setImage(
 				`https://assets.ppy.sh/beatmaps/${this.beatmap?.setId}/covers/cover.jpg`
 			);
+		}
+
+		// Handle bans
+		let bans = await prisma.mapInMatch.findMany({
+			where: {
+				bannedByTeamId: {
+					not: null,
+				},
+			},
+		});
+		if (bans) {
+			let banString = "";
+			let teamString = {};
+			for (const ban of bans) {
+				let string =
+					teamString[ban.bannedByTeamId] == null
+						? `${ban.mapIdentifier}`
+						: `, ${ban.mapIdentifier}`;
+
+				teamString[ban.bannedByTeamId] =
+					teamString[ban.bannedByTeamId] == null
+						? string
+						: (teamString[ban.bannedByTeamId] += string);
+			}
+
+			banString =
+				this.teams[0].name +
+				": " +
+				teamString[this.teams[0].id] +
+				"\n" +
+				this.teams[1].name +
+				": " +
+				teamString[this.teams[1].id];
+
+			embed.addField("Bans", banString);
 		}
 
 		if (state == 3) {

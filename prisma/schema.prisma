@@ -201,6 +201,7 @@ model TeamInMatch {
   roll       Int?
   pick_order Int?
   ban_order  Int?
+  warmedUp   Boolean      @default(false)
   Bans       MapInMatch[] @relation("banned")
   Wins       MapInMatch[] @relation("won")
   Picks      MapInMatch[] @relation("picked")
@@ -223,6 +224,8 @@ model MapInMatch {
   PickedByTeam    TeamInMatch? @relation(fields: [pickedByMatchId, pickedByTeamId], references: [matchId, teamId], name: "picked")
   pickedByTeamId  Int?
   pickedByMatchId Int?
+  pickNumber      Int?
+  pickTeamNumber  Int?
   won_by          TeamInMatch? @relation(fields: [wonByMatchId, wonByTeamId], references: [matchId, teamId], name: "won")
   wonByTeamId     Int?
   wonByMatchId    Int?
