@@ -325,13 +325,13 @@ class MatchManager {
 			if (compareScore <= 0) {
 				let winner = this.teams[1];
 				winner.addScore();
-				winner.add(lastMap.mapIdentifier);
+				winner.addWin(lastMap.mapIdentifier);
 			}
 
 			if (compareScore >= 0) {
 				let winner = this.teams[0];
 				winner.addScore();
-				winner.add(lastMap.mapIdentifier);
+				winner.addWin(lastMap.mapIdentifier);
 			}
 
 			let scoreToWin = (this.round.best_of + 1) / 2;
