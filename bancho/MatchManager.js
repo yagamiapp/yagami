@@ -513,8 +513,15 @@ class MatchManager {
 	}
 	async pickPhase() {
 		let team = this.teams[this.waiting_on];
+		let bestOfPhrase = `Best of ${this.round.best_of}`;
+		for (const team of teams) {
+			if (team.score == this.round.best_of - 1) {
+				bestOfPhrase = `Match Point: ${team.name}`;
+			}
+		}
+
 		await this.channel.sendMessage(
-			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // Next pick: ${team.name}`
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
 		);
 		await this.channel.sendMessage("Use !pick [map] to pick a map");
 	}
