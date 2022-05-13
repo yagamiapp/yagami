@@ -52,7 +52,7 @@ module.exports = {
 		)
 		.addIntegerOption((option) =>
 			option
-				.setName("x_v_x_mode")
+				.setName("XvX_mode")
 				.setDescription(
 					"How many players are playing against eachother"
 				)
