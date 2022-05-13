@@ -413,8 +413,6 @@ class MatchManager {
 			await this.updateWaitingOn(0);
 		}
 
-		if (this.lobby.playing) return;
-
 		let team = this.teams[this.waiting_on];
 
 		if (team.warmedUp) {
@@ -1241,6 +1239,7 @@ class MatchManager {
 					emoteEnum[this.teams[1].id]
 				}`;
 				embed.color = this.teams[0].color;
+				embed.setThumbnail(this.teams[0].icon_url);
 			}
 			if (this.teams[0].score < this.teams[1].score) {
 				description = `
@@ -1250,6 +1249,7 @@ class MatchManager {
 					emoteEnum[this.teams[1].id]
 				}`;
 				embed.color = this.teams[1].color;
+				embed.setThumbnail(this.teams[1].icon_url);
 			}
 			embed.setFooter(null);
 			embed.setImage(null);
