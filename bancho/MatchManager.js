@@ -593,7 +593,8 @@ class MatchManager {
 
 		let content = msg.content;
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
-		console.log(roll);
+
+		console.log("Roll Command: ", roll);
 		if (roll && this.rollVerification[roll.groups.user]) {
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
@@ -608,6 +609,7 @@ class MatchManager {
 					},
 				},
 			});
+			console.log("Roll team in match: ", teamInMatch);
 			if (!teamInMatch.roll) {
 				await new Promise((resolve) =>
 					setTimeout(resolve, prismaTimeout)
