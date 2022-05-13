@@ -1126,7 +1126,8 @@ class MatchManager {
 				pickNumber: "asc",
 			},
 		});
-		if (picks.length > 0) {
+
+		if (this.teams[0].pick_order) {
 			embed.addField(
 				"First Pick",
 				this.teams[this.teams[0].pick_order - 1].name
