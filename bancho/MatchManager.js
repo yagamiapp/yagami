@@ -117,6 +117,7 @@ class MatchManager {
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
 					teamId: team.id,
+					matchId: this.id,
 				},
 			});
 			let newTeam = new Team(this, team, users);
