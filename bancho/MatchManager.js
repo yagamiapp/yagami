@@ -1108,6 +1108,9 @@ class MatchManager {
 				bannedByTeamId: {
 					not: null,
 				},
+				Match: {
+					id: this.id,
+				},
 			},
 		});
 		if (bans.length > 0) {
