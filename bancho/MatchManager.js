@@ -359,9 +359,7 @@ class MatchManager {
 				where: {
 					matchId: this.id,
 					mapIdentifier: {
-						contains: {
-							toUpperCase: "TB",
-						},
+						contains: "TB",
 					},
 				},
 			});
