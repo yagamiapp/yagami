@@ -852,6 +852,7 @@ class MatchManager {
 		let lastTeamPicks = await prisma.mapInMatch.findMany({
 			where: {
 				pickedByTeamId: team.id,
+				matchId: this.id,
 			},
 			orderBy: {
 				pickTeamNumber: "asc",
