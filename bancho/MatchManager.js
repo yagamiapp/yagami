@@ -343,17 +343,48 @@ class MatchManager {
 					);
 					await this.updateState(8);
 					await this.channel.sendMessage(
-						`The lobby will be closed in 180 seconds`
+						`The lobby will be closed in 90 seconds`
 					);
-					await this.lobby.startTimer(180);
+					await this.lobby.startTimer(90);
 					setTimeout(() => {
-						this.lobby.close();
+						this.lobby.closeLobby();
 						this.updateState(9);
-					}, 180);
+					}, 90 * 1000);
 					return;
 				}
 			}
 
+			// Check for TB
+			let tiebreakers = await prisma.mapInMatch.findMany({
+				where: {
+					matchId: this.id,
+					mapIdentifier: {
+						contains: {
+							toUpperCase: "TB",
+						},
+					},
+				},
+			});
+			if (tiebreakers.length > 0) {
+				let tb = true;
+				for (const team of this.teams) {
+					if (team.score == scoreToWin - 1) {
+						tb = tb && true;
+					} else {
+						tb = false;
+					}
+
+					if (tb) {
+						await this.channel.sendMessage(
+							`It's a tie so far, time for the tiebreaker!`
+						);
+						this.addPick(tiebreakers[0].mapIdentifier);
+						await this.updateState(1);
+					}
+				}
+			}
+
+			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.updateState(0);
 			await this.pickPhase();
 		}
@@ -517,6 +548,12 @@ class MatchManager {
 
 		if (this.state == 7) {
 			await this.banPhase();
+			return;
+		}
+
+		if (this.state == 8) {
+			this.lobby.closeLobby();
+			this.updateState(9);
 			return;
 		}
 	}
