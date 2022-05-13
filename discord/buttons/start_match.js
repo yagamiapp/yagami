@@ -134,7 +134,7 @@ module.exports = {
 			.setFooter({ text: "Current Phase: Waiting for MP Link" })
 			.setDescription(
 				`
-            Your match will start in 15 minutes!
+            Your match is ready!
             
             Here's what you need to do to get started:
             `
