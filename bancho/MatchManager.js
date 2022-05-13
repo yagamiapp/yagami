@@ -208,6 +208,7 @@ class MatchManager {
 
 		await this.recover();
 		await this.updateMessage();
+		await this.lobby.emit("matchFinished");
 	}
 	/**
 	 *
@@ -366,6 +367,7 @@ class MatchManager {
 					},
 				},
 			});
+			console.log("Tiebreakers: ", tiebreakers);
 			if (tiebreakers.length > 0) {
 				let tb = true;
 				for (const team of this.teams) {
