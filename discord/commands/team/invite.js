@@ -138,7 +138,7 @@ module.exports = {
 		if (inviteeTeam) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					`**Err**: User \`${inviteeData.osu.username}\` is already in a team.`
+					`**Err**: User \`${inviteeData.osu_username}\` is already in a team.`
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
