@@ -313,7 +313,7 @@ class MatchManager {
 
 			let lastMap = await prisma.mapInMatch.findFirst({
 				orderBy: {
-					pickNumber: "asc",
+					pickNumber: "desc",
 				},
 				where: {
 					matchId: this.id,
@@ -322,6 +322,7 @@ class MatchManager {
 					},
 				},
 			});
+
 			console.log("Last Map: ", lastMap);
 
 			if (compareScore <= 0) {
