@@ -154,7 +154,7 @@ class Team {
 	 *
 	 * @param {boolean} b
 	 */
-	async warmedUp(b) {
+	async setWarmedUp(b) {
 		this.warmedUp = b;
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({

@@ -205,9 +205,9 @@ class MatchManager {
 			await this.updateState(4);
 			return;
 		}
-		await this.updateMessage();
 
 		await this.recover();
+		await this.updateMessage();
 	}
 	/**
 	 *
@@ -295,7 +295,7 @@ class MatchManager {
 
 		if (this.state == 4) {
 			let team = this.teams[this.waiting_on];
-			await team.warmedUp(true);
+			await team.setWarmedUp(true);
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
 		}
@@ -393,8 +393,6 @@ class MatchManager {
 	async beatmapHandler(beatmap) {
 		this.beatmap = beatmap;
 		await this.updateMessage();
-		if (this.state == 4) {
-		}
 	}
 
 	async warmup() {
@@ -411,12 +409,14 @@ class MatchManager {
 
 		let team = this.teams[this.waiting_on];
 
+		console.log(team.warmedUp);
 		if (team.warmedUp) {
 			await this.updateState(5);
 			await this.lobby.clearHost();
 			await this.roll();
 			return;
 		}
+
 		let slots = this.lobby.slots.filter((slot) => slot);
 
 		for (const player of team.players) {
@@ -517,6 +517,7 @@ class MatchManager {
 				this.round.bans - team.bans.length == 1 ? "ban" : "bans"
 			} left, Use !list to see the available bans`
 		);
+		await this.updateMessage();
 	}
 	async pickPhase() {
 		let team = this.teams[this.waiting_on];
@@ -555,6 +556,16 @@ class MatchManager {
 			this.lobby.closeLobby();
 			this.updateState(9);
 			return;
+		}
+	}
+
+	async warmupListener(msg) {
+		let command = msg.content.match(/^!skip/g);
+		if (command) {
+			let team = this.teams[this.waiting_on];
+			await team.setWarmedUp(true);
+			await this.updateWaitingOn(1 - this.waiting_on);
+			await this.warmup();
 		}
 	}
 
@@ -926,7 +937,7 @@ class MatchManager {
 		await user.sendMessage(
 			"Here is your invite to the match. If you do not recieve the invite, use !invite to get a new one."
 		);
-		this.lobby.invitePlayer(user.ircUsername);
+		await this.lobby.invitePlayer(user.ircUsername);
 	}
 	/**
 	 * Moves a player to a different slot, or swaps their
@@ -988,6 +999,11 @@ class MatchManager {
 			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
 
+		if (this.state == 4) {
+			await this.warmupListener(msg);
+			return;
+		}
+
 		if (this.state == 5) {
 			await this.rollListener(msg);
 			return;
@@ -1033,11 +1049,11 @@ class MatchManager {
 			.setAuthor(oldembed.author)
 			.setThumbnail(oldembed.thumbnail?.url)
 			.setURL(this.mp)
+			.setImage(oldembed.image?.url)
 			.setFooter({ text: "Current phase: " + states[this.state] });
 
 		if (state <= 2 || (state >= 5 && state <= 7)) {
 			description += `
-				**Score:**
 				${emoteEnum[this.teams[0].id]} ${this.teams[0].name} | ${
 				this.teams[0].score
 			} - ${this.teams[1].score} | ${this.teams[1].name} ${
@@ -1078,10 +1094,11 @@ class MatchManager {
 				},
 			},
 		});
-		if (bans) {
+		if (bans.length > 0) {
 			let banString = "";
 			let teamString = {};
 			for (const ban of bans) {
+				if (!ban.bannedByTeamId) return;
 				let string =
 					teamString[ban.bannedByTeamId] == null
 						? `${ban.mapIdentifier}`
@@ -1093,16 +1110,23 @@ class MatchManager {
 						: (teamString[ban.bannedByTeamId] += string);
 			}
 
-			banString =
-				this.teams[0].name +
-				": " +
-				teamString[this.teams[0].id] +
-				"\n" +
-				this.teams[1].name +
-				": " +
-				teamString[this.teams[1].id];
+			banString = `
+				${emoteEnum[this.teams[0].id]} **${this.teams[0].name}:** ${
+				teamString[this.teams[0].id] || ""
+			}
+				${emoteEnum[this.teams[1].id]} **${this.teams[1].name}:** ${
+				teamString[this.teams[1].id] || ""
+			}
+			`;
 
 			embed.addField("Bans", banString);
+		}
+
+		if (state == 0) {
+			description += `<a:loading:970406520124764200> **${
+				this.teams[this.waiting_on].name
+			}** is currently picking.`;
+			embed.setThumbnail(this.teams[this.waiting_on].icon_url);
 		}
 
 		if (state == 3) {
