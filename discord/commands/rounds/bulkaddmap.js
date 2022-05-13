@@ -45,7 +45,7 @@ module.exports = {
 			.setColor("#F88000");
 
 		let round = await prisma.round.findFirst({
-			where: { tournamentId: tournament.id },
+			where: { tournamentId: tournament.id, acronym: acronym },
 		});
 
 		// In case the round doesn't exist
