@@ -607,6 +607,7 @@ class MatchManager {
 							},
 						},
 					},
+					matchId: this.id,
 				},
 			});
 			console.log("Roll team in match: ", teamInMatch);
