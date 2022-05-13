@@ -102,6 +102,7 @@ module.exports = {
 				in_teams: {
 					some: {
 						discordId: invitee.id,
+						teamId: inviterTeam.id,
 					},
 				},
 			},
