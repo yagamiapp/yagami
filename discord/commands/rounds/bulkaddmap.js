@@ -71,7 +71,7 @@ module.exports = {
 		});
 
 		for (let i = 0; i < ids.length; i++) {
-			let identifier = ids[i];
+			let identifier = ids[i].toUpperCase();
 			embed.setDescription(
 				`<a:loading:970406520124764200> Currently Importing: **${identifier}**`
 			);

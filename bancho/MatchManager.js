@@ -40,7 +40,6 @@ class MatchManager {
 		this.mp = mp;
 		this.init = false;
 		this.rollVerification = {};
-		module.exports[`match_${id}`] = this;
 	}
 
 	async createMatch() {
@@ -724,11 +723,12 @@ class MatchManager {
 		if (!user) return;
 		let command = msg.content.match(/!ban (?<map>\w+)/);
 
+		let mapString = command.groups.map.toUpperCase();
 		if (!command) return;
 		let map = await prisma.mapInMatch.findFirst({
 			where: {
 				matchId: this.id,
-				mapIdentifier: command.groups.map,
+				mapIdentifier: mapString,
 			},
 		});
 		if (!map) {
@@ -808,10 +808,12 @@ class MatchManager {
 		if (!user) return;
 		let command = msg.content.match(/!pick (?<map>\w+)/);
 		if (!command) return;
+
+		let mapString = command.groups.map.toUpperCase();
 		let map = await prisma.mapInMatch.findFirst({
 			where: {
 				matchId: this.id,
-				mapIdentifier: command.groups.map,
+				mapIdentifier: mapString,
 			},
 		});
 		console.log(map);
