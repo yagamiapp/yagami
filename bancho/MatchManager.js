@@ -1121,6 +1121,9 @@ class MatchManager {
 				pickedByTeamId: {
 					not: null,
 				},
+				Match: {
+					id: this.id,
+				},
 			},
 			orderBy: {
 				pickNumber: "asc",
