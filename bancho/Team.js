@@ -95,7 +95,7 @@ class Team {
 					this.match.tournament.score_mode == 0 ||
 					this.match.tournament.score_mode == 3
 				) {
-					scoreSum += score.score;
+					scoreSum += parseInt(score.score);
 				}
 
 				if (
@@ -113,7 +113,7 @@ class Team {
 							parseInt(score.count50) +
 							parseInt(score.countmiss));
 					accuracy = accuracy / divisor;
-					scoreSum += accuracy;
+					scoreSum += parseInt(accuracy);
 				}
 			}
 		}
