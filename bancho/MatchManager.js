@@ -516,7 +516,7 @@ class MatchManager {
 		let team = this.teams[this.waiting_on];
 		let bestOfPhrase = `Best of ${this.round.best_of}`;
 		for (const team of this.teams) {
-			if (team.score == (this.round.best_of + 1) / 2) {
+			if (team.score == (this.round.best_of - 1) / 2) {
 				bestOfPhrase = `Match Point: ${team.name}`;
 			}
 		}
