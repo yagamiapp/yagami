@@ -133,7 +133,6 @@ module.exports = {
 			}
 			embed.addField(team.name, teamString || "No members");
 		}
-		console.log(embed);
 
 		if (interaction.isCommand()) {
 			await interaction.editReply({
