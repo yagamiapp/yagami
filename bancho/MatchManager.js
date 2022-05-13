@@ -322,6 +322,7 @@ class MatchManager {
 					},
 				},
 			});
+			console.log("Last Map: ", lastMap);
 
 			if (compareScore <= 0) {
 				let winner = this.teams[1];
