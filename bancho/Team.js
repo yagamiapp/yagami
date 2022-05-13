@@ -74,7 +74,10 @@ class Team {
 	 * @returns { number } Positive integer if this team "wins", negative if other team "wins"
 	 */
 	compareTo(team) {
-		let scoreDiff = this.calculateScore(this) - this.calculateScore(team);
+		let teamScore = this.calculateScore(this);
+		let otherTeamScore = this.calculateScore(team);
+		console.log(`${teamScore} - ${otherTeamScore}`);
+		let scoreDiff = teamScore - otherTeamScore;
 		return scoreDiff;
 	}
 

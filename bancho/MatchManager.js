@@ -302,6 +302,7 @@ class MatchManager {
 		if (this.state == 2) {
 			console.log("Comparing Scores:");
 			let compareScore = this.teams[0].compareTo(this.teams[1]);
+			console.log(compareScore);
 			if (compareScore == 0) {
 				await this.channel.sendMessage(
 					"Wow! A tie? That's happened X times so far, Let's try that again"
@@ -438,7 +439,6 @@ class MatchManager {
 			},
 		});
 		teamRolls = teamRolls.map((team) => team.roll);
-		console.log(teamRolls);
 		// If both rolls are null
 		if (teamRolls.filter((team) => team).length == 0) {
 			await this.channel.sendMessage(
@@ -449,7 +449,6 @@ class MatchManager {
 		}
 
 		if (!teamRolls.includes(null)) {
-			console.log("Checking rolls");
 			await this.updateMessage();
 
 			// Check if all elements in array are the same
@@ -1129,12 +1128,13 @@ class MatchManager {
 		if (picks.length > 0) {
 			let pickString = `**First Pick**:${
 				this.teams[this.teams[0].pick_order - 1].name
-			}`;
+			}\n`;
 			for (const pick of picks) {
 				if (!pick.pickedByTeamId) return;
-				let string = `${emoteEnum[pick.wonByTeamId]} **${
-					pick.mapIdentifier
-				}**\n`;
+				let string = `${
+					emoteEnum[pick.wonByTeamId] ||
+					"<a:loading:970406520124764200>"
+				} **${pick.mapIdentifier}**\n`;
 
 				pickString += string;
 			}
