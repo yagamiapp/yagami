@@ -373,14 +373,14 @@ class MatchManager {
 					} else {
 						tb = false;
 					}
-
-					if (tb) {
-						await this.channel.sendMessage(
-							`It's a tie so far, time for the tiebreaker!`
-						);
-						this.addPick(tiebreakers[0].mapIdentifier);
-						await this.updateState(1);
-					}
+				}
+				if (tb) {
+					await this.channel.sendMessage(
+						`It's a tie so far, time for the tiebreaker!`
+					);
+					this.addPick(tiebreakers[0].mapIdentifier);
+					await this.updateState(1);
+					return;
 				}
 			}
 
