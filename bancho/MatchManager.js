@@ -1193,9 +1193,8 @@ class MatchManager {
 
 		if (state == 4) {
 			if (this.beatmap == null) {
-				let host = this.lobby.getHost();
 				embed.setDescription(
-					`${host.user.username} is picking a warmup`
+					`${this.teams[this.waiting_on].name} is picking a warmup`
 				);
 				embed.setThumbnail(`https://s.ppy.sh/a/${host.user.id}`);
 			} else {

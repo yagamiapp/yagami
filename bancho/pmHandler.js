@@ -7,17 +7,18 @@ let commandFiles = fs
 let commands = {};
 commandFiles.forEach((file) => {
 	let command = require("./dm-commands/" + file);
-	if (command.mp) commands[command.name] = command;
+
+	commands[command.name] = command;
 });
 
 module.exports = {
 	commands,
-	async pmHandler(msg) {
+	async pmHandler(msg, client) {
 		if (msg.self) return;
 		/*
 		 * Log message
 		 */
-		console.log(`[DM from ${msg.user.ircUsername}] >> ${msg.message}`);
+		console.log(`[DM from ${msg.user.username}] >> ${msg.message}`);
 
 		/*
 		 *	Command Handling
@@ -31,13 +32,13 @@ module.exports = {
 		if (message.match(commandRegex)) {
 			message = message.substring(1);
 			let args = message.split(" ");
+			console.log(args);
 
 			if (args[0] == "!mp") return;
-			let command = commands[args[0]];
 			if (!command) return;
 			let options = args.splice(1, 1);
 			try {
-				await command.exec(msg, options);
+				await command.exec(msg, options, client);
 			} catch (e) {
 				console.log(e);
 				msg.user.sendMessage("We encountered an error: " + e);

@@ -10,9 +10,36 @@ module.exports = {
 	 * @param {array} options The options given for the command
 	 * @param {import("../MatchManager").MatchManager}
 	 */
-	async exec(msg, options) {
+	async exec(msg, options, client) {
 		let username = msg.user.username;
+		let match = await prisma.match.findFirst({
+			where: {
+				state: {
+					gte: 0,
+					lte: 7,
+					not: 3,
+				},
 
-		let match = await msg.channel.sendMessage("Pong!");
+				teams: {
+					some: {
+						Team: {
+							members: {
+								some: {
+									user: {
+										osu_username: username,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		});
+
+		let channel = await client.fetchChannel(match.mp_link);
+		await msg.user.sendMessage("Sending another invite:");
+		await channel.sendMessage(`!mp invite #${msg.user.id}`);
+
+		// let matc = await msg.channel.sendMessage("Pong!");
 	},
 };

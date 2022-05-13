@@ -1,5 +1,4 @@
 const { BanchoClient } = require("bancho.js");
-
 const { pmHandler } = require("./pmHandler");
 
 let credentials = {
@@ -16,7 +15,7 @@ module.exports = {
 		console.log("Connected to Bancho!");
 
 		client.on("PM", (msg) => {
-			pmHandler(msg);
+			pmHandler(msg, this);
 		});
 	},
 	/**
