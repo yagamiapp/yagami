@@ -48,32 +48,40 @@ module.exports = {
 
 		// TODO: Order pool by identifier in this order: NM, HD, HR, DT, EZ, FL, FM, TB
 		// let alphabet = ["NM", "HD", "HR", "DT", "EZ", "FL", "FM", "TB"];
-
-		for (const map of pool) {
-			let data = await prisma.map.findFirst({
-				where: {
-					in_pools: {
-						some: {
-							mappoolId: map.mappoolId,
+		if (command.options.admin || round.show_mappool) {
+			for (const map of pool) {
+				let data = await prisma.map.findFirst({
+					where: {
+						in_pools: {
+							some: {
+								mappoolId: map.mappoolId,
+							},
 						},
+						beatmap_id: map.mapId,
 					},
-					beatmap_id: map.mapId,
-				},
-			});
+				});
 
-			let mapString = `${data.artist} - ${data.title} \\[${data.version}\\]`;
-			let identifier = modIcon[map.identifier.substring(0, 2)];
+				let mapString = `${data.artist} - ${data.title} \\[${data.version}\\]`;
+				let identifier = modIcon[map.identifier.substring(0, 2)];
 
-			if (map.identifier.substring(2)) {
-				identifier += ` **${map.identifier.substring(2)}**`;
+				if (map.identifier.substring(2)) {
+					identifier += ` **${map.identifier.substring(2)}**`;
+				}
+				poolString += `${identifier} [${mapString}](https://osu.ppy.sh/b/${data.beatmap_id})\n`;
 			}
-			poolString += `${identifier} [${mapString}](https://osu.ppy.sh/b/${data.beatmap_id})\n`;
+			if (poolString == "") poolString = "No maps";
+		} else {
+			poolString = "**Mappool is hidden**";
 		}
-		if (poolString == "") poolString = "No maps";
 		// Build buttons to scroll to other rounds
 		let components = new MessageActionRow().addComponents(
 			new MessageButton()
-				.setCustomId("round_list?index=" + (index - 1))
+				.setCustomId(
+					"round_list?index=" +
+						(index - 1) +
+						"&admin=" +
+						command.options.admin
+				)
 				.setLabel("◀")
 				.setStyle("PRIMARY"),
 			new MessageButton()
@@ -82,7 +90,12 @@ module.exports = {
 				.setStyle("SECONDARY")
 				.setDisabled(true),
 			new MessageButton()
-				.setCustomId("round_list?index=" + (index + 1))
+				.setCustomId(
+					"round_list?index=" +
+						(index + 1) +
+						"&admin=" +
+						command.options.admin
+				)
 				.setLabel("▶")
 				.setStyle("PRIMARY")
 		);

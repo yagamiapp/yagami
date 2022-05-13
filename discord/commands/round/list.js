@@ -26,6 +26,6 @@ module.exports = {
 			return;
 		}
 
-		execute(interaction, { options: { index: 0, admin: true } });
+		execute(interaction, { options: { index: 0, admin: false } });
 	},
 };

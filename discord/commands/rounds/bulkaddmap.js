@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
-let { execute } = require("../../buttons/round_list");
+let { execute } = require("../../buttons/rounds_list");
 const { fetchGuild, prisma } = require("../../../prisma");
 const { fetchMap } = require("../../../bancho/fetchMap");
 
@@ -121,6 +121,6 @@ module.exports = {
 			});
 		}
 
-		execute(interaction, { options: { index: 0 } });
+		execute(interaction, { options: { index: 0, admin: true } });
 	},
 };
