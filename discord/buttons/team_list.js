@@ -131,7 +131,7 @@ module.exports = {
 					teamString += " **(c)**";
 				}
 			}
-			embed.addField(team.name, teamString);
+			embed.addField(team.name, teamString || "No members");
 		}
 		console.log(embed);
 

@@ -399,17 +399,11 @@ class MatchManager {
 		if (!this.waiting_on) {
 			await this.updateWaitingOn(0);
 		}
-		// Don't warmup if current host is on the correct team or
-		// if the lobby is in progress
-		let host = this.lobby.getHost()?.user?.username;
-		let teamList = this.teams[this.waiting_on].players.map(
-			(player) => player.user.username
-		);
-		if (teamList.includes(host) || this.lobby.playing) return;
+
+		if (this.lobby.playing) return;
 
 		let team = this.teams[this.waiting_on];
 
-		console.log(team.warmedUp);
 		if (team.warmedUp) {
 			await this.updateState(5);
 			await this.lobby.clearHost();
@@ -998,6 +992,8 @@ class MatchManager {
 		console.log(
 			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
+
+		this.msgListener(msg);
 
 		if (this.state == 4) {
 			await this.warmupListener(msg);
