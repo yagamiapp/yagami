@@ -1046,7 +1046,7 @@ class MatchManager {
 			.setImage(oldembed.image?.url)
 			.setFooter({ text: "Current phase: " + states[this.state] });
 
-		if (state <= 2 || (state >= 5 && state <= 7)) {
+		if (state <= 2 || (state >= 5 && state <= 8)) {
 			description += `
 				${emoteEnum[this.teams[0].id]} ${this.teams[0].name} | ${
 				this.teams[0].score
@@ -1127,9 +1127,11 @@ class MatchManager {
 			},
 		});
 		if (picks.length > 0) {
-			let pickString = `**First Pick**:${
+			embed.addField(
+				"First Pick",
 				this.teams[this.teams[0].pick_order - 1].name
-			}\n`;
+			);
+			let pickString = ``;
 			for (const pick of picks) {
 				if (!pick.pickedByTeamId) return;
 				let string = `${
@@ -1204,6 +1206,29 @@ class MatchManager {
 					`https://assets.ppy.sh/beatmaps/${this.beatmap.setId}/covers/cover.jpg`
 				);
 			}
+		}
+
+		if (state >= 8) {
+			if (this.teams[0].score > this.teams[1].score) {
+				description = `
+					${emoteEnum[this.teams[0].id]} **${this.teams[0].name}** | ${
+					this.teams[0].score
+				} - ${this.teams[1].score} | ${this.teams[1].name} ${
+					emoteEnum[this.teams[1].id]
+				}`;
+				embed.color = this.teams[0].color;
+			}
+			if (this.teams[0].score < this.teams[1].score) {
+				description = `
+					${emoteEnum[this.teams[0].id]} ${this.teams[0].name} | ${
+					this.teams[0].score
+				} - ${this.teams[1].score} | **${this.teams[1].name}** ${
+					emoteEnum[this.teams[1].id]
+				}`;
+				embed.color = this.teams[1].color;
+			}
+			embed.setFooter(null);
+			embed.setImage(null);
 		}
 
 		if (!(description == "")) {
