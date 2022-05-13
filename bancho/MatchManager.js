@@ -763,7 +763,7 @@ class MatchManager {
 		}
 
 		// If the map is already banned
-		if (team.bans.includes(map.id)) {
+		if (team.bans.includes(map.mapIdentifier)) {
 			await this.channel.sendMessage(
 				`${map.mapIdentifier} has already been chosen as a ban`
 			);
