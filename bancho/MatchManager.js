@@ -862,11 +862,8 @@ class MatchManager {
 
 		let lastTeamPick = lastTeamPickMods[lastTeamPicks.length - 1];
 
-		console.log(
-			`Pick Mode: ${this.tournament.double_pick}; Last Pick Mods: *${lastTeamPick}*; This pick mods: *${mapInPool.mods}*`
-		);
 		if (
-			(this.tournament.double_pick == 1 && lastTeamPick?.mods != "") ||
+			(this.tournament.double_pick == 1 && lastTeamPick != "") ||
 			this.tournament.double_pick == 0
 		) {
 			if (lastTeamPick == mapInPool.mods) {
