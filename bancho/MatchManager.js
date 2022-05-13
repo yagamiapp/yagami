@@ -1145,7 +1145,7 @@ class MatchManager {
 
 				pickString += string;
 			}
-			embed.addField("Picks", pickString);
+			embed.addField("Picks", pickString || "No picks yet");
 		}
 
 		if (state == 0) {
