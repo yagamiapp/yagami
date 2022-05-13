@@ -993,7 +993,7 @@ class MatchManager {
 			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
 
-		this.msgListener(msg);
+		// this.msgListener(msg);
 
 		if (this.state == 4) {
 			await this.warmupListener(msg);
