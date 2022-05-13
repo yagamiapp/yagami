@@ -1115,6 +1115,31 @@ class MatchManager {
 
 			embed.addField("Bans", banString);
 		}
+		// Handle Picks
+		let picks = await prisma.mapInMatch.findMany({
+			where: {
+				pickedByTeamId: {
+					not: null,
+				},
+			},
+			orderBy: {
+				pickNumber: "asc",
+			},
+		});
+		if (picks.length > 0) {
+			let pickString = `**First Pick**:${
+				this.teams[this.teams[0].pick_order - 1].name
+			}`;
+			for (const pick of picks) {
+				if (!pick.pickedByTeamId) return;
+				let string = `${emoteEnum[pick.wonByTeamId]} **${
+					pick.mapIdentifier
+				}**\n`;
+
+				pickString += string;
+			}
+			embed.addField("Picks", pickString);
+		}
 
 		if (state == 0) {
 			description += `<a:loading:970406520124764200> **${
