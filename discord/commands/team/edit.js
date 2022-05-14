@@ -67,6 +67,20 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
+		// In case the player name is longer than 25 characters
+		if (options.name.length > 25) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: The name of your team cannot be longer than 25 characters.`
+				)
+				.setColor("RED")
+				.setFooter({
+					text: "If your team name is an emote, pick something else :",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		// In case the icon_url does not lead to an image
 		let urlRegex = /(?:http|https).+(?:jpg|jpeg|png|webp|gif|svg)/;
 		if (
