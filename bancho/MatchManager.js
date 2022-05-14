@@ -791,7 +791,7 @@ class MatchManager {
 
 		await team.addBan(map.mapIdentifier);
 		await this.channel.sendMessage(
-			`${team.name} chose to ban ${map.mapIdentifier}`
+			`${team.name} choose to ban ${map.mapIdentifier}`
 		);
 		await this.updateWaitingOn(1 - this.waiting_on);
 		await this.banPhase();
@@ -900,7 +900,7 @@ class MatchManager {
 
 		this.addPick(mapInPool);
 		await this.channel.sendMessage(
-			`${team.name} chose to pick ${map.mapIdentifier}`
+			`${team.name} choose to pick ${map.mapIdentifier}`
 		);
 	}
 
