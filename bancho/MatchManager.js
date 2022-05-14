@@ -208,7 +208,6 @@ class MatchManager {
 
 		await this.recover();
 		await this.updateMessage();
-		await this.lobby.emit("matchFinished");
 	}
 	/**
 	 *
@@ -413,7 +412,11 @@ class MatchManager {
 			await this.updateWaitingOn(0);
 		}
 
+		// If current host is on warming up team, do nothing
 		let team = this.teams[this.waiting_on];
+		let host = this.lobby.getHost();
+		let user = team.getUserPos(host?.user?.id);
+		if (user != undefined || user != null) return;
 
 		if (team.warmedUp) {
 			await this.updateState(5);
@@ -1224,6 +1227,7 @@ class MatchManager {
 		}
 
 		if (state == 4) {
+			if (!this.waiting_on) return;
 			if (this.beatmap == null) {
 				embed.setDescription(
 					`${this.teams[this.waiting_on].name} is picking a warmup`
