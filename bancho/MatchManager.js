@@ -1228,7 +1228,7 @@ class MatchManager {
 				embed.setDescription(
 					`${this.teams[this.waiting_on].name} is picking a warmup`
 				);
-				embed.setThumbnail(`https://s.ppy.sh/a/${host.user.id}`);
+				embed.setThumbnail(this.teams[this.waiting_on].icon_url);
 			} else {
 				embed.setDescription(
 					`**Warmup:** ${this.beatmap.artist} -  ${this.beatmap.title} [${this.beatmap.version}]`
