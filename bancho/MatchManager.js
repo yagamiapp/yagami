@@ -625,7 +625,7 @@ class MatchManager {
 				await prisma.teamInMatch.update({
 					where: {
 						teamId_matchId: {
-							teamId: teamInMatch.teamId,
+							teamId: team.id,
 							matchId: this.id,
 						},
 					},
@@ -638,7 +638,7 @@ class MatchManager {
 				);
 				let team = await prisma.team.findFirst({
 					where: {
-						id: teamInMatch.teamId,
+						id: team.id,
 					},
 				});
 
