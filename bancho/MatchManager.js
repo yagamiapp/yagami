@@ -619,32 +619,7 @@ class MatchManager {
 			if (team == null) return;
 
 			if (team.roll == null) {
-				await new Promise((resolve) =>
-					setTimeout(resolve, prismaTimeout)
-				);
-				await prisma.teamInMatch.update({
-					where: {
-						teamId_matchId: {
-							teamId: team.id,
-							matchId: this.id,
-						},
-					},
-					data: {
-						roll: parseInt(roll.groups.roll),
-					},
-				});
-				await new Promise((resolve) =>
-					setTimeout(resolve, prismaTimeout)
-				);
-				let team = await prisma.team.findFirst({
-					where: {
-						id: team.id,
-					},
-				});
-
-				await new Promise((resolve) =>
-					setTimeout(resolve, prismaTimeout)
-				);
+				team.setRoll(roll.groups.roll);
 				await this.channel.sendMessage(
 					`${team.name} rolled a ${roll.groups.roll}`
 				);
