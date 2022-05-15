@@ -26,17 +26,10 @@ module.exports = {
 					"The role given to users when they are registered to the tournament"
 				)
 		)
-		.addBooleanOption((option) =>
-			option
-				.setName("update")
-				.setDescription("Update guild commands and permissions")
-		)
 		.addChannelOption((option) =>
 			option
 				.setName("match_results_channel")
-				.setDescription(
-					"The channel in which match messages will be posted"
-				)
+				.setDescription("The channel in which match messages will be posted")
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });

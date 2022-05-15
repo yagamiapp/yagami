@@ -59,7 +59,7 @@ module.exports = {
 					tournamentId: tournament.id,
 					members: {
 						some: {
-							discord_id: users[0].id,
+							discordId: users[0].id,
 						},
 					},
 				},
@@ -69,7 +69,7 @@ module.exports = {
 					tournamentId: tournament.id,
 					members: {
 						some: {
-							discord_id: users[1].id,
+							discordId: users[1].id,
 						},
 					},
 				},
@@ -78,7 +78,9 @@ module.exports = {
 
 		let matches = await prisma.match.findMany({
 			where: {
-				round_id: round.id,
+				Round: {
+					tournamentId: tournament.id,
+				},
 			},
 		});
 
@@ -97,7 +99,9 @@ module.exports = {
 		// In case the team1 user is not on a team
 		if (!teams[0]) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: The user from team 1 is not on a team")
+				.setDescription(
+					"**Err**: The user from team 1 is not on a team"
+				)
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -109,7 +113,9 @@ module.exports = {
 		// In case the team 2 user is not on a team
 		if (!teams[1]) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: The user from team 2 is not on a team")
+				.setDescription(
+					"**Err**: The user from team 2 is not on a team"
+				)
 				.setColor("RED")
 				.setFooter({
 					text: "Use /teams list to see all the teams",
@@ -132,18 +138,64 @@ module.exports = {
 
 		let match = await prisma.match.create({
 			data: {
+				roundId: round.id,
 				id: matches.length + 1,
-				round_id: round.id,
 				state: 10,
 			},
 		});
 
+		// Create teams in match
 		for (let team of teams) {
 			await prisma.teamInMatch.create({
 				data: {
-					team_id: team.id,
-					match_id: match.id,
+					Team: {
+						connect: {
+							id: team.id,
+						},
+					},
+					match: {
+						connect: {
+							id_roundId: {
+								id: match.id,
+								roundId: match.roundId,
+							},
+						},
+					},
 					score: 0,
+				},
+			});
+		}
+
+		// Create maps in match
+		let mappool = await prisma.mapInPool.findMany({
+			where: {
+				Mappool: {
+					Round: {
+						id: round.id,
+					},
+				},
+			},
+		});
+
+		for (let map of mappool) {
+			await prisma.mapInMatch.create({
+				data: {
+					Map: {
+						connect: {
+							identifier_mappoolId: {
+								identifier: map.identifier,
+								mappoolId: map.mappoolId,
+							},
+						},
+					},
+					Match: {
+						connect: {
+							id_roundId: {
+								id: match.id,
+								roundId: match.roundId,
+							},
+						},
+					},
 				},
 			});
 		}
@@ -161,7 +213,7 @@ module.exports = {
 				where: {
 					in_teams: {
 						some: {
-							team_id: team.id,
+							teamId: team.id,
 						},
 					},
 				},

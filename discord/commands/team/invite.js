@@ -29,7 +29,7 @@ module.exports = {
 			where: {
 				members: {
 					some: {
-						discord_id: invitee.id,
+						discordId: invitee.id,
 					},
 				},
 			},
@@ -45,16 +45,7 @@ module.exports = {
 			where: {
 				members: {
 					some: {
-						discord_id: interaction.user.id,
-					},
-				},
-			},
-		});
-		let inviterMembers = await prisma.user.findMany({
-			where: {
-				in_teams: {
-					some: {
-						team_id: inviterTeam.id,
+						discordId: interaction.user.id,
 					},
 				},
 			},
@@ -64,12 +55,26 @@ module.exports = {
 		if (!inviterTeam) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					`**Err**: You cannot invite a user if you do not own a team.`
+					`**Err**: You cannot invite a user if you are not in a team.`
 				)
-				.setColor("RED");
+				.setColor("RED")
+				.setFooter({
+					text: "You can create a team by using /team create",
+				});
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
+
+		let inviterMembers = await prisma.user.findMany({
+			where: {
+				in_teams: {
+					some: {
+						teamId: inviterTeam.id,
+					},
+				},
+			},
+		});
+
 		// In case registration is disabled
 		if (!tournament.allow_registrations) {
 			let embed = new MessageEmbed()
@@ -96,7 +101,8 @@ module.exports = {
 				discord_id: invitee.id,
 				in_teams: {
 					some: {
-						discord_id: invitee.id,
+						discordId: invitee.id,
+						teamId: inviterTeam.id,
 					},
 				},
 			},
@@ -132,7 +138,7 @@ module.exports = {
 		if (inviteeTeam) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					`**Err**: User \`${inviteeData.osu.username}\` is already in a team.`
+					`**Err**: User \`${inviteeData.osu_username}\` is already in a team.`
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });

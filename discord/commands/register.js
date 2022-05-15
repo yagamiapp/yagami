@@ -24,7 +24,7 @@ module.exports = {
 				tournamentId: tournament.id,
 				members: {
 					some: {
-						discord_id: interaction.user.id,
+						discordId: interaction.user.id,
 					},
 				},
 			},
@@ -73,8 +73,8 @@ module.exports = {
 
 		await prisma.userInTeam.create({
 			data: {
-				discord_id: interaction.user.id,
-				team_id: teamObject.id,
+				discordId: interaction.user.id,
+				teamId: teamObject.id,
 			},
 		});
 

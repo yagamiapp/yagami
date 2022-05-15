@@ -1,5 +1,5 @@
 let deploy = require("./deploy-commands");
-const { GuildMember, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const { prisma } = require("../prisma");
 const { stripIndents } = require("common-tags/lib");
 
@@ -43,7 +43,10 @@ module.exports = {
 				`
 			)
 			.addField("Set up your server settings:", `\`\`\`/settings\`\`\``)
-			.addField("Link your account to your osu! account:", `\`\`\`/link\`\`\``)
+			.addField(
+				"Link your account to your osu! account:",
+				`\`\`\`/link\`\`\``
+			)
 			.addField(
 				"Set up your first tournament:",
 				`\`\`\`/tournaments create\`\`\``
@@ -85,7 +88,7 @@ module.exports = {
 	},
 	/**
 	 *
-	 * @param {GuildMember} member
+	 * @param {import("discord.js").GuildMember} member
 	 */
 	async onUserJoin(member) {
 		if (member.user.bot) return;
@@ -105,7 +108,13 @@ module.exports = {
 
 		let linkedRoleObj = member.guild.roles.cache.get(linkedRole);
 		if (!linkedRoleObj)
-			await setData(null, "guilds", member.guild.id, "settings", "linked_role");
+			await setData(
+				null,
+				"guilds",
+				member.guild.id,
+				"settings",
+				"linked_role"
+			);
 		else await member.roles.add(linkedRoleObj);
 	},
 };

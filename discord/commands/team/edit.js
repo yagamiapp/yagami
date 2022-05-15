@@ -17,7 +17,9 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
+				.setDescription(
+					"Set a custom color for your tournament e.g.(#0EB8B9)"
+				)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
@@ -29,7 +31,7 @@ module.exports = {
 			where: {
 				members: {
 					some: {
-						discord_id: interaction.user.id,
+						discordId: interaction.user.id,
 					},
 				},
 			},
@@ -65,6 +67,20 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
+		// In case the player name is longer than 25 characters
+		if (options.name.length > 25) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: The name of your team cannot be longer than 25 characters.`
+				)
+				.setColor("RED")
+				.setFooter({
+					text: "If your team name is an emote, pick something else :",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		// In case the icon_url does not lead to an image
 		let urlRegex = /(?:http|https).+(?:jpg|jpeg|png|webp|gif|svg)/;
 		if (
@@ -116,7 +132,7 @@ module.exports = {
 			where: {
 				in_teams: {
 					some: {
-						team_id: team.id,
+						teamId: team.id,
 					},
 				},
 			},

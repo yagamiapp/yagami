@@ -2,7 +2,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
 const crypto = require("crypto");
-require("dotenv").config();
 
 module.exports = {
 	data: new SlashCommandBuilder()

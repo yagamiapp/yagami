@@ -1,11 +1,11 @@
 //@ts-check
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { stripIndents } = require("common-tags/lib");
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, version: djs } = require("discord.js");
 const { version } = require("../../package.json");
 const { prisma } = require("../../prisma");
-const { "discord.js": djs } = require("../../package.json").dependencies;
-const { start_time } = require("../../index");
+
+const start_time = Date.now();
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -20,9 +20,7 @@ module.exports = {
 		let uptime = Date.now() - start_time;
 		let uptimeSplits = {
 			days: Math.floor(uptime / (1000 * 60 * 60 * 24)),
-			hours: Math.floor(
-				(uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-			),
+			hours: Math.floor((uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
 			mins: Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60)),
 			secs: Math.floor((uptime % (1000 * 60)) / 1000),
 		};
@@ -33,37 +31,7 @@ module.exports = {
 			(uptimeSplits.secs != 0 ? `${uptimeSplits.secs} secs` : "");
 
 		// TODO: Right align text
-		let tournaments = await prisma.tournament.count({});
-		let info = {
-			Version: [
-				{ name: "Bot Version", value: version },
-				{ name: "Node Version", value: process.versions.node },
-				{ name: "DJS Version", value: djs },
-			],
-			Latency: [
-				{ name: "Uptime", value: uptimeString },
-				{
-					name: "Response Time",
-					value: Date.now() - interaction.createdTimestamp + " ms",
-				},
-				{
-					name: "API Latency",
-					value: Math.round(interaction.client.ws.ping) + " ms",
-				},
-			],
-			Statistics: [
-				{
-					name: "Servers",
-					value: interaction.client.guilds.cache.size,
-				},
-				{ name: "Tournaments", value: tournaments },
-			],
-		};
-
-		let maxLength = 48;
-		for (const key in info) {
-			const element = info[key];
-		}
+		let tournaments = await prisma.tournament.count();
 
 		let embed = new MessageEmbed()
 			.setColor("#F88000")

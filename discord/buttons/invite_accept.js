@@ -7,7 +7,7 @@ module.exports = {
 		.setLabel("Accept")
 		.setStyle("PRIMARY"),
 	async execute(interaction, command) {
-		let tournament = prisma.tournament.findFirst({
+		let tournament = await prisma.tournament.findFirst({
 			where: {
 				Guild_id: command.options.guild,
 			},
@@ -22,7 +22,7 @@ module.exports = {
 			where: {
 				members: {
 					some: {
-						discord_id: command.options.user,
+						discordId: command.options.user,
 					},
 				},
 			},
@@ -33,8 +33,8 @@ module.exports = {
 		// };
 		await prisma.userInTeam.create({
 			data: {
-				team_id: team.id,
-				discord_id: interaction.user.id,
+				teamId: team.id,
+				discordId: interaction.user.id,
 			},
 		});
 
@@ -51,7 +51,9 @@ module.exports = {
 		let tourneyGuild = await interaction.client.guilds.fetch(
 			command.options.guild
 		);
-		let tourneyMember = await tourneyGuild.members.fetch(command.options.user);
+		let tourneyMember = await tourneyGuild.members.fetch(
+			command.options.user
+		);
 
 		let dm = await tourneyMember.createDM();
 		let dmEmbed = new MessageEmbed()

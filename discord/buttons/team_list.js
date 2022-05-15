@@ -15,7 +15,9 @@ module.exports = {
 		// In case there are no teams
 		if (teams.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no teams in this tournament.")
+				.setDescription(
+					"**Err**: There are no teams in this tournament."
+				)
 				.setColor("RED");
 			await interaction.reply({ embeds: [embed] });
 			return;
@@ -27,7 +29,7 @@ module.exports = {
 				where: {
 					in_teams: {
 						some: {
-							team_id: team.id,
+							teamId: team.id,
 						},
 					},
 				},
@@ -106,7 +108,7 @@ module.exports = {
 				where: {
 					in_teams: {
 						some: {
-							team_id: team.id,
+							teamId: team.id,
 						},
 					},
 				},
@@ -129,7 +131,7 @@ module.exports = {
 					teamString += " **(c)**";
 				}
 			}
-			embed.addField(team.name, teamString);
+			embed.addField(team.name, teamString || "No members");
 		}
 
 		if (interaction.isCommand()) {

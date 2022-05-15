@@ -14,10 +14,10 @@ module.exports = {
 			},
 		});
 		let matches = await prisma.match.findMany({
-			where: { round_id: round.id },
+			where: { roundId: round.id, OR: [{ state: 3 }, { state: 10 }] },
 		});
 		for (let i = 0; i < matches.length; i++) {
-			matches[i].round_id = i + 1;
+			matches[i].roundId = i + 1;
 		}
 
 		// Group elements into groups of 2
@@ -30,7 +30,7 @@ module.exports = {
 		// In case there are no matches
 		if (groups.length == 0) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no matches")
+				.setDescription("**Err**: There are no matches to start")
 				.setColor("RED")
 				.setFooter({
 					text: "You can create a match with /matches create",
@@ -42,6 +42,7 @@ module.exports = {
 		// Select group and build embed
 		let index = parseInt(command.options.index);
 		let group = groups[index];
+		if (!group) group = groups[0];
 
 		// Build buttons to scroll to other rounds
 		let pages = new MessageActionRow().addComponents(
@@ -96,30 +97,30 @@ module.exports = {
 				where: {
 					TeamInMatch: {
 						some: {
-							match_id: match.id,
+							matchId: match.id,
 						},
 					},
 				},
 			});
 
 			embed.addField(
-				"Match " + match.round_id,
+				"Match " + match.id,
 				`${teams[0].name} vs ${teams[1].name}`,
 				true
 			);
 			let startButton = new MessageButton()
-				.setLabel("Start match " + match.round_id)
+				.setLabel("Start match " + match.id)
 				.setCustomId("start_match?id=" + match.id + "&index=" + index)
 				.setStyle("SUCCESS");
 			if (match.state != 10) {
 				startButton
-					.setLabel("Started match " + match.round_id)
+					.setLabel("Started match " + match.id)
 					.setDisabled(true);
 			}
 			startButtons.addComponents([startButton]);
 			viewButtons.addComponents([
 				new MessageButton()
-					.setLabel("View match " + match.round_id)
+					.setLabel("View match " + match.id)
 					.setCustomId(
 						"view_match?id=" +
 							match.id +
