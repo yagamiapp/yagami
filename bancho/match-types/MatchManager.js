@@ -698,7 +698,6 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 
 		if (user == null) return;
-		user = team.getUser(user);
 		let command = msg.content.match(/!ban (?<map>\w+)/);
 
 		if (!command) return;
@@ -784,7 +783,6 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 
 		if (user == null) return;
-		user = team.getUser(user);
 		let command = msg.content.match(/!pick (?<map>\w+)/);
 		if (!command) return;
 
@@ -1059,11 +1057,6 @@ class MatchManager {
 		}
 
 		if (state >= 5 && state <= 7) {
-			let teamsInMatch = await prisma.teamInMatch.findMany({
-				where: {
-					matchId: this.id,
-				},
-			});
 			description += "\n";
 
 			for (const team of this.teams) {

@@ -20,9 +20,9 @@ module.exports = {
 		map = await client.beatmaps.getByBeatmapId(id);
 		map = map[0];
 
-		map.approved_date = new Date(map?.approved_date) || null;
-		map.submit_date = new Date(map?.submit_date) || null;
-		map.last_update = new Date(map?.last_update) || null;
+		map.approved_date = new Date(map?.approved_date);
+		map.submit_date = new Date(map?.submit_date);
+		map.last_update = new Date(map?.last_update);
 
 		await prisma.map.upsert({
 			create: map,
