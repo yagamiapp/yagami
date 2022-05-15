@@ -217,7 +217,6 @@ class MatchManager {
 	async joinHandler(event) {
 		let user;
 		let team;
-		console.log(event);
 		for (let teamTest of this.teams) {
 			let userTest = teamTest.getUserPos(event.player.user._id);
 			if (userTest != null) {
@@ -455,12 +454,7 @@ class MatchManager {
 	}
 
 	async roll() {
-		let teamRolls = await prisma.teamInMatch.findMany({
-			where: {
-				matchId: this.id,
-			},
-		});
-		teamRolls = teamRolls.map((team) => team.roll);
+		let teamRolls = this.teams.map((team) => team.roll);
 		// If both rolls are null
 		if (teamRolls.filter((team) => team).length == 0) {
 			await this.channel.sendMessage(
@@ -617,10 +611,10 @@ class MatchManager {
 					team = teamTest;
 				}
 			}
-			if (team == null) return;
+			if (!team) return;
 
 			if (team.roll == null) {
-				team.setRoll(roll.groups.roll);
+				team.setRoll(parseInt(roll.groups.roll));
 				await this.channel.sendMessage(
 					`${team.name} rolled a ${roll.groups.roll}`
 				);
