@@ -297,6 +297,7 @@ class MatchManager {
 
 		if (this.state == 4) {
 			let team = this.teams[this.waiting_on];
+			await this.lobby.clearHost();
 			await team.setWarmedUp(true);
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
@@ -410,7 +411,7 @@ class MatchManager {
 	}
 
 	async warmup() {
-		if (!this.waiting_on) {
+		if (this.waiting_on == null) {
 			await this.updateWaitingOn(0);
 		}
 
@@ -432,10 +433,12 @@ class MatchManager {
 		for (const player of team.players) {
 			let slotMap = slots.map((slot) => slot?.user?.username);
 			if (slotMap.includes(player.user.username)) {
-				await this.lobby.setMods("Freemod");
+				if (!this.lobby.freemod) {
+					await this.lobby.setMods("Freemod");
+				}
 				await this.lobby.setHost(player.user.username);
 				await this.channel.sendMessage(
-					`${player.user.username} has been selected to choose the warmup. Use !skip to skip your warmup`
+					`${player.user.username} has been selected to choose the warmup for ${team.name}. Use !skip to skip your warmup`
 				);
 				await this.channel.sendMessage(
 					`You have 3 minutes to start the warmup`
@@ -575,9 +578,14 @@ class MatchManager {
 	}
 
 	async warmupListener(msg) {
+		let team = this.teams[this.waiting_on];
+		let user = team.getUserPos(msg.user.id);
+		if (user == null) return;
+
 		let command = msg.content.match(/^!skip/g);
 		if (command) {
 			let team = this.teams[this.waiting_on];
+			await this.lobby.clearHost();
 			await team.setWarmedUp(true);
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
