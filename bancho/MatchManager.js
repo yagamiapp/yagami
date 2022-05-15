@@ -126,7 +126,8 @@ class MatchManager {
 
 		// Update state if no mp link
 		if (!this.mp) {
-			await this.updateMessage(3);
+			await this.updateState(3);
+			await this.updateMessage();
 			return;
 		}
 
@@ -140,7 +141,8 @@ class MatchManager {
 			await this.channel.join();
 		} catch (e) {
 			console.log(`${this.mp} no longer exists`);
-			await this.updateMessage(3);
+			await this.updateState(3);
+			await this.updateMessage();
 		}
 		await this.lobby.clearHost();
 
