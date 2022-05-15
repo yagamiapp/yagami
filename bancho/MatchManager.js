@@ -289,7 +289,6 @@ class MatchManager {
 	}
 
 	async finishHandler() {
-		console.log("Match Finished!");
 		let matchNum = this.mp.match(/\d+/g);
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
 		let lastGame = data.games[data.games.length - 1];
@@ -303,9 +302,16 @@ class MatchManager {
 			await this.warmup();
 		}
 		if (this.state == 2) {
-			console.log("Comparing Scores:");
+			let scoreString = "";
+			for (const team of this.teams) {
+				let score = team.calculateScore(team);
+				scoreString +=
+					scoreString == ""
+						? `${team.name} (${score})`
+						: ` | ${team.name} (${score})`;
+			}
+			await this.channel.sendMessage(scoreString);
 			let compareScore = this.teams[0].compareTo(this.teams[1]);
-			console.log(compareScore);
 			if (compareScore == 0) {
 				await this.channel.sendMessage(
 					"Wow! A tie? That's happened X times so far, Let's try that again"
@@ -325,8 +331,6 @@ class MatchManager {
 					},
 				},
 			});
-
-			console.log("Last Map: ", lastMap);
 
 			if (compareScore <= 0) {
 				let winner = this.teams[1];
@@ -369,7 +373,6 @@ class MatchManager {
 					},
 				},
 			});
-			console.log("Tiebreakers: ", tiebreakers);
 			if (tiebreakers.length > 0) {
 				let tb = true;
 				for (const team of this.teams) {
@@ -607,7 +610,6 @@ class MatchManager {
 		let content = msg.content;
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
 
-		console.log("Roll Command: ", roll);
 		if (roll && this.rollVerification[roll.groups.user]) {
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
@@ -623,7 +625,6 @@ class MatchManager {
 					matchId: this.id,
 				},
 			});
-			console.log("Roll team in match: ", teamInMatch);
 			if (!teamInMatch.roll) {
 				await new Promise((resolve) =>
 					setTimeout(resolve, prismaTimeout)
@@ -829,7 +830,6 @@ class MatchManager {
 				mapIdentifier: mapString,
 			},
 		});
-		console.log(map);
 
 		let mapInPool = await prisma.mapInPool.findFirst({
 			where: {
