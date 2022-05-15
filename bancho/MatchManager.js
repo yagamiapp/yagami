@@ -296,7 +296,6 @@ class MatchManager {
 
 		if (this.state == 4) {
 			let team = this.teams[this.waiting_on];
-			await this.lobby.clearHost();
 			await team.setWarmedUp(true);
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
@@ -426,7 +425,6 @@ class MatchManager {
 
 		if (team.warmedUp) {
 			await this.updateState(5);
-			await this.lobby.clearHost();
 			await this.roll();
 			return;
 		}
