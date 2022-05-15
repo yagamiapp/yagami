@@ -701,8 +701,8 @@ class MatchManager {
 		user = team.getUser(user);
 		let command = msg.content.match(/!ban (?<map>\w+)/);
 
-		let mapString = command.groups.map.toUpperCase();
 		if (!command) return;
+		let mapString = command.groups.map.toUpperCase();
 		let map = await prisma.mapInMatch.findFirst({
 			where: {
 				matchId: this.id,
