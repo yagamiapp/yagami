@@ -424,6 +424,7 @@ class MatchManager {
 		if (user != undefined || user != null) return;
 
 		if (team.warmedUp) {
+			await this.lobby.clearHost();
 			await this.updateState(5);
 			await this.roll();
 			return;
