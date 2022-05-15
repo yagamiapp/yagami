@@ -217,6 +217,7 @@ class MatchManager {
 	async joinHandler(event) {
 		let user;
 		let team;
+		console.log(event);
 		for (let teamTest of this.teams) {
 			let userTest = teamTest.getUserPos(event.player.user._id);
 			if (userTest != null) {
