@@ -611,21 +611,16 @@ class MatchManager {
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
 
 		if (roll && this.rollVerification[roll.groups.user]) {
-			let teamInMatch = await prisma.teamInMatch.findFirst({
-				where: {
-					Team: {
-						members: {
-							some: {
-								user: {
-									osu_username: roll.groups.user,
-								},
-							},
-						},
-					},
-					matchId: this.id,
-				},
-			});
-			if (!teamInMatch.roll) {
+			let team;
+			for (const teamTest of this.teams) {
+				let userList = teamTest.users.map((user) => user.osu_username);
+				if (userList.includes(roll.groups.user)) {
+					team = teamTest;
+				}
+			}
+			if (!team) return;
+
+			if (!team.roll) {
 				await new Promise((resolve) =>
 					setTimeout(resolve, prismaTimeout)
 				);
