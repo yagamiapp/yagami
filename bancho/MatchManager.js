@@ -168,9 +168,8 @@ class MatchManager {
 		);
 
 		// Do onJoin for players currently in the lobby
-		let players = this.lobby.slots;
+		let players = this.lobby.slots.map((user) => user);
 		for (let player of players) {
-			if (!player) continue;
 			await this.joinHandler({ player });
 		}
 
@@ -226,7 +225,7 @@ class MatchManager {
 				team.addPlayer(event.player);
 			}
 		}
-		if (!user) {
+		if (user == null) {
 			await this.channel.lobby.kickPlayer(event.player.user.username);
 			return;
 		}
@@ -616,9 +615,9 @@ class MatchManager {
 					team = teamTest;
 				}
 			}
-			if (!team) return;
+			if (team == null) return;
 
-			if (!team.roll) {
+			if (team.roll == null) {
 				await new Promise((resolve) =>
 					setTimeout(resolve, prismaTimeout)
 				);
@@ -663,7 +662,7 @@ class MatchManager {
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 		user = team.getUser(user);
-		if (!user) return;
+		if (user == null) return;
 		let command = msg.content.match(
 			/!choose (?<order>first|second) (?<type>pick|ban)/
 		);
@@ -726,8 +725,9 @@ class MatchManager {
 	async banListener(msg) {
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
+
+		if (user == null) return;
 		user = team.getUser(user);
-		if (!user) return;
 		let command = msg.content.match(/!ban (?<map>\w+)/);
 
 		let mapString = command.groups.map.toUpperCase();
@@ -811,8 +811,9 @@ class MatchManager {
 	async pickListener(msg) {
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
+
+		if (user == null) return;
 		user = team.getUser(user);
-		if (!user) return;
 		let command = msg.content.match(/!pick (?<map>\w+)/);
 		if (!command) return;
 
@@ -824,6 +825,11 @@ class MatchManager {
 			},
 		});
 
+		if (!map) {
+			await this.channel.sendMessage("Invalid map name");
+			return;
+		}
+
 		let mapInPool = await prisma.mapInPool.findFirst({
 			where: {
 				Mappool: {
@@ -834,11 +840,6 @@ class MatchManager {
 				identifier: map.mapIdentifier,
 			},
 		});
-
-		if (!map) {
-			await this.channel.sendMessage("Invalid map name");
-			return;
-		}
 
 		// Check if banned
 		if (map.bannedByTeamId) {
@@ -1094,15 +1095,10 @@ class MatchManager {
 			});
 			description += "\n";
 
-			for (const teamInMatch of teamsInMatch) {
-				if (!teamInMatch.roll) return;
-				let team = await prisma.team.findFirst({
-					where: {
-						id: teamInMatch.teamId,
-					},
-				});
+			for (const team of this.teams) {
+				if (team.roll == null) return;
 
-				description += `**${team.name}** rolled a **${teamInMatch.roll}**\n`;
+				description += `**${team.name}** rolled a **${team.roll}**\n`;
 			}
 		}
 		if (this.beatmap) {
