@@ -168,7 +168,7 @@ class MatchManager {
 		);
 
 		// Do onJoin for players currently in the lobby
-		let players = this.lobby.slots.map((user) => user);
+		let players = this.lobby.slots.filter((x) => x);
 		for (let player of players) {
 			await this.joinHandler({ player });
 		}
