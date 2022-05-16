@@ -26,11 +26,12 @@ module.exports.recover = async () => {
 			await ahr.load();
 		} catch (e) {
 			console.log(e);
-			await prisma.autoHostRotate.delete({
-				where: {
-					discordId: ahr.owner_id,
-				},
-			});
+			if (e == "Could not join channel")
+				await prisma.autoHostRotate.delete({
+					where: {
+						discordId: ahr.owner_id,
+					},
+				});
 		}
 	}
 
