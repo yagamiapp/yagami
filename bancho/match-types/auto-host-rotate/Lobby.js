@@ -44,18 +44,19 @@ class Lobby {
 		this.lastMap = this.lobby.beatmap;
 
 		this.channel.on("message", async (msg) => {
-			await msgHandler(msg);
+			await this.msgHandler(msg);
 		});
 		this.lobby.on("playerJoined", async (player) => {
-			await joinHandler(player);
+			await this.joinHandler(player);
 		});
 		this.lobby.on("playerLeft", async (player) => {
-			await leaveHandler(player);
+			await this.leaveHandler(player);
 		});
 		this.lobby.on("beatmap", async (beatmap) => {
-			console.log(this.lobby.beatmap);
 			await mapHandler(this.lastMap, beatmap);
 		});
+		this.lobby.on("matchFinished", async () => await this.finishHandler());
+
 		// Make lobby name
 		let nameString = "AHR |";
 		if (this.min_rank != null || !his.max_rank != 1) {
@@ -100,53 +101,84 @@ class Lobby {
 						id: player,
 					},
 				});
+				continue;
 			}
+			this.addPlayer(player);
 		}
 
 		// Add players to queue
 		let slots = this.lobby.slots.filter((x) => x);
 		for (const player of slots) {
-			if (!playerMap.includes(player.user.id)) {
-				await this.addPlayer(player);
-			}
+			this.joinHandler(player);
 		}
+
+		this.finishHandler();
 	}
 
 	/**
 	 *
 	 * @param {import("bancho.js").BanchoLobbyPlayer} user
+	 * @private
 	 */
 	async addPlayer(user) {
 		let player = new Player(user, this);
 		await player.toDB();
 		this.queue.push(player);
 	}
-}
 
-/**
- *
- * @param {import("bancho.js").BanchoMessage} msg
- */
-async function msgHandler(msg) {
-	if (msg.self) return;
-	console.log(
-		`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
-	);
-}
+	/**
+	 *
+	 * @param {Player} user
+	 * @private
+	 */
+	async removePlayer(user) {
+		let splice = this.queue.indexOf(user);
+		this.queue.splice(splice, 1);
+	}
 
-/**
- *
- * @param {import("bancho.js").BanchoLobbyPlayer} player
- */
-async function joinHandler(player) {
-	console.log(player);
-}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 * @private
+	 */
+	async msgHandler(msg) {
+		if (msg.self) return;
+		console.log(
+			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
+		);
+	}
 
-/**
- *
- * @param {import("bancho.js").BanchoLobbyPlayer} player
- */
-async function leaveHandler(player) {}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoLobbyPlayer} player
+	 * @private
+	 */
+	async joinHandler(player) {
+		if (player.user.ppRank) {
+		}
+		if (!playerMap.includes(player.user.id)) {
+			await this.addPlayer(player);
+		}
+	}
+
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoLobbyPlayer} player
+	 * @private
+	 */
+	async leaveHandler(player) {
+		let obj = this.queue.find((x) => x.player.user.id == player.user.id);
+		this.removePlayer(obj);
+	}
+
+	/**
+	 * On lobby finish, or when first initialized.
+	 */
+	async finishHandler() {
+		// Get top player of queue
+		let top = this.queue[0];
+	}
+}
 
 function secondsToTime(seconds) {
 	let minutes = Math.floor(seconds / 60);
