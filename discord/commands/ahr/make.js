@@ -86,10 +86,11 @@ module.exports = {
 				discordId: interaction.user.id,
 				mp_link: interaction.options.getString("mp_link"),
 				min_stars: interaction.options.getNumber("min_stars") || 0,
-				max_stars: interaction.options.getNumber("max_stars") || 0,
+				max_stars: interaction.options.getNumber("max_stars"),
 				min_length: interaction.options.getInteger("min_length") || 0,
-				max_length: interaction.options.getInteger("max_length") || 0,
+				max_length: interaction.options.getInteger("max_length"),
 				max_rank: interaction.options.getInteger("max_rank") || 1,
+				min_rank: interaction.options.getInteger("min_rank"),
 			},
 		});
 
