@@ -246,14 +246,14 @@ model AutoHostRotate {
   max_rank      Int?
   playerOrder   AutoHostRotatePlayer[] @relation("queue")
   CurrentHost   AutoHostRotatePlayer?  @relation("current", fields: [currentHostId], references: [id])
-  currentHostId Int?
+  currentHostId Int?                   @unique
 }
 
 model AutoHostRotatePlayer {
-  id       Int              @id
+  id       Int             @id
   username String
   rank     Int
   lobbyId  String
-  InLobby  AutoHostRotate   @relation("queue", fields: [lobbyId], references: [discordId], onDelete: Cascade)
-  HostIn   AutoHostRotate[] @relation("current")
+  InLobby  AutoHostRotate  @relation("queue", fields: [lobbyId], references: [discordId], onDelete: Cascade)
+  HostIn   AutoHostRotate? @relation("current")
 }

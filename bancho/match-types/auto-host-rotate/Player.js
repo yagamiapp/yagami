@@ -21,6 +21,22 @@ class Player {
 			},
 		});
 	}
+
+	async setHost() {
+		this.host = true;
+		await prisma.autoHostRotatePlayer.update({
+			where: {
+				id: this.player.user.id,
+			},
+			data: {
+				HostIn: {
+					connect: {
+						discordId: this.lobby.owner_id,
+					},
+				},
+			},
+		});
+	}
 }
 
 module.exports.Player = Player;
