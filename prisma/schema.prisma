@@ -238,8 +238,8 @@ model AutoHostRotate {
   discordId String @id
   mp_link   String
 
-  min_stars     Int?
-  max_stars     Int?
+  min_stars     Float?
+  max_stars     Float?
   min_length    Int?
   max_length    Int?
   min_rank      Int?
@@ -254,6 +254,6 @@ model AutoHostRotatePlayer {
   username String
   rank     Int
   lobbyId  String
-  InLobby  AutoHostRotate   @relation("queue", fields: [lobbyId], references: [discordId])
+  InLobby  AutoHostRotate   @relation("queue", fields: [lobbyId], references: [discordId], onDelete: Cascade)
   HostIn   AutoHostRotate[] @relation("current")
 }
