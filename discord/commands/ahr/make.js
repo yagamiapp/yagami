@@ -1,9 +1,18 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
+const { prisma } = require("../../../prisma");
+const { Lobby } = require("../../../bancho/match-types/auto-host-rotate/Lobby");
+const { MessageEmbed } = require("discord.js");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("make")
 		.setDescription("Make a auto host rotate lobby")
+		.addStringOption((option) =>
+			option
+				.setName("mp_link")
+				.setDescription("The link to your match")
+				.setRequired(true)
+		)
 		.addNumberOption((option) =>
 			option
 				.setName("min_stars")
@@ -27,14 +36,77 @@ module.exports = {
 				.setName("max_length")
 				.setDescription("The maximum length of a map in seconds")
 				.setMinValue(1)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("max_rank")
+				.setDescription("The highest rank a player can be")
+				.setMinValue(1)
 		),
 	/**
 	 *
 	 * @param {import("discord.js").CommandInteraction} interaction
 	 */
 	async execute(interaction) {
-		let options = interaction.options.data[0].options;
+		await interaction.deferReply({ ephemeral: true });
 
-		console.log(options);
+		// Check for duplicates
+		let duplicate = await prisma.autoHostRotate.findMany({
+			where: {
+				discordId: interaction.user.id,
+			},
+		});
+		if (duplicate.length > 0) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Err**: You already have a auto host rotate lobby."
+				)
+				.setColor("RED");
+			return interaction.editReply({ embeds: [embed] });
+		}
+
+		// Check the mp link is valid
+		let mp_link = interaction.options.getString("mp_link");
+		mp_link.match(
+			/^https:\/\/osu.ppy.sh\/(mp\/\d+|community\/matches\/\d+)$/
+		);
+		if (!mp_link) {
+			let embed = new MessageEmbed()
+				.setDescription("**Err**: The mp link is invalid.")
+				.setColor("RED")
+				.setFooter({
+					text: "Please make sure it is a valid osu! multiplayer link.",
+				});
+			return interaction.editReply({ embeds: [embed] });
+		}
+
+		// Create the lobby
+		await prisma.autoHostRotate.create({
+			data: {
+				discordId: interaction.user.id,
+				mp_link: interaction.options.getString("mp_link"),
+				min_stars: interaction.options.getNumber("min_stars") || 0,
+				max_stars: interaction.options.getNumber("max_stars") || 0,
+				min_length: interaction.options.getInteger("min_length") || 0,
+				max_length: interaction.options.getInteger("max_length") || 0,
+				max_rank: interaction.options.getInteger("max_rank") || 1,
+			},
+		});
+
+		let embed = new MessageEmbed();
+		embed
+			.setTitle("Loading match")
+			.setDescription(
+				"<a:loading:970406520124764200> We're currently setting up your lobby..."
+			)
+			.setColor("#F88000");
+		await interaction.editReply({ embeds: [embed] });
+
+		let lobby = new Lobby(interaction.user.id);
+		try {
+			await lobby.load();
+		} catch (e) {
+			console.log(e);
+		}
 	},
 };

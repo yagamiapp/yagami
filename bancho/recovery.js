@@ -1,5 +1,7 @@
 const { prisma } = require("../prisma");
 const { MatchManager } = require("./match-types/MatchManager");
+const { Lobby } = require("./match-types/auto-host-rotate/Lobby");
+
 module.exports.recover = async () => {
 	let matches = await prisma.match.findMany({
 		where: {
@@ -17,6 +19,20 @@ module.exports.recover = async () => {
 			],
 		},
 	});
+	let hostRotates = await prisma.autoHostRotate.findMany({});
+	for (let lobby of hostRotates) {
+		let ahr = new Lobby(lobby.discordId);
+		try {
+			await ahr.load();
+		} catch (e) {
+			console.log(e);
+			await prisma.autoHostRotate.delete({
+				where: {
+					discordId: ahr.owner_id,
+				},
+			});
+		}
+	}
 
 	for (const match of matches) {
 		if (match.state < 8 && match.state != 3) {
