@@ -113,7 +113,7 @@ model Tournament {
 }
 
 model User {
-  discord_id               String       @id
+  discord_id               String          @id
   discord_avatar           String
   discord_avatarURL        String
   discord_bot              Boolean
@@ -143,6 +143,7 @@ model User {
   token_refresh_token      String
   token_type               String
   in_teams                 UserInTeam[]
+  ahrOwnerOf               AutoHostRotate?
 }
 
 model Guild {
@@ -230,4 +231,25 @@ model MapInMatch {
   wonByTeamId     Int?
   wonByMatchId    Int?
   @@id([mapIdentifier, matchId])
+}
+
+model AutoHostRotate {
+  Owner       User                   @relation(fields: [discordId], references: [discord_id])
+  discordId   String                 @id
+  min_stars   Int?
+  max_stars   Int?
+  min_length  Int?
+  max_length  Int?
+  min_rank    Int?
+  max_rank    Int?
+  playerOrder AutoHostRotatePlayer[]
+}
+
+model AutoHostRotatePlayer {
+  id       String         @id
+  username String
+  rank     Int
+  lobbyId  String
+  inLobby  AutoHostRotate @relation(fields: [lobbyId], references: [discordId])
+  host     Boolean        @default(false)
 }
