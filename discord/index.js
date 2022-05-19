@@ -37,6 +37,17 @@ module.exports = {
 			bot.buttons.set(button.data.customId, button);
 		}
 
+		// Make collectio nof modals
+		bot.modals = new Collection();
+		const modalFiles = fs
+			.readdirSync("./discord/modals")
+			.filter((file) => file.endsWith(".js"));
+
+		for (const file of modalFiles) {
+			const modal = require(`./modals/${file}`);
+			bot.modals.set(modal.getData().customId, modal);
+		}
+
 		// Command Handler
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isCommand()) return;
@@ -135,6 +146,60 @@ module.exports = {
 					.setColor("#ff0000")
 					.setDescription(
 						"**Err**: There was an error while executing this button!"
+					);
+				if (interaction.replied || interaction.deferred) {
+					await interaction.editReply({
+						embeds: [embed],
+						ephemeral: true,
+					});
+				} else {
+					await interaction.reply({
+						embeds: [embed],
+						ephemeral: true,
+					});
+				}
+			}
+		});
+
+		// Modal Handler
+		bot.on("interactionCreate", async (interaction) => {
+			if (!interaction.isModalSubmit()) return;
+
+			// Restructure command id into command object
+			let command = {};
+			let stringParse = interaction.customId.split("?");
+			command.name = stringParse[0];
+
+			let options = {};
+			stringParse[1]?.split("&").forEach((option) => {
+				// Split into key value pairs
+				option = option.split("=");
+				options[option[0]] = option[1];
+			});
+			command.options = options;
+
+			// Craft message to send to console
+			let guild = interaction.guild?.nameAcronym ?? "DM Channel";
+			let optionString = "";
+			for (const key in command.options) {
+				const element = command.options[key];
+				optionString += `${key}: ${element}  `;
+			}
+			console.log(
+				`[${guild}] ${interaction.user.username}#${interaction.user.discriminator} >> <${command.name}> ${optionString}`
+			);
+
+			const modal = bot.modals.get(command.name);
+			if (!modal) return;
+
+			try {
+				await modal.execute(interaction, command);
+			} catch (error) {
+				console.log(error);
+				let embed = new MessageEmbed()
+					.setColor("#ff0000")
+					.setDescription(
+						"**Err**: There was an error while executing this modal!"
 					);
 				if (interaction.replied || interaction.deferred) {
 					await interaction.editReply({
