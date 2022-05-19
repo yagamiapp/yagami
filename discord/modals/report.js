@@ -6,35 +6,31 @@ const {
 } = require("discord.js");
 
 module.exports = {
-	getData: () => {
-		let modal = new Modal()
-			.setCustomId("report")
-			.setTitle("Report a bug")
-			.setComponents([
-				new MessageActionRow().addComponents([
-					new TextInputComponent()
-						.setLabel("Brief description of the bug")
-						.setCustomId("title")
-						.setRequired(true)
-						.setStyle("SHORT"),
-				]),
-				new MessageActionRow().addComponents([
-					new TextInputComponent()
-						.setLabel("Go into more detail")
-						.setCustomId("content")
-						.setRequired(true)
-						.setStyle("PARAGRAPH"),
-				]),
-				new MessageActionRow().addComponents([
-					new TextInputComponent()
-						.setLabel("Any helpful links/content")
-						.setCustomId("links")
-						.setStyle("SHORT"),
-				]),
-			]);
-
-		return modal;
-	},
+	data: new Modal()
+		.setCustomId("report")
+		.setTitle("Report a bug")
+		.setComponents([
+			new MessageActionRow().addComponents([
+				new TextInputComponent()
+					.setLabel("Brief description of the bug")
+					.setCustomId("title")
+					.setRequired(true)
+					.setStyle("SHORT"),
+			]),
+			new MessageActionRow().addComponents([
+				new TextInputComponent()
+					.setLabel("Go into more detail")
+					.setCustomId("content")
+					.setRequired(true)
+					.setStyle("PARAGRAPH"),
+			]),
+			new MessageActionRow().addComponents([
+				new TextInputComponent()
+					.setLabel("Any helpful links/content")
+					.setCustomId("links")
+					.setStyle("SHORT"),
+			]),
+		]),
 	/**
 	 *
 	 * @param {import("discord.js").ModalSubmitInteraction} interaction

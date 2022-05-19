@@ -45,7 +45,7 @@ module.exports = {
 
 		for (const file of modalFiles) {
 			const modal = require(`./modals/${file}`);
-			bot.modals.set(modal.getData().customId, modal);
+			bot.modals.set(modal.data.customId, modal);
 		}
 
 		// Command Handler

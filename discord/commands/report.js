@@ -6,7 +6,6 @@ module.exports = {
 		.setName("report")
 		.setDescription("Report a bug"),
 	async execute(interaction) {
-		let data = modal.getData();
-		interaction.showModal(data);
+		interaction.showModal(modal.data);
 	},
 };
