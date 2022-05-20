@@ -26,7 +26,12 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
-		let options = interaction.options.data[0].options;
+		let optionArr = interaction.options.data[0].options;
+		let options = {};
+		for (const option of optionArr) {
+			options[option.name] = option.value;
+		}
+
 		let team = await prisma.team.findFirst({
 			where: {
 				members: {
@@ -68,6 +73,7 @@ module.exports = {
 			return;
 		}
 		// In case the player name is longer than 25 characters
+		console.log(options);
 		if (options.name.length > 25) {
 			let embed = new MessageEmbed()
 				.setDescription(
@@ -111,10 +117,10 @@ module.exports = {
 			return;
 		}
 
-		options.forEach((element) => {
-			let prop = element.name;
-			team[prop] = element.value;
-		});
+		for (const key in options) {
+			const value = options[key];
+			team[key] = value;
+		}
 
 		await prisma.team.update({
 			where: {
