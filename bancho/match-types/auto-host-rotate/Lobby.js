@@ -61,7 +61,8 @@ class Lobby {
 			"beatmap",
 			async (beatmap) => await this.mapHandler(this.lastMap, beatmap)
 		);
-		this.lobby.on("matchFinished", async () => await this.finishHandler());
+		this.lobby.on("matchFinished", async () => await this.rotateHost());
+		this.lobby.on("allPlayersReady", async () => await this.readyHandler());
 
 		// Make lobby name
 		let nameString = "AHR |";
@@ -109,7 +110,8 @@ class Lobby {
 				});
 				continue;
 			}
-			await this.addPlayer(player);
+			let user = this.lobby.slots.find((x) => x.user.id == player);
+			await this.addPlayer(user);
 		}
 
 		// Add players to queue
@@ -118,7 +120,7 @@ class Lobby {
 			await this.joinHandler(player);
 		}
 
-		await this.finishHandler();
+		await this.rotateHost();
 	}
 
 	/**
@@ -147,13 +149,13 @@ class Lobby {
 		this.queue.splice(splice, 1);
 	}
 
-	/**
-	 * @param {import("nodesu").Beatmap} map
-	 */
-	async mapHandler(map) {
-		if (map == null) return;
+	async mapHandler() {
+		const map = this.lobby.beatmap;
 
-		if (map.stars > this.max_stars) {
+		if (map == null) return;
+		if (this.lastMap.beatmapId == map.beatmapId) return;
+
+		if (map.difficultyRating > this.max_stars && this.max_stars != null) {
 			this.lobby.setMap(this.lastMap);
 			this.channel.sendMessage(
 				`${map.artist} - ${map.title} [${
@@ -165,19 +167,19 @@ class Lobby {
 			return;
 		}
 
-		if (map.stars > this.min_stars) {
+		if (map.difficultyRating < this.min_stars && this.min_stars != null) {
 			this.lobby.setMap(this.lastMap);
 			this.channel.sendMessage(
 				`${map.artist} - ${map.title} [${
 					map.version
-				}]: ${map.stars.toFixed(2)}☆ < ${this.max_stars.toFixed(
+				}]: ${map.stars.toFixed(2)}☆ < ${this.min_stars.toFixed(
 					2
 				)}☆ Please pick another map`
 			);
 			return;
 		}
 
-		if (map.hitLength > this.max_length) {
+		if (map.hitLength > this.max_length && this.max_length != null) {
 			this.lobby.setMap(this.lastMap);
 			this.channel.sendMessage(
 				`${map.artist} - ${map.title} [${map.version}]: ${secondsToTime(
@@ -187,7 +189,7 @@ class Lobby {
 			return;
 		}
 
-		if (map.hitLength > this.min_length) {
+		if (map.hitLength < this.min_length && this.min_length != null) {
 			this.lobby.setMap(this.lastMap);
 			this.channel.sendMessage(
 				`${map.artist} - ${map.title} [${map.version}]: ${secondsToTime(
@@ -196,6 +198,10 @@ class Lobby {
 			);
 			return;
 		}
+
+		this.channel.sendMessage(
+			`[https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapSetId} Beatconnect Mirror]`
+		);
 	}
 
 	/**
@@ -208,6 +214,28 @@ class Lobby {
 		console.log(
 			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
+
+		if (
+			msg.message == "Closed the match" &&
+			msg.user.ircUsername == "BanchoBot"
+		) {
+			this.closeLobby();
+			return;
+		}
+		console.log(msg.message);
+		let command = msg.message.match(/^!\S+/);
+		if (!command || msg.content.startsWith("!mp")) return;
+		let args = msg.message.replace("!", "").split(" ");
+		console.log(args);
+
+		if (args[0] == "skip") {
+			this.rotateHost();
+			return;
+		}
+
+		if (args[0] == "queue") {
+			this.sendQueueMessage();
+		}
 	}
 
 	/**
@@ -216,7 +244,7 @@ class Lobby {
 	 * @private
 	 */
 	async joinHandler(player) {
-		if (player.user.ppRank < this.max_rank) {
+		if (player.user.ppRank < this.max_rank && this.max_rank != null) {
 			this.lobby.kickPlayer(player.user.username);
 			player.user.sendMessage(`Your rank is too high for this lobby`);
 		}
@@ -236,6 +264,8 @@ class Lobby {
 	 * @private
 	 */
 	async leaveHandler(player) {
+		let playerCount = this.lobby.slots.filter((x) => x).length;
+		if (playerCount == 0) this.closeLobby;
 		let obj = this.queue.find((x) => x.player.user.id == player.user.id);
 		this.removePlayer(obj);
 	}
@@ -243,9 +273,10 @@ class Lobby {
 	/**
 	 * On lobby finish, or when first initialized.
 	 */
-	async finishHandler() {
+	async rotateHost() {
+		this.lobby.updateSettings();
 		// Add last host to bottom of queue if there is one
-		if (this.lastHost != null) {
+		if (this.currentHost != null) {
 			this.queue[this.queue.length] = this.currentHost;
 		}
 		// Get top player of queue
@@ -257,6 +288,23 @@ class Lobby {
 		await this.channel.sendMessage(
 			`${top.player.user.ircUsername}, you are now the host, use !skip to skip host`
 		);
+		await this.sendQueueMessage();
+	}
+
+	/**
+	 * @param {Player} player
+	 */
+	async setCurrentHost(player) {
+		this.currentHost = player;
+		await this.lobby.setHost("#" + player.player.user.id);
+		await player.setHost();
+	}
+
+	async readyHandler() {
+		await this.lobby.startMatch();
+	}
+
+	async sendQueueMessage() {
 		let queueMessage = this.queue
 			.map((x) => x.player.user.ircUsername)
 			.join(", ");
@@ -267,13 +315,13 @@ class Lobby {
 		await this.channel.sendMessage(`Current Queue: ${queueMessage}`);
 	}
 
-	/**
-	 * @param {Player} player
-	 */
-	async setCurrentHost(player) {
-		this.currentHost = player;
-		await this.lobby.setHost("#" + player.player.user.id);
-		await player.setHost();
+	async closeLobby() {
+		console.log("Closing rotate lobby " + this.channel.name);
+		await prisma.autoHostRotate.delete({
+			where: {
+				discordId: this.owner_id,
+			},
+		});
 	}
 }
 

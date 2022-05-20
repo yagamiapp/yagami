@@ -12,8 +12,17 @@ class Player {
 	}
 
 	async toDB() {
-		await prisma.autoHostRotatePlayer.create({
-			data: {
+		await prisma.autoHostRotatePlayer.upsert({
+			where: {
+				id: this.player.user.id,
+			},
+			create: {
+				id: this.player.user.id,
+				username: this.player.user.username,
+				rank: this.player.user.ppRank,
+				lobbyId: this.lobby.owner_id,
+			},
+			update: {
 				id: this.player.user.id,
 				username: this.player.user.username,
 				rank: this.player.user.ppRank,
