@@ -1,5 +1,5 @@
 const { prisma } = require("../prisma");
-const { MatchManager } = require("./match-types/MatchManager");
+const { MatchManager } = require("./match-types/bracket/Match");
 module.exports.recover = async () => {
 	let matches = await prisma.match.findMany({
 		where: {

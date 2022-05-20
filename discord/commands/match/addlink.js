@@ -1,7 +1,7 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { prisma } = require("../../../prisma");
 const { MessageEmbed } = require("discord.js");
-const { MatchManager } = require("../../../bancho/match-types/MatchManager");
+const { MatchManager } = require("../../../bancho/match-types/bracket/Match");
 const { stripIndents } = require("common-tags/lib");
 
 module.exports = {

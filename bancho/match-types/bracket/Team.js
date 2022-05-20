@@ -1,4 +1,4 @@
-const { prisma } = require("../prisma");
+const { prisma } = require("../../../prisma");
 
 // There's currently a bug with local SQLite
 // Databases, where too many requests in
