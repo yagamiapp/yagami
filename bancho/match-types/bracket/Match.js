@@ -1,10 +1,10 @@
-const { prisma } = require("../../prisma");
-const { bot: discord } = require("../../discord");
+const { prisma } = require("../../../prisma");
+const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
 const { MessageEmbed } = require("discord.js");
-const { Team } = require("../Team");
+const { Team } = require("./Team");
 const { stripIndents } = require("common-tags");
-const { fetchChannel, fetchUser } = require("../client");
+const { fetchChannel, fetchUser } = require("../../client");
 
 // State Enumeration
 let states = {
