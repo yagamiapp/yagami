@@ -2,7 +2,7 @@ const axios = require("axios");
 const { MessageEmbed } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { stripIndents } = require("common-tags/lib");
-const { prisma } = require("../prisma");
+const { prisma, fetchGuild } = require("../prisma");
 
 /**
  *
@@ -123,27 +123,14 @@ module.exports.authUser = async (query, req, res) => {
 		)
 		.setColor("LUMINOUS_VIVID_PINK");
 
-	// if (guild.settings.change_nickname && interaction.member.manageable) {
-	// 	await interaction.member.setNickname(userData.username);
-	// }
-	// if (guild.settings.linked_role && interaction.member.manageable) {
-	// 	let role = interaction.guild.roles.cache.find(
-	// 		(r) => r.id === guild.settings.linked_role
-	// 	);
-	// 	if (role) {
-	// 		await interaction.member.roles.add(role);
-	// 	} else {
-	// 		await firebase.setData(
-	// 			null,
-	// 			"guilds",
-	// 			interaction.guildId,
-	// 			"settings",
-	// 			"linked_role"
-	// 		);
-	// 	}
-	// }
+	let guild = await fetchGuild(interaction.guildId);
+
+	if (guild.linked_role != null && interaction.member.manageable) {
+		interaction.member.edit({ roles: [guild.linked_role] });
+	}
 
 	await interaction.editReply({ embeds: [embed] });
+	interaction;
 
 	linkCommand.clearData(query.state);
 
