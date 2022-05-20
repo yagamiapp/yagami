@@ -265,7 +265,7 @@ class Lobby {
 	 */
 	async leaveHandler(player) {
 		let playerCount = this.lobby.slots.filter((x) => x).length;
-		if (playerCount == 0) this.closeLobby;
+		if (playerCount == 0) this.closeLobby();
 		let obj = this.queue.find((x) => x.player.user.id == player.user.id);
 		this.removePlayer(obj);
 	}
