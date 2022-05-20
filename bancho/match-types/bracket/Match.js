@@ -3,6 +3,7 @@ const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
 const { MessageEmbed } = require("discord.js");
 const { Team } = require("./Team");
+const { Map } = require("./Map");
 const { stripIndents } = require("common-tags");
 const { fetchChannel, fetchUser } = require("../../client");
 
@@ -81,11 +82,27 @@ class MatchManager {
 		});
 
 		// Get mappool from DB
-		this.mappool = await prisma.mapInMatch.findMany({
+		let mappool = await prisma.mapInMatch.findMany({
 			where: {
 				matchId: this.id,
 			},
 		});
+		for (const mapInMatch in mappool) {
+			console.log(mapInMatch);
+			// let map = await prisma.map.findFirst({
+			// 	where: {
+			// 		in_pools: {
+			// 			some: {
+			// 				InMatches: {
+			// 					some: {
+			// 						matchId: this.id,
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// });
+		}
 
 		// Make team objects from db
 		let dbTeams = await prisma.team.findMany({
