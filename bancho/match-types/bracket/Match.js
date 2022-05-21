@@ -181,6 +181,14 @@ class MatchManager {
 			}
 			this.mappool.push(mapObj);
 		}
+		// Set Last Game Data
+		let matchNum = this.mp.match(/\d+/g);
+		let data = await nodesuClient.multi.getMatch(matchNum[0]);
+		let lastGame = data.games[data.games.length - 1];
+		/**
+		 * @type {import("nodesu")}
+		 */
+		this.lastGameData = lastGame;
 
 		// Update state if no mp link
 		if (!this.mp) {
@@ -350,6 +358,7 @@ class MatchManager {
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
 		let lastGame = data.games[data.games.length - 1];
 		this.lastGameData = lastGame;
+		this.updateMessage();
 
 		if (this.state == 4) {
 			let team = this.teams[this.waiting_on];
@@ -1032,9 +1041,10 @@ class MatchManager {
 			}\n`;
 		}
 
+		console.log(this.lastGameData);
 		// Individual Score Table
-		if ([0, 1, 4].includes(state) || this.lastGameData) {
-			console.log(lastGameData);
+		if ([0, 1, 4].includes(state) && this.lastGameData) {
+			console.log(this.lastGameData);
 		}
 
 		// Match Rolls
