@@ -39,32 +39,6 @@ class Team {
 		this.pick_order = team.pick_order;
 		this.warmedUp = team.warmedUp;
 		this.score = team.score;
-		let bans = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.match.id,
-				bannedByTeamId: this.id,
-			},
-		});
-		bans = bans.map((map) => map.mapIdentifier);
-		this.bans = bans;
-
-		let picks = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.match.id,
-				pickedByTeamId: this.id,
-			},
-		});
-		picks = picks.map((map) => map.mapIdentifier);
-		this.picks = picks;
-
-		let wins = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.match.id,
-				wonByTeamId: this.id,
-			},
-		});
-		wins = wins.map((map) => map.mapIdentifier);
-		this.wins = wins;
 	}
 	/**
 	 * Compares one team to another based on the score mode
@@ -250,9 +224,13 @@ class Team {
 			},
 		});
 	}
-	async addBan(id) {
-		this.bans.push(id);
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
+	/**
+	 *
+	 * @param {import("./Map.js").Map} map
+	 */
+	async addBan(map) {
+		this.bans.push(map);
+		map.banned = true;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -264,7 +242,7 @@ class Team {
 				Bans: {
 					connect: {
 						mapIdentifier_matchId: {
-							mapIdentifier: id,
+							mapIdentifier: map.identifier,
 							matchId: this.match.id,
 						},
 					},
@@ -272,11 +250,13 @@ class Team {
 			},
 		});
 	}
-
-	async addPick(id) {
-		this.picks.push(id);
-		console.log(id);
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
+	/**
+	 *
+	 * @param {import("./Map.js").Map} map
+	 */
+	async addPick(map) {
+		this.picks.push(map);
+		map.picked = true;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -288,7 +268,7 @@ class Team {
 				Picks: {
 					connect: {
 						mapIdentifier_matchId: {
-							mapIdentifier: id,
+							mapIdentifier: map.identifier,
 							matchId: this.match.id,
 						},
 					},
@@ -296,10 +276,13 @@ class Team {
 			},
 		});
 	}
-	async addWin(id) {
-		this.wins.push(id);
-		console.log(id);
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
+	/**
+	 *
+	 * @param {import("./Map.js").Map} map
+	 */
+	async addWin(map) {
+		this.wins.push(map);
+		map.won = true;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -311,7 +294,7 @@ class Team {
 				Wins: {
 					connect: {
 						mapIdentifier_matchId: {
-							mapIdentifier: id,
+							mapIdentifier: map.identifier,
 							matchId: this.match.id,
 						},
 					},

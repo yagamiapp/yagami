@@ -15,27 +15,39 @@ class Map extends TournamentMap {
 		this.picked = false;
 		this.won = false;
 
+		this.pickNumber = mapInMatch.pickNumber;
+		this.pickTeamNumber = mapInMatch.pickTeamNumber;
+
 		if (mapInMatch.bannedByTeamId != null) {
-			this.banned == true;
+			this.banned = true;
 			let team = match.teams.find(
 				(team) => team.id == mapInMatch.bannedByTeamId
 			);
+			/**
+			 * @type {import("./Team").Team}
+			 */
 			this.bannedBy = team;
 		}
 
 		if (mapInMatch.pickedByTeamId != null) {
-			this.picked == true;
+			this.picked = true;
 			let team = match.teams.find(
 				(team) => team.id == mapInMatch.bannedByTeamId
 			);
+			/**
+			 * @type {import("./Team").Team}
+			 */
 			this.pickedBy = team;
 		}
 
 		if (mapInMatch.wonByTeamId != null) {
-			this.won == true;
+			this.won = true;
 			let team = match.teams.find(
 				(team) => team.id == mapInMatch.bannedByTeamId
 			);
+			/**
+			 * @type {import("./Team").Team}
+			 */
 			this.wonBy = team;
 		}
 	}
