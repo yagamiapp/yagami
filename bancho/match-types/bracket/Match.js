@@ -877,6 +877,7 @@ class MatchManager {
 	 */
 	async addPick(map) {
 		let team = this.teams[this.waiting_on];
+		this.picks.push(map);
 		await team.addPick(map);
 
 		await prisma.mapInMatch.update({
