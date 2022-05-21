@@ -13,6 +13,9 @@ class Team {
 	 * @param {import("@prisma/client").User[]} users
 	 */
 	constructor(match, team, users) {
+		/**
+		 * @type {import("./Match").MatchManager}
+		 */
 		this.match = match;
 		this.color = team.color;
 		this.icon_url = team.icon_url;
@@ -23,7 +26,10 @@ class Team {
 		this.name = team.name;
 		this.tournamentId = team.tournamentId;
 		this.users = users;
+		this.picks = [];
 		this.bans = [];
+		this.wins = [];
+
 		/**
 		 * @type {import("bancho.js").BanchoLobbyPlayer[]}
 		 */
@@ -39,32 +45,48 @@ class Team {
 		this.pick_order = team.pick_order;
 		this.warmedUp = team.warmedUp;
 		this.score = team.score;
-		let bans = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.match.id,
-				bannedByTeamId: this.id,
-			},
-		});
-		bans = bans.map((map) => map.mapIdentifier);
-		this.bans = bans;
 
-		let picks = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.match.id,
-				pickedByTeamId: this.id,
-			},
-		});
-		picks = picks.map((map) => map.mapIdentifier);
-		this.picks = picks;
+		// let picks = await prisma.mapInMatch.findMany({
+		// 	where: {
+		// 		pickedByTeamId: this.id,
+		// 		matchId: this.match.id,
+		// 	},
+		// });
+		// this.picks = [];
+		// for (const pick of picks) {
+		// 	let map = this.match.mappool.find(
+		// 		(x) => x.identifier == pick.mapIdentifier
+		// 	);
+		// 	this.picks.push(map);
+		// }
 
-		let wins = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.match.id,
-				wonByTeamId: this.id,
-			},
-		});
-		wins = wins.map((map) => map.mapIdentifier);
-		this.wins = wins;
+		// let bans = await prisma.mapInMatch.findMany({
+		// 	where: {
+		// 		bannedByTeamId: this.id,
+		// 		matchId: this.match.id,
+		// 	},
+		// });
+		// this.bans = [];
+		// for (const ban of bans) {
+		// 	let map = this.match.mappool.find(
+		// 		(x) => x.identifier == ban.mapIdentifier
+		// 	);
+		// 	this.picks.push(map);
+		// }
+
+		// let wins = await prisma.mapInMatch.findMany({
+		// 	where: {
+		// 		wonByTeamId: this.id,
+		// 		matchId: this.match.id,
+		// 	},
+		// });
+		// this.wins = [];
+		// for (const win of wins) {
+		// 	let map = this.match.mappool.find(
+		// 		(x) => x.identifier == win.mapIdentifier
+		// 	);
+		// 	this.picks.push(map);
+		// }
 	}
 	/**
 	 * Compares one team to another based on the score mode
@@ -250,9 +272,14 @@ class Team {
 			},
 		});
 	}
-	async addBan(id) {
-		this.bans.push(id);
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
+	/**
+	 *
+	 * @param {import("./Map.js").Map} map
+	 */
+	async addBan(map) {
+		this.bans.push(map);
+		map.banned = true;
+		map.bannedBy = this;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -264,7 +291,7 @@ class Team {
 				Bans: {
 					connect: {
 						mapIdentifier_matchId: {
-							mapIdentifier: id,
+							mapIdentifier: map.identifier,
 							matchId: this.match.id,
 						},
 					},
@@ -272,11 +299,16 @@ class Team {
 			},
 		});
 	}
-
-	async addPick(id) {
-		this.picks.push(id);
-		console.log(id);
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
+	/**
+	 *
+	 * @param {import("./Map.js").Map} map
+	 */
+	async addPick(map) {
+		this.picks.push(map);
+		map.picked = true;
+		map.pickedBy = this;
+		map.pickNumber = this.match.picks.length + 1;
+		map.pickTeamNumber = this.picks.length + 1;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -288,7 +320,7 @@ class Team {
 				Picks: {
 					connect: {
 						mapIdentifier_matchId: {
-							mapIdentifier: id,
+							mapIdentifier: map.identifier,
 							matchId: this.match.id,
 						},
 					},
@@ -296,10 +328,14 @@ class Team {
 			},
 		});
 	}
-	async addWin(id) {
-		this.wins.push(id);
-		console.log(id);
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
+	/**
+	 *
+	 * @param {import("./Map.js").Map} map
+	 */
+	async addWin(map) {
+		this.wins.push(map);
+		map.won = true;
+		map.wonBy = this;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -311,7 +347,7 @@ class Team {
 				Wins: {
 					connect: {
 						mapIdentifier_matchId: {
-							mapIdentifier: id,
+							mapIdentifier: map.identifier,
 							matchId: this.match.id,
 						},
 					},

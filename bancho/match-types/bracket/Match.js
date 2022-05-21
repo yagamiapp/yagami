@@ -3,6 +3,7 @@ const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
 const { MessageEmbed } = require("discord.js");
 const { Team } = require("./Team");
+const { Map } = require("./Map");
 const { stripIndents } = require("common-tags");
 const { fetchChannel, fetchUser } = require("../../client");
 
@@ -80,13 +81,6 @@ class MatchManager {
 			},
 		});
 
-		// Get mappool from DB
-		this.mappool = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.id,
-			},
-		});
-
 		// Make team objects from db
 		let dbTeams = await prisma.team.findMany({
 			where: {
@@ -113,15 +107,79 @@ class MatchManager {
 					},
 				},
 			});
+			let newTeam = new Team(this, team, users);
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
 					teamId: team.id,
 					matchId: this.id,
 				},
 			});
-			let newTeam = new Team(this, team, users);
+
 			await newTeam.setTeamInMatch(teamInMatch);
 			this.teams.push(newTeam);
+		}
+
+		// Get mappool from DB
+		/**
+		 * @type {Map[]}
+		 */
+		this.mappool = [];
+		/**
+		 * @type {Map[]}
+		 */
+		this.bans = [];
+		/**
+		 * @type {Map[]}
+		 */
+		this.picks = [];
+		let mappool = await prisma.mapInMatch.findMany({
+			where: {
+				matchId: this.id,
+			},
+		});
+
+		for (const mapInMatch of mappool) {
+			let map = await prisma.map.findFirst({
+				where: {
+					in_pools: {
+						some: {
+							InMatches: {
+								some: {
+									matchId: this.id,
+								},
+							},
+							identifier: mapInMatch.mapIdentifier,
+						},
+					},
+				},
+			});
+			let mapInPool = await prisma.mapInPool.findFirst({
+				where: {
+					mapId: map.beatmap_id,
+					InMatches: {
+						some: {
+							Match: {
+								id: this.id,
+							},
+						},
+					},
+				},
+			});
+			let mapObj = new Map(this, map, mapInMatch);
+			mapObj.setMapInPool(mapInPool);
+			// Give bans to teams
+			if (mapObj.banned) {
+				this.bans.push(mapObj);
+				mapObj.bannedBy.addBan(mapObj);
+			}
+			if (mapObj.picked) {
+				this.picks.push(mapObj);
+				mapObj.pickedBy.addPick(mapObj);
+			}
+			if (mapObj.won) {
+				mapObj.wonBy.addWin(mapObj);
+			}
+			this.mappool.push(mapObj);
 		}
 
 		// Update state if no mp link
@@ -318,28 +376,21 @@ class MatchManager {
 				return;
 			}
 
-			let lastMap = await prisma.mapInMatch.findFirst({
-				orderBy: {
-					pickNumber: "desc",
-				},
-				where: {
-					matchId: this.id,
-					pickNumber: {
-						not: null,
-					},
-				},
-			});
+			let searchArr = this.mappool
+				.filter((x) => x.pickNumber)
+				.sort((a, b) => b.pickNumber - a.pickNumber);
+			let lastMap = searchArr[0];
 
 			if (compareScore <= 0) {
 				let winner = this.teams[1];
 				await winner.addScore();
-				await winner.addWin(lastMap.mapIdentifier);
+				await winner.addWin(lastMap);
 			}
 
 			if (compareScore >= 0) {
 				let winner = this.teams[0];
 				await winner.addScore();
-				await winner.addWin(lastMap.mapIdentifier);
+				await winner.addWin(lastMap);
 			}
 
 			let scoreToWin = (this.round.best_of + 1) / 2;
@@ -363,14 +414,10 @@ class MatchManager {
 			}
 
 			// Check for TB
-			let tiebreakers = await prisma.mapInMatch.findMany({
-				where: {
-					matchId: this.id,
-					mapIdentifier: {
-						contains: "TB",
-					},
-				},
-			});
+			let tiebreakers = this.mappool.filter((x) =>
+				x.identifier.includes("TB")
+			);
+
 			if (tiebreakers.length > 0) {
 				let tb = true;
 				for (const team of this.teams) {
@@ -526,6 +573,7 @@ class MatchManager {
 		);
 		await this.updateMessage();
 	}
+
 	async pickPhase() {
 		let team = this.teams[this.waiting_on];
 		let bestOfPhrase = `Best of ${this.round.best_of}`;
@@ -702,12 +750,7 @@ class MatchManager {
 
 		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
-		let map = await prisma.mapInMatch.findFirst({
-			where: {
-				matchId: this.id,
-				mapIdentifier: mapString,
-			},
-		});
+		let map = this.mappool.find((x) => x.identifier == mapString);
 		if (!map) {
 			await this.channel.sendMessage(
 				`Map ${command.groups.map} not found`
@@ -715,34 +758,22 @@ class MatchManager {
 			return;
 		}
 
-		// Check for double bans
-		let otherBans = [];
-		for (const ban of team.bans) {
-			let map = await prisma.mapInPool.findFirst({
-				where: {
-					identifier: ban,
-				},
-			});
-			otherBans.push(map);
+		// If the map is already banned
+		if (map.banned) {
+			await this.channel.sendMessage(
+				`${map.identifier} has already been chosen as a ban`
+			);
+			return;
 		}
-		let otherBanMods = otherBans.map((ban) => ban.mods);
 
-		let mapMods = await prisma.mapInPool.findFirst({
-			where: {
-				InMatches: {
-					some: {
-						matchId: this.id,
-					},
-				},
-				identifier: map.mapIdentifier,
-			},
-		});
-		mapMods = mapMods.mods;
+		// Check for double bans
+		let otherBans = this.mappool.filter((x) => x.bannedBy?.id == team.id);
+		let otherBanMods = otherBans.map((ban) => ban.mods);
 		if (
-			(this.tournament.double_ban == 1 && mapMods != "") ||
+			(this.tournament.double_ban == 1 && map.mods != "") ||
 			this.tournament.double_ban == 0
 		) {
-			if (otherBanMods.includes(mapMods)) {
+			if (otherBanMods.includes(map.mods)) {
 				await this.channel.sendMessage(
 					`You cannot ban from the same modpool more than once.`
 				);
@@ -758,17 +789,9 @@ class MatchManager {
 			return;
 		}
 
-		// If the map is already banned
-		if (team.bans.includes(map.mapIdentifier)) {
-			await this.channel.sendMessage(
-				`${map.mapIdentifier} has already been chosen as a ban`
-			);
-			return;
-		}
-
-		await team.addBan(map.mapIdentifier);
+		await team.addBan(map);
 		await this.channel.sendMessage(
-			`${team.name} choose to ban ${map.mapIdentifier}`
+			`${team.name} chooses to ban ${map.identifier}`
 		);
 		await this.updateWaitingOn(1 - this.waiting_on);
 		await this.banPhase();
@@ -784,81 +807,44 @@ class MatchManager {
 
 		if (user == null) return;
 		let command = msg.content.match(/!pick (?<map>\w+)/);
-		if (!command) return;
 
+		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
-		let map = await prisma.mapInMatch.findFirst({
-			where: {
-				matchId: this.id,
-				mapIdentifier: mapString,
-			},
-		});
+		let map = this.mappool.find((x) => x.identifier == mapString);
 
 		if (!map) {
 			await this.channel.sendMessage("Invalid map name");
 			return;
 		}
 
-		let mapInPool = await prisma.mapInPool.findFirst({
-			where: {
-				Mappool: {
-					Round: {
-						id: this.round.id,
-					},
-				},
-				identifier: map.mapIdentifier,
-			},
-		});
-
 		// Check if banned
-		if (map.bannedByTeamId) {
+		if (map.banned) {
 			await this.channel.sendMessage(
-				`${mapInPool.identifier} was one of the bans`
+				`${map.identifier} was one of the bans`
 			);
 			return;
 		}
 
 		// Check for previous picks
-		if (map.pickedByTeamId) {
+		if (map.picked) {
 			await this.channel.sendMessage(
-				`${mapInPool.identifier} has already been picked`
+				`${map.identifier} has already been picked`
 			);
 			return;
 		}
 
 		// Check for double picks
-		let lastTeamPicks = await prisma.mapInMatch.findMany({
-			where: {
-				pickedByTeamId: team.id,
-				matchId: this.id,
-			},
-			orderBy: {
-				pickTeamNumber: "asc",
-			},
-		});
-
-		let lastTeamPickMods = [];
-		for (const pick of lastTeamPicks) {
-			let map = await prisma.mapInPool.findFirst({
-				where: {
-					identifier: pick.mapIdentifier,
-					InMatches: {
-						some: {
-							matchId: this.id,
-						},
-					},
-				},
-			});
-			lastTeamPickMods.push(map.mods);
-		}
-
-		let lastTeamPick = lastTeamPickMods[lastTeamPicks.length - 1];
+		let lastTeamPickMods = this.mappool
+			.filter((x) => x.pickedBy?.id == team.id)
+			.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber)
+			.map((x) => x.mods);
+		let lastTeamPick = lastTeamPickMods[lastTeamPickMods.length - 1];
 
 		if (
 			(this.tournament.double_pick == 1 && lastTeamPick != "") ||
 			this.tournament.double_pick == 0
 		) {
-			if (lastTeamPick == mapInPool.mods) {
+			if (lastTeamPick == map.mods) {
 				await this.channel.sendMessage(
 					`You cannot pick the same modpool twice.`
 				);
@@ -874,33 +860,21 @@ class MatchManager {
 			return;
 		}
 
-		this.addPick(mapInPool);
+		await this.addPick(map);
 		await this.channel.sendMessage(
-			`${team.name} choose to pick ${map.mapIdentifier}`
+			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapSetId} Beatconnect Mirror]`
 		);
 	}
 
 	/**
 	 * Picks a map in the lobby and adds it to the
-	 * @param {import("@prisma/client").MapInPool} map
+	 * @param {import("./Map").Map} map
 	 */
 	async addPick(map) {
 		let team = this.teams[this.waiting_on];
-		await team.addPick(map.identifier);
-		let globalPicks = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.id,
-				pickedByTeamId: {
-					not: null,
-				},
-			},
-		});
-		let teamPicks = await prisma.mapInMatch.findMany({
-			where: {
-				matchId: this.id,
-				pickedByTeamId: team.id,
-			},
-		});
+		this.picks.push(map);
+		await team.addPick(map);
+
 		await prisma.mapInMatch.update({
 			where: {
 				mapIdentifier_matchId: {
@@ -909,20 +883,21 @@ class MatchManager {
 				},
 			},
 			data: {
-				pickNumber: globalPicks.length,
-				pickTeamNumber: teamPicks.length,
+				pickNumber: this.picks.length,
+				pickTeamNumber: team.picks.length,
 			},
 		});
 
-		await this.lobby.setMap(map.mapId);
+		await this.lobby.setMap(map.beatmap_id);
+
+		let modString = map.mods;
 		if (this.tournament.force_nf) {
-			if (!map.mods.includes("NF")) {
-				map.mods += " NF";
+			if (!modString.includes("NF")) {
+				modString += " NF";
 			}
 		}
-		await this.lobby.setMods(map.mods);
+		await this.lobby.setMods(modString);
 		await this.updateState(1);
-		// Ready Phase Command
 	}
 
 	async invitePlayer(name) {
@@ -1072,30 +1047,21 @@ class MatchManager {
 		}
 
 		// Handle bans
-		let bans = await prisma.mapInMatch.findMany({
-			where: {
-				bannedByTeamId: {
-					not: null,
-				},
-				Match: {
-					id: this.id,
-				},
-			},
-		});
+		let bans = this.bans;
 		if (bans.length > 0) {
 			let banString = "";
 			let teamString = {};
 			for (const ban of bans) {
-				if (!ban.bannedByTeamId) return;
+				if (!ban.banned) return;
 				let string =
-					teamString[ban.bannedByTeamId] == null
-						? `${ban.mapIdentifier}`
-						: `, ${ban.mapIdentifier}`;
+					teamString[ban.bannedBy.id] == null
+						? `${ban.identifier}`
+						: `, ${ban.identifier}`;
 
-				teamString[ban.bannedByTeamId] =
-					teamString[ban.bannedByTeamId] == null
+				teamString[ban.bannedBy.id] =
+					teamString[ban.bannedBy.id] == null
 						? string
-						: (teamString[ban.bannedByTeamId] += string);
+						: (teamString[ban.bannedBy.id] += string);
 			}
 
 			banString = `
@@ -1110,19 +1076,7 @@ class MatchManager {
 			embed.addField("Bans", banString);
 		}
 		// Handle Picks
-		let picks = await prisma.mapInMatch.findMany({
-			where: {
-				pickedByTeamId: {
-					not: null,
-				},
-				Match: {
-					id: this.id,
-				},
-			},
-			orderBy: {
-				pickNumber: "asc",
-			},
-		});
+		let picks = this.picks.sort((a, b) => a.pickNumber - b.pickNumber);
 
 		if (this.teams[0].pick_order) {
 			embed.addField(
@@ -1131,11 +1085,11 @@ class MatchManager {
 			);
 			let pickString = ``;
 			for (const pick of picks) {
-				if (!pick.pickedByTeamId) return;
+				if (!pick.picked) return;
 				let string = `${
-					emoteEnum[pick.wonByTeamId] ||
+					emoteEnum[pick.wonBy?.id] ||
 					"<a:loading:970406520124764200>"
-				} **${pick.mapIdentifier}**\n`;
+				} **${pick.identifier}**\n`;
 
 				pickString += string;
 			}
