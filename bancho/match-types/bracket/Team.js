@@ -13,6 +13,9 @@ class Team {
 	 * @param {import("@prisma/client").User[]} users
 	 */
 	constructor(match, team, users) {
+		/**
+		 * @type {import("./Match").MatchManager}
+		 */
 		this.match = match;
 		this.color = team.color;
 		this.icon_url = team.icon_url;
@@ -33,12 +36,18 @@ class Team {
 	 *
 	 * @param {import("@prisma/client").TeamInMatch} team
 	 */
-	async setTeamInMatch(team) {
+	setTeamInMatch(team) {
 		this.roll = team.roll;
 		this.ban_order = team.ban_order;
 		this.pick_order = team.pick_order;
 		this.warmedUp = team.warmedUp;
 		this.score = team.score;
+
+		this.picks = this.match.picks
+			.filter((x) => x.pickedBy?.id == this.id)
+			.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber);
+		this.bans = this.match.bans.filter((x) => x.bannedBy?.id == this.id);
+		this.won = this.match.picks.filter((x) => x.wonBy?.id == this.id);
 	}
 	/**
 	 * Compares one team to another based on the score mode
