@@ -231,6 +231,7 @@ class Team {
 	async addBan(map) {
 		this.bans.push(map);
 		map.banned = true;
+		map.bannedBy = this;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -257,6 +258,7 @@ class Team {
 	async addPick(map) {
 		this.picks.push(map);
 		map.picked = true;
+		map.pickedBy = this;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -283,6 +285,7 @@ class Team {
 	async addWin(map) {
 		this.wins.push(map);
 		map.won = true;
+		map.wonBy = this;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
