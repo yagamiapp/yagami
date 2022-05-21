@@ -170,14 +170,14 @@ class MatchManager {
 			// Give bans to teams
 			if (mapObj.banned) {
 				this.bans.push(mapObj);
-				mapObj.bannedBy.addBan(mapObj);
+				await mapObj.bannedBy.addBan(mapObj);
 			}
 			if (mapObj.picked) {
 				this.picks.push(mapObj);
-				mapObj.pickedBy.addPick(mapObj);
+				await mapObj.pickedBy.addPick(mapObj);
 			}
 			if (mapObj.won) {
-				mapObj.wonBy.addWin(mapObj);
+				await mapObj.wonBy.addWin(mapObj);
 			}
 			this.mappool.push(mapObj);
 		}
