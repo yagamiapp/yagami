@@ -32,7 +32,7 @@ class Map extends TournamentMap {
 		if (mapInMatch.pickedByTeamId != null) {
 			this.picked = true;
 			let team = match.teams.find(
-				(team) => team.id == mapInMatch.bannedByTeamId
+				(team) => team.id == mapInMatch.pickedByTeamId
 			);
 			/**
 			 * @type {import("./Team").Team}
@@ -43,7 +43,7 @@ class Map extends TournamentMap {
 		if (mapInMatch.wonByTeamId != null) {
 			this.won = true;
 			let team = match.teams.find(
-				(team) => team.id == mapInMatch.bannedByTeamId
+				(team) => team.id == mapInMatch.wonByTeamId
 			);
 			/**
 			 * @type {import("./Team").Team}

@@ -159,7 +159,6 @@ class MatchManager {
 			});
 			let mapObj = new Map(this, map, mapInMatch);
 			mapObj.setMapInPool(mapInPool);
-			mappool[mapInMatch.mapIdentifier] = mapObj;
 			// Give bans to teams
 			if (mapObj.banned) {
 				this.bans.push(mapObj);
