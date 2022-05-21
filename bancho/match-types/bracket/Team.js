@@ -49,9 +49,13 @@ class Team {
 				matchId: this.match.id,
 			},
 		});
-		this.picks = picks.map((x) =>
-			this.match.mappool.find((map) => map.identifier == x.pickedByTeamId)
-		);
+		this.picks = [];
+		for (const pick of picks) {
+			let map = this.match.mappool.find(
+				(x) => x.identifier == pick.mapIdentifier
+			);
+			this.picks.push(map);
+		}
 
 		let bans = await prisma.mapInMatch.findMany({
 			where: {
@@ -59,9 +63,13 @@ class Team {
 				matchId: this.match.id,
 			},
 		});
-		this.bans = bans.map((x) =>
-			this.match.mappool.find((map) => map.identifier == x.bannedByTeamId)
-		);
+		this.bans = [];
+		for (const ban of bans) {
+			let map = this.match.mappool.find(
+				(x) => x.identifier == ban.mapIdentifier
+			);
+			this.picks.push(map);
+		}
 
 		let wins = await prisma.mapInMatch.findMany({
 			where: {
@@ -69,10 +77,13 @@ class Team {
 				matchId: this.match.id,
 			},
 		});
-
-		this.wins = wins.map((x) =>
-			this.match.mappool.find((map) => map.identifier == x.wonByTeamId)
-		);
+		this.wins = [];
+		for (const win of wins) {
+			let map = this.match.mappool.find(
+				(x) => x.identifier == win.mapIdentifier
+			);
+			this.picks.push(map);
+		}
 	}
 	/**
 	 * Compares one team to another based on the score mode
@@ -263,7 +274,6 @@ class Team {
 	 * @param {import("./Map.js").Map} map
 	 */
 	async addBan(map) {
-		console.log(this.bans);
 		this.bans.push(map);
 		map.banned = true;
 		map.bannedBy = this;
@@ -291,7 +301,6 @@ class Team {
 	 * @param {import("./Map.js").Map} map
 	 */
 	async addPick(map) {
-		console.log(this.picks);
 		this.picks.push(map);
 		map.picked = true;
 		map.pickedBy = this;
