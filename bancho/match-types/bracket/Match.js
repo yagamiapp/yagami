@@ -838,7 +838,7 @@ class MatchManager {
 			.filter((x) => x.pickedBy?.id == team.id)
 			.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber)
 			.map((x) => x.mods);
-		let lastTeamPick = lastTeamPickMods[lastTeamPicks.length - 1];
+		let lastTeamPick = lastTeamPickMods[lastTeamPickMods.length - 1];
 
 		if (
 			(this.tournament.double_pick == 1 && lastTeamPick != "") ||
