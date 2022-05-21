@@ -47,7 +47,7 @@ class Team {
 			.filter((x) => x.pickedBy?.id == this.id)
 			.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber);
 		this.bans = this.match.bans.filter((x) => x.bannedBy?.id == this.id);
-		this.won = this.match.picks.filter((x) => x.wonBy?.id == this.id);
+		this.won = this.match.wins.filter((x) => x.wonBy?.id == this.id);
 	}
 	/**
 	 * Compares one team to another based on the score mode
@@ -238,6 +238,7 @@ class Team {
 	 * @param {import("./Map.js").Map} map
 	 */
 	async addBan(map) {
+		console.log(this.bans);
 		this.bans.push(map);
 		map.banned = true;
 		map.bannedBy = this;
@@ -265,6 +266,7 @@ class Team {
 	 * @param {import("./Map.js").Map} map
 	 */
 	async addPick(map) {
+		console.log(this.picks);
 		this.picks.push(map);
 		map.picked = true;
 		map.pickedBy = this;
@@ -292,6 +294,7 @@ class Team {
 	 * @param {import("./Map.js").Map} map
 	 */
 	async addWin(map) {
+		console.log(this.won);
 		this.wins.push(map);
 		map.won = true;
 		map.wonBy = this;
