@@ -835,7 +835,7 @@ class MatchManager {
 
 		// Check for double picks
 		let lastTeamPickMods = this.mappool
-			.filter((x) => x.pickedBy.id == team.id)
+			.filter((x) => x.pickedBy?.id == team.id)
 			.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber)
 			.map((x) => x.mods);
 		let lastTeamPick = lastTeamPickMods[lastTeamPicks.length - 1];
