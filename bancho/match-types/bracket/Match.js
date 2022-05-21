@@ -108,7 +108,6 @@ class MatchManager {
 				},
 			});
 			let newTeam = new Team(this, team, users);
-			await newTeam.setTeamInMatch(teamInMatch);
 			this.teams.push(newTeam);
 		}
 
