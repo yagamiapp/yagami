@@ -26,7 +26,10 @@ class Team {
 		this.name = team.name;
 		this.tournamentId = team.tournamentId;
 		this.users = users;
+		this.picks = [];
 		this.bans = [];
+		this.wins = [];
+
 		/**
 		 * @type {import("bancho.js").BanchoLobbyPlayer[]}
 		 */
@@ -43,47 +46,47 @@ class Team {
 		this.warmedUp = team.warmedUp;
 		this.score = team.score;
 
-		let picks = await prisma.mapInMatch.findMany({
-			where: {
-				pickedByTeamId: this.id,
-				matchId: this.match.id,
-			},
-		});
-		this.picks = [];
-		for (const pick of picks) {
-			let map = this.match.mappool.find(
-				(x) => x.identifier == pick.mapIdentifier
-			);
-			this.picks.push(map);
-		}
+		// let picks = await prisma.mapInMatch.findMany({
+		// 	where: {
+		// 		pickedByTeamId: this.id,
+		// 		matchId: this.match.id,
+		// 	},
+		// });
+		// this.picks = [];
+		// for (const pick of picks) {
+		// 	let map = this.match.mappool.find(
+		// 		(x) => x.identifier == pick.mapIdentifier
+		// 	);
+		// 	this.picks.push(map);
+		// }
 
-		let bans = await prisma.mapInMatch.findMany({
-			where: {
-				bannedByTeamId: this.id,
-				matchId: this.match.id,
-			},
-		});
-		this.bans = [];
-		for (const ban of bans) {
-			let map = this.match.mappool.find(
-				(x) => x.identifier == ban.mapIdentifier
-			);
-			this.picks.push(map);
-		}
+		// let bans = await prisma.mapInMatch.findMany({
+		// 	where: {
+		// 		bannedByTeamId: this.id,
+		// 		matchId: this.match.id,
+		// 	},
+		// });
+		// this.bans = [];
+		// for (const ban of bans) {
+		// 	let map = this.match.mappool.find(
+		// 		(x) => x.identifier == ban.mapIdentifier
+		// 	);
+		// 	this.picks.push(map);
+		// }
 
-		let wins = await prisma.mapInMatch.findMany({
-			where: {
-				wonByTeamId: this.id,
-				matchId: this.match.id,
-			},
-		});
-		this.wins = [];
-		for (const win of wins) {
-			let map = this.match.mappool.find(
-				(x) => x.identifier == win.mapIdentifier
-			);
-			this.picks.push(map);
-		}
+		// let wins = await prisma.mapInMatch.findMany({
+		// 	where: {
+		// 		wonByTeamId: this.id,
+		// 		matchId: this.match.id,
+		// 	},
+		// });
+		// this.wins = [];
+		// for (const win of wins) {
+		// 	let map = this.match.mappool.find(
+		// 		(x) => x.identifier == win.mapIdentifier
+		// 	);
+		// 	this.picks.push(map);
+		// }
 	}
 	/**
 	 * Compares one team to another based on the score mode
