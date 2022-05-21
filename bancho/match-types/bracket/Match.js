@@ -108,6 +108,14 @@ class MatchManager {
 				},
 			});
 			let newTeam = new Team(this, team, users);
+			let teamInMatch = await prisma.teamInMatch.findFirst({
+				where: {
+					teamId: team.id,
+					matchId: this.id,
+				},
+			});
+
+			await team.setTeamInMatch(teamInMatch);
 			this.teams.push(newTeam);
 		}
 
@@ -172,18 +180,6 @@ class MatchManager {
 				mapObj.wonBy.addWin(mapObj);
 			}
 			this.mappool.push(mapObj);
-		}
-
-		// Add picks and bans to team
-		for (const team of this.teams) {
-			let teamInMatch = await prisma.teamInMatch.findFirst({
-				where: {
-					teamId: team.id,
-					matchId: this.id,
-				},
-			});
-
-			await team.setTeamInMatch(teamInMatch);
 		}
 
 		// Update state if no mp link
