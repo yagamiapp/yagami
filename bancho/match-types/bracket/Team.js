@@ -36,18 +36,43 @@ class Team {
 	 *
 	 * @param {import("@prisma/client").TeamInMatch} team
 	 */
-	setTeamInMatch(team) {
+	async setTeamInMatch(team) {
 		this.roll = team.roll;
 		this.ban_order = team.ban_order;
 		this.pick_order = team.pick_order;
 		this.warmedUp = team.warmedUp;
 		this.score = team.score;
 
-		this.picks = this.match.picks
-			.filter((x) => x.pickedBy?.id == this.id)
-			.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber);
-		this.bans = this.match.bans.filter((x) => x.bannedBy?.id == this.id);
-		this.won = this.match.wins.filter((x) => x.wonBy?.id == this.id);
+		let picks = await prisma.mapInMatch.findMany({
+			where: {
+				pickedByTeamId: this.id,
+				matchId: this.match.id,
+			},
+		});
+		this.picks = picks.map((x) =>
+			this.match.mappool.find((map) => map.identifier == x.pickedByTeamId)
+		);
+
+		let bans = await prisma.mapInMatch.findMany({
+			where: {
+				bannedByTeamId: this.id,
+				matchId: this.match.id,
+			},
+		});
+		this.bans = bans.map((x) =>
+			this.match.mappool.find((map) => map.identifier == x.bannedByTeamId)
+		);
+
+		let wins = await prisma.mapInMatch.findMany({
+			where: {
+				wonByTeamId: this.id,
+				matchId: this.match.id,
+			},
+		});
+
+		this.wins = wins.map((x) =>
+			this.match.mappool.find((map) => map.identifier == x.wonByTeamId)
+		);
 	}
 	/**
 	 * Compares one team to another based on the score mode

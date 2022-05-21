@@ -183,7 +183,7 @@ class MatchManager {
 				},
 			});
 
-			team.setTeamInMatch(teamInMatch);
+			await team.setTeamInMatch(teamInMatch);
 		}
 
 		// Update state if no mp link
