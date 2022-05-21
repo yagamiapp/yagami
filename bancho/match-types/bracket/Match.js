@@ -1032,6 +1032,11 @@ class MatchManager {
 			}\n`;
 		}
 
+		// Individual Score Table
+		if ([0, 1, 4].includes(state) || this.lastGameData) {
+			console.log(lastGameData);
+		}
+
 		// Match Rolls
 		if (state >= 5 && state <= 7) {
 			description += "\n";
