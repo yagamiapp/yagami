@@ -363,8 +363,8 @@ class MatchManager {
 				let score = team.calculateScore(team);
 				scoreString +=
 					scoreString == ""
-						? `${team.name} (${score})`
-						: ` | ${team.name} (${score})`;
+						? `${team.name} (${score.toLocaleString()})`
+						: ` | ${team.name} (${score.toLocaleString()})`;
 			}
 			await this.channel.sendMessage(scoreString);
 			let compareScore = this.teams[0].compareTo(this.teams[1]);
@@ -1022,6 +1022,7 @@ class MatchManager {
 			.setImage(oldembed.image?.url)
 			.setFooter({ text: "Current phase: " + states[this.state] });
 
+		// Score line
 		if (state <= 2 || (state >= 5 && state <= 8)) {
 			description += `
 				${emoteEnum[this.teams[0].id]} ${this.teams[0].name} | ${
@@ -1031,6 +1032,7 @@ class MatchManager {
 			}\n`;
 		}
 
+		// Match Rolls
 		if (state >= 5 && state <= 7) {
 			description += "\n";
 
@@ -1040,6 +1042,8 @@ class MatchManager {
 				description += `**${team.name}** rolled a **${team.roll}**\n`;
 			}
 		}
+
+		// Beatmap Image
 		if (this.beatmap) {
 			embed.setImage(
 				`https://assets.ppy.sh/beatmaps/${this.beatmap?.setId}/covers/cover.jpg`
@@ -1103,6 +1107,7 @@ class MatchManager {
 			embed.setThumbnail(this.teams[this.waiting_on].icon_url);
 		}
 
+		// If no match link
 		if (state == 3) {
 			embed
 				.setColor("RED")
@@ -1143,6 +1148,7 @@ class MatchManager {
 				);
 		}
 
+		// Warmup Phase
 		if (state == 4) {
 			if (!this.waiting_on) return;
 			if (this.beatmap == null) {
@@ -1160,6 +1166,7 @@ class MatchManager {
 			}
 		}
 
+		// Final Matfch Results
 		if (state >= 8) {
 			if (this.teams[0].score > this.teams[1].score) {
 				description = `
