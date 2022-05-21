@@ -1,5 +1,5 @@
 const { MessageButton, MessageEmbed } = require("discord.js");
-const { prisma } = require("../../prisma");
+const { prisma, fetchGuild } = require("../../prisma");
 
 module.exports = {
 	data: new MessageButton()
@@ -7,11 +7,8 @@ module.exports = {
 		.setLabel("Accept")
 		.setStyle("PRIMARY"),
 	async execute(interaction, command) {
-		let tournament = await prisma.tournament.findFirst({
-			where: {
-				Guild_id: command.options.guild,
-			},
-		});
+		let guild = await fetchGuild(command.options.guild);
+		let tournament = guild.active_tournament;
 
 		let userData = await prisma.user.findFirst({
 			where: {
@@ -25,6 +22,7 @@ module.exports = {
 						discordId: command.options.user,
 					},
 				},
+				tournamentId: tournament.id,
 			},
 		});
 
