@@ -115,7 +115,7 @@ class MatchManager {
 				},
 			});
 
-			await team.setTeamInMatch(teamInMatch);
+			await newTeam.setTeamInMatch(teamInMatch);
 			this.teams.push(newTeam);
 		}
 
