@@ -176,7 +176,7 @@ class MatchManager {
 		}
 
 		// Add picks and bans to team
-		for (const team of teams) {
+		for (const team of this.teams) {
 			let teamInMatch = await prisma.teamInMatch.findFirst({
 				where: {
 					teamId: team.id,
