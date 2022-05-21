@@ -307,6 +307,8 @@ class Team {
 		this.picks.push(map);
 		map.picked = true;
 		map.pickedBy = this;
+		map.pickNumber = this.match.picks.length + 1;
+		map.pickTeamNumber = this.picks.length + 1;
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -331,7 +333,6 @@ class Team {
 	 * @param {import("./Map.js").Map} map
 	 */
 	async addWin(map) {
-		console.log(this.won);
 		this.wins.push(map);
 		map.won = true;
 		map.wonBy = this;
