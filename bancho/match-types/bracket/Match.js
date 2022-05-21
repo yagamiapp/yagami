@@ -1087,7 +1087,8 @@ class MatchManager {
 			for (const pick of picks) {
 				if (!pick.picked) return;
 				let string = `${
-					emoteEnum[pick.wonBy.id] || "<a:loading:970406520124764200>"
+					emoteEnum[pick.wonBy?.id] ||
+					"<a:loading:970406520124764200>"
 				} **${pick.identifier}**\n`;
 
 				pickString += string;
