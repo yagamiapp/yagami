@@ -1181,7 +1181,7 @@ class MatchManager {
 						userScore.splice(0, 1);
 						for (let i = 0; i < userScore.length; i++) {
 							let prop = userScore[i];
-							for (let j = prop.length; i < maxes[i]; j++) {
+							for (let j = prop.length; j < maxes[i]; j++) {
 								prop += " ";
 							}
 							userScore[i] = prop;
@@ -1191,7 +1191,7 @@ class MatchManager {
 					leaderboard += teamLb + "\n";
 				}
 			}
-			embed.addField("scores", leaderboard);
+			embed.addField("Scores", leaderboard);
 		}
 
 		// Match Rolls
