@@ -30,7 +30,7 @@ module.exports = {
 		// Get the teams in the match
 		let teams = await prisma.team.findMany({
 			where: {
-				TeamInMatch: {
+				InBracketMatches: {
 					some: {
 						matchId: parseInt(command.options.id),
 					},
@@ -113,7 +113,7 @@ module.exports = {
 				inTeams: {
 					some: {
 						Team: {
-							TeamInMatch: {
+							InBracketMatches: {
 								some: {
 									matchId: match.id,
 								},

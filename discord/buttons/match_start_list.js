@@ -95,7 +95,7 @@ module.exports = {
 		for (let match of group) {
 			let teams = await prisma.team.findMany({
 				where: {
-					TeamInMatch: {
+					InBracketMatches: {
 						some: {
 							matchId: match.id,
 						},

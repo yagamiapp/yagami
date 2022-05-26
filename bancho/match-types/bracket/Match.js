@@ -85,7 +85,7 @@ class MatchManager {
 		// Make team objects from db
 		let dbTeams = await prisma.team.findMany({
 			where: {
-				TeamInMatch: {
+				InBracketMatches: {
 					some: {
 						matchId: this.id,
 					},
