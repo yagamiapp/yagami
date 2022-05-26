@@ -1,5 +1,4 @@
 let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
-const { stripIndents } = require("common-tags/lib");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
