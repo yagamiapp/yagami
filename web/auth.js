@@ -130,7 +130,6 @@ module.exports.authUser = async (query, req, res) => {
 	}
 
 	await interaction.editReply({ embeds: [embed] });
-	interaction;
 
 	linkCommand.clearData(query.state);
 
