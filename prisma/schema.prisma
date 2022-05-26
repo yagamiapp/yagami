@@ -10,6 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Global {
+  id   Int @id @default(autoincrement())
+  ties Int @default(0)
+}
+
 model Map {
   beatmap_id           String      @id
   fetch_time           DateTime    @default(now())
@@ -70,10 +75,17 @@ model MapInPool {
 }
 
 model Mappool {
-  id     Int         @id @default(autoincrement())
-  maps   MapInPool[]
-  global Boolean     @default(false)
-  Round  Round?
+  id        Int             @id @default(autoincrement())
+  maps      MapInPool[]
+  global    Boolean         @default(false)
+  Round     Round?
+  Qualifier QualifierRound?
+
+  tournament_name      String?
+  tournament_acronym   String?
+  tournament_iteration String?
+  round_name           String?
+  round_acronym        String?
 }
 
 model Round {
@@ -109,11 +121,17 @@ model Tournament {
   delete_warning      Boolean?
   double_pick         Int      @default(1) // 0: No double picking; 1: Only double picking NM; 2 Double Picking allowed
   double_ban          Int      @default(1) // 0: No double picking; 1: Only double picking NM; 2 Double Picking allowed
-  Team                Team[]
+  Teams               Team[]
+
+  multiplier_nm Float @default(1.0)
+  multiplier_hd Float @default(1.0)
+  multiplier_hr Float @default(1.0)
+  multiplier_ez Float @default(1.5)
+  multiplier_fl Float @default(1.0)
 }
 
 model User {
-  discord_id               String       @id
+  discord_id               String          @id
   discord_avatar           String
   discord_avatarURL        String
   discord_bot              Boolean
@@ -138,11 +156,29 @@ model User {
   osu_level_progress       Int
   osu_hit_accuracy         Float
   osu_pp                   Float
-  token_access_token       String
-  token_expires_in         Int
-  token_refresh_token      String
-  token_type               String
-  in_teams                 UserInTeam[]
+  OsuOauth                 OsuOauth?
+  DiscordOauth             DiscordOauth?
+  inTeams                  UserInTeam[]
+  OwnerOfLobby             AutoHostRotate?
+}
+
+model OsuOauth {
+  User          User   @relation(fields: [discord_id], references: [discord_id])
+  discord_id    String @id
+  access_token  String
+  expires_in    Int
+  refresh_token String
+  type          String
+}
+
+model DiscordOauth {
+  User          User   @relation(fields: [discord_id], references: [discord_id])
+  discord_id    String @id
+  access_token  String
+  expires_in    Int
+  refresh_token String
+  type          String
+  scope         String
 }
 
 model Guild {
@@ -156,14 +192,16 @@ model Guild {
 }
 
 model Team {
-  id           Int           @id @default(autoincrement())
-  name         String
-  icon_url     String
-  color        String
-  members      UserInTeam[]
-  tournament   Tournament    @relation(fields: [tournamentId], references: [id])
-  tournamentId Int
-  TeamInMatch  TeamInMatch[]
+  id               Int                    @id @default(autoincrement())
+  name             String
+  icon_url         String
+  color            String
+  Members          UserInTeam[]
+  Tournament       Tournament             @relation(fields: [tournamentId], references: [id])
+  tournamentId     Int
+  scrim            Boolean                @default(false)
+  InBracketMatches TeamInMatch[]
+  InQualifiers     TeamInQualifierMatch[]
 }
 
 model UserInTeam {
@@ -187,6 +225,7 @@ model Match {
   roundId     Int
   MapsInMatch MapInMatch[]
   state       Int
+  scrim       Boolean       @default(false)
 
   @@id([id, roundId])
 }
@@ -201,7 +240,7 @@ model TeamInMatch {
   roll       Int?
   pick_order Int?
   ban_order  Int?
-  warmedUp   Boolean      @default(false)
+  warmed_up  Boolean      @default(false)
   Bans       MapInMatch[] @relation("banned")
   Wins       MapInMatch[] @relation("won")
   Picks      MapInMatch[] @relation("picked")
@@ -230,4 +269,50 @@ model MapInMatch {
   wonByTeamId     Int?
   wonByMatchId    Int?
   @@id([mapIdentifier, matchId])
+}
+
+model QualifierRound {
+  id        Int     @id @default(autoincrement())
+  Mappool   Mappool @relation(fields: [mappoolId], references: [id])
+  mappoolId Int     @unique
+}
+
+model QualifierMatch {
+  id        Int                    @id @default(autoincrement())
+  Teams     TeamInQualifierMatch[]
+  map_index Int                    @default(0)
+}
+
+model TeamInQualifierMatch {
+  Team    Team           @relation(fields: [teamId], references: [id])
+  teamId  Int
+  Match   QualifierMatch @relation(fields: [matchId], references: [id])
+  matchId Int
+
+  @@id([teamId, matchId])
+}
+
+model AutoHostRotate {
+  Owner     User   @relation(fields: [discordId], references: [discord_id])
+  discordId String @id
+  mp_link   String
+
+  min_stars     Float?
+  max_stars     Float?
+  min_length    Int?
+  max_length    Int?
+  min_rank      Int?
+  max_rank      Int?
+  playerOrder   AutoHostRotatePlayer[] @relation("queue")
+  CurrentHost   AutoHostRotatePlayer?  @relation("current", fields: [currentHostId], references: [id])
+  currentHostId Int?                   @unique
+}
+
+model AutoHostRotatePlayer {
+  id       Int             @id
+  username String
+  rank     Int
+  lobbyId  String
+  InLobby  AutoHostRotate  @relation("queue", fields: [lobbyId], references: [discordId], onDelete: Cascade)
+  HostIn   AutoHostRotate? @relation("current")
 }
