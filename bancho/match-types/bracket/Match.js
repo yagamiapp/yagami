@@ -85,7 +85,7 @@ class MatchManager {
 		// Make team objects from db
 		let dbTeams = await prisma.team.findMany({
 			where: {
-				TeamInMatch: {
+				InBracketMatches: {
 					some: {
 						matchId: this.id,
 					},
@@ -101,7 +101,7 @@ class MatchManager {
 		for (let team of dbTeams) {
 			let users = await prisma.user.findMany({
 				where: {
-					in_teams: {
+					inTeams: {
 						some: {
 							teamId: team.id,
 						},
@@ -479,7 +479,7 @@ class MatchManager {
 		let user = team.getUserPos(host?.user?.id);
 		if (user != undefined || user != null) return;
 
-		if (team.warmedUp) {
+		if (team.warmed_up) {
 			await this.lobby.clearHost();
 			await this.updateState(5);
 			await this.roll();

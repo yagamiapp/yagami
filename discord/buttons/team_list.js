@@ -27,7 +27,7 @@ module.exports = {
 		for (const team of teams) {
 			let membersInTeam = await prisma.user.findMany({
 				where: {
-					in_teams: {
+					inTeams: {
 						some: {
 							teamId: team.id,
 						},
@@ -106,7 +106,7 @@ module.exports = {
 			let teamString = "";
 			let members = await prisma.user.findMany({
 				where: {
-					in_teams: {
+					inTeams: {
 						some: {
 							teamId: team.id,
 						},

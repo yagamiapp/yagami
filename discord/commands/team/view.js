@@ -17,7 +17,7 @@ module.exports = {
 
 		let team = await prisma.team.findFirst({
 			where: {
-				members: {
+				Members: {
 					some: {
 						discordId: user.id,
 					},
@@ -46,7 +46,7 @@ module.exports = {
 
 		let members = await prisma.user.findMany({
 			where: {
-				in_teams: {
+				inTeams: {
 					some: {
 						teamId: team.id,
 					},

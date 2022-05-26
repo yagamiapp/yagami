@@ -43,7 +43,7 @@ class Team {
 		this.roll = team.roll;
 		this.ban_order = team.ban_order;
 		this.pick_order = team.pick_order;
-		this.warmedUp = team.warmedUp;
+		this.warmedUp = team.warmed_up;
 		this.score = team.score;
 
 		// let picks = await prisma.mapInMatch.findMany({
@@ -180,7 +180,7 @@ class Team {
 	 * @param {boolean} b
 	 */
 	async setWarmedUp(b) {
-		this.warmedUp = b;
+		this.warmed_up = b;
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
@@ -190,7 +190,7 @@ class Team {
 				},
 			},
 			data: {
-				warmedUp: b,
+				warmed_up: b,
 			},
 		});
 	}

@@ -18,7 +18,7 @@ module.exports = {
 			where: { roundId: round.id, id: parseInt(command.options.id) },
 		});
 		let teams = await prisma.team.findMany({
-			where: { TeamInMatch: { some: { matchId: match.id } } },
+			where: { InBracketMatches: { some: { matchId: match.id } } },
 		});
 
 		let back = new MessageActionRow().addComponents([
@@ -43,7 +43,7 @@ module.exports = {
 			let teamString = "";
 			let members = await prisma.user.findMany({
 				where: {
-					in_teams: {
+					inTeams: {
 						some: {
 							teamId: team.id,
 						},
