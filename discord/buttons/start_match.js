@@ -110,7 +110,7 @@ module.exports = {
 		messageChannel = messageChannel || interaction.channel;
 		let players = await prisma.user.findMany({
 			where: {
-				in_teams: {
+				inTeams: {
 					some: {
 						Team: {
 							TeamInMatch: {

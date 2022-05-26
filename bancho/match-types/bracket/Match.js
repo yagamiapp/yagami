@@ -101,7 +101,7 @@ class MatchManager {
 		for (let team of dbTeams) {
 			let users = await prisma.user.findMany({
 				where: {
-					in_teams: {
+					inTeams: {
 						some: {
 							teamId: team.id,
 						},

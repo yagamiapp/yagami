@@ -32,7 +32,7 @@ module.exports = {
 		}
 		let members = await prisma.user.findMany({
 			where: {
-				in_teams: {
+				inTeams: {
 					some: {
 						teamId: team.id,
 					},
