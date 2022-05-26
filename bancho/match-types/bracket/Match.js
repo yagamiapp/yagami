@@ -3,6 +3,7 @@ const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
 const { MessageEmbed } = require("discord.js");
 const { Team } = require("./Team");
+const { convertEnumToAcro } = require("../../modEnum");
 const { Map } = require("./Map");
 const { stripIndents } = require("common-tags");
 const { fetchChannel, fetchUser } = require("../../client");
@@ -181,6 +182,14 @@ class MatchManager {
 			}
 			this.mappool.push(mapObj);
 		}
+		// Set Last Game Data
+		let matchNum = this.mp.match(/\d+/g);
+		let data = await nodesuClient.multi.getMatch(matchNum[0]);
+		let lastGame = data.games[data.games.length - 1];
+		/**
+		 * @type {import("nodesu")}
+		 */
+		this.lastGameData = lastGame;
 
 		// Update state if no mp link
 		if (!this.mp) {
@@ -350,6 +359,7 @@ class MatchManager {
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
 		let lastGame = data.games[data.games.length - 1];
 		this.lastGameData = lastGame;
+		this.updateMessage();
 
 		if (this.state == 4) {
 			let team = this.teams[this.waiting_on];
@@ -793,6 +803,7 @@ class MatchManager {
 		await this.channel.sendMessage(
 			`${team.name} chooses to ban ${map.identifier}`
 		);
+		await this.updateMessage();
 		await this.updateWaitingOn(1 - this.waiting_on);
 		await this.banPhase();
 	}
@@ -996,15 +1007,30 @@ class MatchManager {
 	/**
 	 * Updates the log message
 	 * @function
-	 * @param {number} state Mimics the state of the match
 	 * @private
 	 */
-	async updateMessage(state) {
-		state = state || this.state;
+	async updateMessage() {
+		let state = this.state;
 
-		let emoteEnum = {};
-		emoteEnum[this.teams[0].id] = ":red_square:";
-		emoteEnum[this.teams[1].id] = ":blue_square:";
+		let emotes = {
+			teams: {},
+			grades: {},
+			loading: "<a:loading:970406520124764200>",
+		};
+		emotes.teams[this.teams[0].id] = ":red_square:";
+		emotes.teams[this.teams[1].id] = ":blue_square:";
+
+		emotes.grades = {
+			SSH: "<:rank_SSH:979114277929631764>",
+			SS: "<:rank_SS:979114272955179069>",
+			SH: "<:rank_SH:979114267850727465>",
+			S: "<:rank_S:979114262502973450>",
+			A: "<:rank_A:979114140465516645>",
+			B: "<:rank_B:979114234233372752>",
+			C: "<:rank_C:979114239736299570>",
+			D: "<:rank_D:979114244777857096>",
+			F: "<:rank_F:979114251337744504>",
+		};
 
 		let channel = await discord.channels.fetch(this.channel_id);
 		/**
@@ -1025,11 +1051,163 @@ class MatchManager {
 		// Score line
 		if (state <= 2 || (state >= 5 && state <= 8)) {
 			description += `
-				${emoteEnum[this.teams[0].id]} ${this.teams[0].name} | ${
+				${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
 				this.teams[0].score
 			} - ${this.teams[1].score} | ${this.teams[1].name} ${
-				emoteEnum[this.teams[1].id]
+				emotes.teams[this.teams[1].id]
 			}\n`;
+		}
+
+		// Individual Score Table
+		if (
+			([0, 1].includes(state) &&
+				this.lastGameData &&
+				this.picks.length > 0) ||
+			(state == 4 && this.lastGameData)
+		) {
+			let leaderboard = "";
+			let lastMap = (
+				await nodesuClient.beatmaps.getByBeatmapId(
+					this.lastGameData.beatmap_id
+				)
+			)[0];
+			let { title, artist, version } = lastMap;
+			let lastMapId =
+				this.mappool.find((map) => map.beatmap_id == lastMap.beatmap_id)
+					?.identifier || "Warmup";
+			leaderboard += `**${lastMapId}**: ${title} - ${artist} [${version}]\n`;
+
+			let teamStrings = {};
+			for (const team of this.teams) {
+				teamStrings[team.id] = { userScores: [] };
+				teamStrings[team.id].team = team;
+			}
+
+			for (const score of this.lastGameData.scores) {
+				// Get team of user from id
+				let playerId = score.user_id;
+				let team;
+				for (const teamTest of this.teams) {
+					if (teamTest.users.find((u) => u.osu_id == playerId)) {
+						team = teamTest;
+					}
+				}
+				let user = team.users.find((u) => u.osu_id == playerId);
+
+				let mods = convertEnumToAcro(score.enabled_mods);
+
+				// Calculate acc
+				let accuracy =
+					300 * score.count300 +
+					100 * score.count100 +
+					50 * score.count50;
+				let divisor =
+					300 *
+					(parseInt(score.count300) +
+						parseInt(score.count100) +
+						parseInt(score.count50) +
+						parseInt(score.countmiss));
+				accuracy = accuracy / divisor;
+				// Calculate grade
+				let grade = "";
+				let percent300 =
+					parseInt(score.count300) /
+					(parseInt(score.count300) +
+						parseInt(score.count100) +
+						parseInt(score.count50) +
+						parseInt(score.countmiss));
+				let percent50 =
+					parseInt(score.count50) /
+					(parseInt(score.count300) +
+						parseInt(score.count100) +
+						parseInt(score.count50) +
+						parseInt(score.countmiss));
+				if (score.countmiss == 0) {
+					if (percent300 > 0.9) {
+						if (percent50 < 0.1) {
+							if (mods.includes("HD") || mods.includes("FL")) {
+								grade = "SH";
+							} else {
+								grade = "S";
+							}
+						}
+					} else if (percent300 > 0.8) {
+						grade = "A";
+					} else if (percent300 > 0.7) {
+						grade = "B";
+					}
+				} else {
+					if (percent300 > 0.9) {
+						grade = "A";
+					} else if (percent300 > 0.8) {
+						grade = "B";
+					} else if (percent300 > 0.6) {
+						grade = "C";
+					}
+				}
+				if (accuracy == 1) {
+					if (mods.includes("HD") || mods.includes("FL")) {
+						grade = "SSH";
+					} else {
+						grade = "SS";
+					}
+				}
+
+				if (grade == "") {
+					grade = "D";
+				}
+				if (score.pass == 0) {
+					grade = "F";
+				}
+
+				let userScore = [
+					emotes.grades[grade],
+					user.osu_username,
+					parseInt(score.score).toLocaleString(),
+					parseInt(score.maxcombo).toLocaleString() + "x",
+					(accuracy * 100).toFixed(2) + "%",
+					`${mods == "" ? "" : "+" + mods.join("")}`,
+				];
+
+				teamStrings[team.id].userScores.push(userScore);
+			}
+
+			for (const key in teamStrings) {
+				const teamString = teamStrings[key];
+				if (teamString.userScores?.length > 0) {
+					let teamLb = `${emotes.teams[teamString.team.id]} **${
+						teamString.team.name
+					}**\n`;
+					// TODO: Get max of each column and add spaces to align
+					let maxes = [];
+					for (let i = 1; i < teamString.userScores[0].length; i++) {
+						maxes.push(getMaxLength(teamString.userScores, i));
+					}
+
+					for (const userScore of teamString.userScores) {
+						let grade = userScore.splice(0, 1);
+						let mods = userScore.splice(userScore.length - 1, 1);
+
+						// Add spaces to align
+						for (let i = 0; i < userScore.length; i++) {
+							let prop = userScore[i];
+							for (let j = prop.length; j < maxes[i]; j++) {
+								prop += " ";
+							}
+							userScore[i] = prop;
+						}
+
+						teamLb += `${grade} \`${userScore.join("` `")}\``;
+						if (lastMapId.includes("FM") || lastMapId == "Warmup") {
+							teamLb += `${mods}\n`;
+						} else {
+							teamLb += "\n";
+						}
+					}
+					leaderboard += teamLb + "\n";
+				}
+			}
+			description += "\n" + leaderboard;
 		}
 
 		// Match Rolls
@@ -1052,7 +1230,7 @@ class MatchManager {
 
 		// Handle bans
 		let bans = this.bans;
-		if (bans.length > 0) {
+		if (bans.length > 0 && state != 3) {
 			let banString = "";
 			let teamString = {};
 			for (const ban of bans) {
@@ -1069,10 +1247,10 @@ class MatchManager {
 			}
 
 			banString = `
-				${emoteEnum[this.teams[0].id]} **${this.teams[0].name}:** ${
+				${emotes.teams[this.teams[0].id]} **${this.teams[0].name}:** ${
 				teamString[this.teams[0].id] || ""
 			}
-				${emoteEnum[this.teams[1].id]} **${this.teams[1].name}:** ${
+				${emotes.teams[this.teams[1].id]} **${this.teams[1].name}:** ${
 				teamString[this.teams[1].id] || ""
 			}
 			`;
@@ -1082,7 +1260,7 @@ class MatchManager {
 		// Handle Picks
 		let picks = this.picks.sort((a, b) => a.pickNumber - b.pickNumber);
 
-		if (this.teams[0].pick_order) {
+		if (this.teams[0].pick_order && state != 3) {
 			embed.addField(
 				"First Pick",
 				this.teams[this.teams[0].pick_order - 1].name
@@ -1091,8 +1269,7 @@ class MatchManager {
 			for (const pick of picks) {
 				if (!pick.picked) return;
 				let string = `${
-					emoteEnum[pick.wonBy?.id] ||
-					"<a:loading:970406520124764200>"
+					emotes.teams[pick.wonBy?.id] || emotes.loading
 				} **${pick.identifier}**\n`;
 
 				pickString += string;
@@ -1101,7 +1278,7 @@ class MatchManager {
 		}
 
 		if (state == 0) {
-			description += `<a:loading:970406520124764200> **${
+			description += `${emotes.loading} **${
 				this.teams[this.waiting_on].name
 			}** is currently picking.`;
 			embed.setThumbnail(this.teams[this.waiting_on].icon_url);
@@ -1146,6 +1323,7 @@ class MatchManager {
 				\`\`\`
             `
 				);
+			embed.image = null;
 		}
 
 		// Warmup Phase
@@ -1170,20 +1348,20 @@ class MatchManager {
 		if (state >= 8) {
 			if (this.teams[0].score > this.teams[1].score) {
 				description = `
-					${emoteEnum[this.teams[0].id]} **${this.teams[0].name}** | ${
+					${emotes.teams[this.teams[0].id]} **${this.teams[0].name}** | ${
 					this.teams[0].score
 				} - ${this.teams[1].score} | ${this.teams[1].name} ${
-					emoteEnum[this.teams[1].id]
+					emotes.teams[this.teams[1].id]
 				}`;
 				embed.color = this.teams[0].color;
 				embed.setThumbnail(this.teams[0].icon_url);
 			}
 			if (this.teams[0].score < this.teams[1].score) {
 				description = `
-					${emoteEnum[this.teams[0].id]} ${this.teams[0].name} | ${
+					${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
 					this.teams[0].score
 				} - ${this.teams[1].score} | **${this.teams[1].name}** ${
-					emoteEnum[this.teams[1].id]
+					emotes.teams[this.teams[1].id]
 				}`;
 				embed.color = this.teams[1].color;
 				embed.setThumbnail(this.teams[1].icon_url);
@@ -1200,3 +1378,13 @@ class MatchManager {
 }
 
 module.exports.MatchManager = MatchManager;
+
+function getMaxLength(obj, index) {
+	let max = 0;
+	for (const o of obj) {
+		if (o[index].length > max) {
+			max = o[index].length;
+		}
+	}
+	return max;
+}
