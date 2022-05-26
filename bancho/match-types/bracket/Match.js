@@ -1061,9 +1061,11 @@ class MatchManager {
 		// Individual Score Table
 		if ([0, 1, 4].includes(state) && this.lastGameData) {
 			let leaderboard = "";
-			let lastMap = await nodesuClient.beatmaps.getByBeatmapId(
-				this.lastGameData.beatmap_id
-			);
+			let lastMap = (
+				await nodesuClient.beatmaps.getByBeatmapId(
+					this.lastGameData.beatmap_id
+				)
+			)[0];
 			let { title, artist, version } = lastMap;
 			let lastMapId =
 				this.mappool.find((map) => map.beatmap_id == lastMap.beatmap_id)
@@ -1158,6 +1160,7 @@ class MatchManager {
 					user.osu_username,
 					parseInt(score.score).toLocaleString(),
 					parseInt(score.maxcombo).toLocaleString() + "x",
+					`${score.count300}/${score.count100}/${score.count50}/${score.countmiss}`,
 					(accuracy * 100).toFixed(2) + "%",
 				];
 
