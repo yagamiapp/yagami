@@ -639,7 +639,6 @@ class MatchManager {
 		let command = msg.content.match(/^!skip/g);
 		if (command) {
 			let team = this.teams[this.waiting_on];
-			await this.lobby.clearHost();
 			await team.setWarmedUp(true);
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
