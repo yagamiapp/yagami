@@ -39,6 +39,7 @@ module.exports = {
 						discordId: interaction.user.id,
 					},
 				},
+				tournamentId: tournament.id,
 			},
 		});
 
