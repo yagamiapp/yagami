@@ -94,7 +94,32 @@ module.exports = {
 		let messageChannel = interaction.guild.channels.cache.find(
 			(channel) => channel.id == guild.match_results_channel
 		);
+		messageChannel = messageChannel || interaction.channel;
+		if (!messageChannel.sendable) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: Cannot post match results message in <#${messageChannel.id}>`
+				)
+				.setColor("RED")
+				.setFooter({
+					text: `Make sure the bot's match result channel is set up correctly`,
+				});
 
+			let button = new MessageActionRow().addComponents([
+				new MessageButton()
+					.setCustomId(
+						`match_start_list?round=${round.acronym}&index=${command.options.index}`
+					)
+					.setLabel("Back")
+					.setStyle("DANGER"),
+			]);
+
+			await interaction.update({
+				embeds: [embed],
+				components: [button],
+			});
+			return;
+		}
 		await prisma.match.update({
 			where: {
 				id_roundId: {
@@ -107,7 +132,6 @@ module.exports = {
 			},
 		});
 
-		messageChannel = messageChannel || interaction.channel;
 		let players = await prisma.user.findMany({
 			where: {
 				inTeams: {

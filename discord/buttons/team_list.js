@@ -57,7 +57,6 @@ module.exports = {
 
 			aAvg /= a.members.length;
 			bAvg /= b.members.length;
-			console.log(`${bAvg} - ${aAvg}`);
 			return aAvg - bAvg;
 		});
 		// Group elements into groups of 3
