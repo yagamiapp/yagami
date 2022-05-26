@@ -803,6 +803,7 @@ class MatchManager {
 		await this.channel.sendMessage(
 			`${team.name} chooses to ban ${map.identifier}`
 		);
+		await this.updateMessage();
 		await this.updateWaitingOn(1 - this.waiting_on);
 		await this.banPhase();
 	}
@@ -1006,11 +1007,10 @@ class MatchManager {
 	/**
 	 * Updates the log message
 	 * @function
-	 * @param {number} state Mimics the state of the match
 	 * @private
 	 */
-	async updateMessage(state) {
-		state = state || this.state;
+	async updateMessage() {
+		let state = this.state;
 
 		let emotes = {
 			teams: {},
@@ -1059,7 +1059,12 @@ class MatchManager {
 		}
 
 		// Individual Score Table
-		if ([0, 1, 4].includes(state) && this.lastGameData) {
+		if (
+			([0, 1].includes(state) &&
+				this.lastGameData &&
+				this.picks.length > 0) ||
+			(state == 4 && this.lastGameData)
+		) {
 			let leaderboard = "";
 			let lastMap = (
 				await nodesuClient.beatmaps.getByBeatmapId(
@@ -1160,8 +1165,8 @@ class MatchManager {
 					user.osu_username,
 					parseInt(score.score).toLocaleString(),
 					parseInt(score.maxcombo).toLocaleString() + "x",
-					`${score.count300}/${score.count100}/${score.count50}/${score.countmiss}`,
 					(accuracy * 100).toFixed(2) + "%",
+					`${mods == "" ? "" : "+" + mods.join("")}`,
 				];
 
 				teamStrings[team.id].userScores.push(userScore);
@@ -1180,8 +1185,10 @@ class MatchManager {
 					}
 
 					for (const userScore of teamString.userScores) {
-						let grade = userScore[0];
-						userScore.splice(0, 1);
+						let grade = userScore.splice(0, 1);
+						let mods = userScore.splice(userScore.length - 1, 1);
+
+						// Add spaces to align
 						for (let i = 0; i < userScore.length; i++) {
 							let prop = userScore[i];
 							for (let j = prop.length; j < maxes[i]; j++) {
@@ -1189,12 +1196,18 @@ class MatchManager {
 							}
 							userScore[i] = prop;
 						}
-						teamLb += `${grade} \`${userScore.join("` | `")}\`\n`;
+
+						teamLb += `${grade} \`${userScore.join("` `")}\``;
+						if (lastMapId.includes("FM") || lastMapId == "Warmup") {
+							teamLb += `+${mods.join("")}\n`;
+						} else {
+							teamLb += "\n";
+						}
 					}
 					leaderboard += teamLb + "\n";
 				}
 			}
-			embed.addField("Scores", leaderboard);
+			description += "\n" + leaderboard;
 		}
 
 		// Match Rolls
@@ -1217,7 +1230,7 @@ class MatchManager {
 
 		// Handle bans
 		let bans = this.bans;
-		if (bans.length > 0) {
+		if (bans.length > 0 && state != 3) {
 			let banString = "";
 			let teamString = {};
 			for (const ban of bans) {
@@ -1247,7 +1260,7 @@ class MatchManager {
 		// Handle Picks
 		let picks = this.picks.sort((a, b) => a.pickNumber - b.pickNumber);
 
-		if (this.teams[0].pick_order) {
+		if (this.teams[0].pick_order && state != 3) {
 			embed.addField(
 				"First Pick",
 				this.teams[this.teams[0].pick_order - 1].name
@@ -1310,6 +1323,7 @@ class MatchManager {
 				\`\`\`
             `
 				);
+			embed.image = null;
 		}
 
 		// Warmup Phase
