@@ -632,6 +632,7 @@ class MatchManager {
 	}
 
 	async warmupListener(msg) {
+		if (this.waiting_on == null) return;
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 		if (user == null) return;
