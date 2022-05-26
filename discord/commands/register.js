@@ -22,7 +22,7 @@ module.exports = {
 		let duplicateCheck = await prisma.team.findFirst({
 			where: {
 				tournamentId: tournament.id,
-				members: {
+				Members: {
 					some: {
 						discordId: interaction.user.id,
 					},

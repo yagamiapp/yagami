@@ -27,7 +27,7 @@ module.exports = {
 		});
 		let inviteeTeam = await prisma.team.findFirst({
 			where: {
-				members: {
+				Members: {
 					some: {
 						discordId: invitee.id,
 					},
@@ -44,7 +44,7 @@ module.exports = {
 		});
 		let inviterTeam = await prisma.team.findFirst({
 			where: {
-				members: {
+				Members: {
 					some: {
 						discordId: interaction.user.id,
 					},

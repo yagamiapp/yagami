@@ -23,7 +23,7 @@ module.exports = {
 				teams: {
 					some: {
 						Team: {
-							members: {
+							Members: {
 								some: {
 									user: {
 										osu_username: username,

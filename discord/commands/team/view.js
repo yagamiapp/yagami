@@ -17,7 +17,7 @@ module.exports = {
 
 		let team = await prisma.team.findFirst({
 			where: {
-				members: {
+				Members: {
 					some: {
 						discordId: user.id,
 					},

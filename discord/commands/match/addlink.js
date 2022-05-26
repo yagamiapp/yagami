@@ -26,7 +26,7 @@ module.exports = {
 				teams: {
 					some: {
 						Team: {
-							members: {
+							Members: {
 								some: {
 									discordId: interaction.user.id,
 								},
