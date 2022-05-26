@@ -1199,7 +1199,7 @@ class MatchManager {
 
 						teamLb += `${grade} \`${userScore.join("` `")}\``;
 						if (lastMapId.includes("FM") || lastMapId == "Warmup") {
-							teamLb += `+${mods.join("")}\n`;
+							teamLb += `${mods}\n`;
 						} else {
 							teamLb += "\n";
 						}
