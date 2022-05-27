@@ -460,7 +460,6 @@ class MatchManager {
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.updateState(0);
 			await this.pickPhase();
-			console.log(this);
 		}
 	}
 
@@ -1013,7 +1012,6 @@ class MatchManager {
 	 */
 	async updateMessage() {
 		let state = this.state;
-		console.log(this);
 
 		let emotes = {
 			teams: {},
@@ -1262,7 +1260,6 @@ class MatchManager {
 		}
 		// Handle Picks
 		let picks = this.picks.sort((a, b) => a.pickNumber - b.pickNumber);
-		console.log("Picks in order: ", picks);
 
 		if (this.teams[0].pick_order) {
 			embed.addField(
