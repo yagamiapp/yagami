@@ -800,6 +800,7 @@ class MatchManager {
 			return;
 		}
 
+		this.bans.push(map);
 		await team.addBan(map);
 		await this.channel.sendMessage(
 			`${team.name} chooses to ban ${map.identifier}`
@@ -1012,6 +1013,7 @@ class MatchManager {
 	 */
 	async updateMessage() {
 		let state = this.state;
+		console.log(this);
 
 		let emotes = {
 			teams: {},

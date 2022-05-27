@@ -43,7 +43,7 @@ class Team {
 		this.roll = team.roll;
 		this.ban_order = team.ban_order;
 		this.pick_order = team.pick_order;
-		this.warmedUp = team.warmed_up;
+		this.warmed_up = team.warmed_up;
 		this.score = team.score;
 
 		// let picks = await prisma.mapInMatch.findMany({

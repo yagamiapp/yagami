@@ -27,7 +27,6 @@ class Map extends TournamentMap {
 			 * @type {import("./Team").Team}
 			 */
 			this.bannedBy = team;
-			this.bannedBy.bans.push(this);
 		}
 
 		if (mapInMatch.pickedByTeamId != null) {
@@ -39,7 +38,6 @@ class Map extends TournamentMap {
 			 * @type {import("./Team").Team}
 			 */
 			this.pickedBy = team;
-			this.pickedBy.picks.push(this);
 		}
 
 		if (mapInMatch.wonByTeamId != null) {
@@ -51,7 +49,6 @@ class Map extends TournamentMap {
 			 * @type {import("./Team").Team}
 			 */
 			this.wonBy = team;
-			this.pickedBy.wins.push(this);
 		}
 	}
 }
