@@ -276,6 +276,7 @@ class MatchManager {
 
 		await this.recover();
 		await this.updateMessage();
+		console.log(this);
 	}
 	/**
 	 *
@@ -1230,7 +1231,7 @@ class MatchManager {
 
 		// Handle bans
 		let bans = this.bans;
-		if (bans.length > 0 && state != 3) {
+		if (bans.length > 0) {
 			let banString = "";
 			let teamString = {};
 			for (const ban of bans) {
@@ -1260,7 +1261,7 @@ class MatchManager {
 		// Handle Picks
 		let picks = this.picks.sort((a, b) => a.pickNumber - b.pickNumber);
 
-		if (this.teams[0].pick_order && state != 3) {
+		if (this.teams[0].pick_order) {
 			embed.addField(
 				"First Pick",
 				this.teams[this.teams[0].pick_order - 1].name
