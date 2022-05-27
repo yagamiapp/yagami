@@ -80,10 +80,6 @@ module.exports.authUser = async (query, req, res) => {
 		osu_level_progress: userData.statistics.level.progress,
 		osu_hit_accuracy: userData.statistics.hit_accuracy,
 		osu_pp: userData.statistics.pp,
-		token_access_token: authResponse.access_token,
-		token_expires_in: authResponse.expires_in,
-		token_refresh_token: authResponse.refresh_token,
-		token_type: authResponse.token_type,
 	};
 
 	await prisma.user.upsert({
@@ -92,6 +88,20 @@ module.exports.authUser = async (query, req, res) => {
 		},
 		create: userPayload,
 		update: userPayload,
+	});
+	let token = {
+		discord_id: user.id,
+		access_token: authResponse.access_token,
+		expires_in: authResponse.expires_in,
+		refresh_token: authResponse.refresh_token,
+		type: authResponse.token_type,
+	};
+	await prisma.osuOauth.upsert({
+		where: {
+			discord_id: user.id,
+		},
+		create: token,
+		update: token,
 	});
 	// Cancel timeout message
 	clearInterval(interval);
