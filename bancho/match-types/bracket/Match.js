@@ -1047,7 +1047,8 @@ class MatchManager {
 			.setThumbnail(oldembed.thumbnail?.url)
 			.setURL(this.mp)
 			.setImage(oldembed.image?.url)
-			.setFooter({ text: "Current phase: " + states[this.state] });
+			.setFooter({ text: "Current phase: " + states[this.state] })
+			.setTimestamp();
 
 		// Score line
 		if (state <= 2 || (state >= 5 && state <= 8)) {
