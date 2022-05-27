@@ -95,7 +95,12 @@ module.exports = {
 			(channel) => channel.id == guild.match_results_channel
 		);
 		messageChannel = messageChannel || interaction.channel;
-		if (!messageChannel.sendable) {
+
+		if (
+			!messageChannel
+				.permissionsFor(interaction.guild.me)
+				.has("SEND_MESSAGES")
+		) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: Cannot post match results message in <#${messageChannel.id}>`
