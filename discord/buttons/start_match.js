@@ -17,6 +17,22 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
+		if (
+			command.options.recover &&
+			!interaction.memberPermissions.has("ADMINISTRATOR")
+		) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Err:** You lack the permissions to perform this action"
+				)
+				.setColor("RED")
+				.setFooter({
+					text: "Please ping an admin to recover the match for you",
+				});
+			await interaction.reply({ embeds: [embed], ephemeral: true });
+			return;
+		}
+
 		let round = await prisma.round.findFirst({
 			where: {
 				Match: {
