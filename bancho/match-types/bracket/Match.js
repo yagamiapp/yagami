@@ -1,7 +1,7 @@
 const { prisma } = require("../../../prisma");
 const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const { Team } = require("./Team");
 const { convertEnumToAcro } = require("../../modEnum");
 const { Map } = require("./Map");
@@ -10,6 +10,7 @@ const { fetchChannel, fetchUser } = require("../../client");
 
 // State Enumeration
 let states = {
+	"-1": "Archived",
 	0: "Pick Phase",
 	1: "Ready Phase",
 	2: "Play Phase",
@@ -193,8 +194,7 @@ class MatchManager {
 
 		// Update state if no mp link
 		if (!this.mp) {
-			await this.updateState(3);
-			await this.updateMessage();
+			await this.updateState(-1);
 			return;
 		}
 
@@ -208,8 +208,8 @@ class MatchManager {
 			await this.channel.join();
 		} catch (e) {
 			console.log(`${this.mp} no longer exists`);
-			await this.updateState(3);
-			await this.updateMessage();
+			await this.updateState(-1);
+			return;
 		}
 		await this.lobby.clearHost();
 
@@ -602,6 +602,11 @@ class MatchManager {
 	async recover() {
 		if (this.state == 0) {
 			await this.pickPhase();
+			return;
+		}
+
+		if (this.state == 3) {
+			await this.updateState(-1);
 			return;
 		}
 
@@ -1287,45 +1292,39 @@ class MatchManager {
 		}
 
 		// If no match link
-		if (state == 3) {
+		if (state == -1) {
+			if (this.mp) {
+				embed.addField("Previous MP Link: ", this.mp);
+			}
 			embed
-				.setColor("RED")
+				.setTitle(
+					`ARCHIVED: ${this.round.name}: (${this.teams[0].name}) vs (${this.teams[1].name})`
+				)
+				.setColor("#AAAAAA")
 				.setURL(null)
 				.setDescription(
-					`
-            Uh oh!
-			We had some trouble finding the link to your match.
-			Here are the steps to create a new one:
-            `
-				)
-				.addField(
-					"Create the match",
 					stripIndents`
-                Select one member of your match to make the lobby, by sending a DM to \`BanchoBot\` on osu:
-                \`\`\`
-                !mp make ${this.tournament.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})
-                \`\`\`
-            `
-				)
-				.addField(
-					"Add yagami as a ref",
-					stripIndents`
-                Add the bot as a ref to your match:
-                \`\`\`
-                !mp addref ${process.env.banchoUsername}
-                \`\`\`
-            `
-				)
-				.addField(
-					"Point the bot to the match",
-					stripIndents`
-                Get the link to your match and paste it into the \`/match addlink\` command in this server
-                \`\`\`
-                /match addlink link:https://osu.ppy.sh/...
-				\`\`\`
-            `
+				**This match has been archived. Please select one of the options below to continue**
+				
+				**Recover Match:** I will ask for a new mp link from the players, and the match will start where it left off
+
+				**Delete Match:** The match will be deleted, this message will be kept for reference`
 				);
 			embed.image = null;
+			let recoverButton = new MessageButton()
+				.setCustomId("recover_match?id=" + this.id)
+				.setLabel("Recover Match")
+				.setStyle("SUCCESS");
+			let deleteButton = new MessageButton()
+				.setCustomId("delete_match?id=" + this.id)
+				.setLabel("Delete Match")
+				.setStyle("DANGER");
+			let components = new MessageActionRow().addComponents(
+				recoverButton,
+				deleteButton
+			);
+			await message.edit({ embeds: [embed], components: [components] });
+			return;
 		}
 
 		// Warmup Phase
@@ -1346,7 +1345,7 @@ class MatchManager {
 			}
 		}
 
-		// Final Matfch Results
+		// Final Match Results
 		if (state >= 8) {
 			if (this.teams[0].score > this.teams[1].score) {
 				description = `
