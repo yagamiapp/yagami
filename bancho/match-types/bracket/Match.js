@@ -1058,12 +1058,15 @@ class MatchManager {
 
 		// Score line
 		if (state <= 2 || (state >= 5 && state <= 8)) {
-			description += `
+			embed.addField(
+				"Score",
+				`
 				${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
-				this.teams[0].score
-			} - ${this.teams[1].score} | ${this.teams[1].name} ${
-				emotes.teams[this.teams[1].id]
-			}\n`;
+					this.teams[0].score
+				} - ${this.teams[1].score} | ${this.teams[1].name} ${
+					emotes.teams[this.teams[1].id]
+				}`
+			);
 		}
 
 		// Individual Score Table
