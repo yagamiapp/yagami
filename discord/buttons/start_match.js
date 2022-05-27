@@ -62,9 +62,18 @@ module.exports = {
 						],
 					},
 				},
-				state: {
-					lte: 7,
-				},
+				AND: [
+					{
+						state: {
+							not: -1,
+						},
+					},
+					{
+						state: {
+							lte: 7,
+						},
+					},
+				],
 			},
 		});
 		if (duplicateCheck) {
@@ -80,12 +89,20 @@ module.exports = {
 			let button = new MessageActionRow().addComponents([
 				new MessageButton()
 					.setCustomId(
-						`match_start_list?round=${round.acronym}&index=${command.options.index}`
+						`match_start_list?round=${round.acronym}&index=${
+							command.options.index || 0
+						}`
 					)
 					.setLabel("Back")
 					.setStyle("DANGER"),
 			]);
-
+			if (command.options.recover) {
+				await interaction.reply({
+					embeds: [embed],
+					ephemeral: true,
+				});
+				return;
+			}
 			await interaction.update({ embeds: [embed], components: [button] });
 			return;
 		}
@@ -119,6 +136,13 @@ module.exports = {
 					.setStyle("DANGER"),
 			]);
 
+			if (command.options.recover) {
+				await interaction.reply({
+					embeds: [embed],
+					ephemeral: true,
+				});
+				return;
+			}
 			await interaction.update({
 				embeds: [embed],
 				components: [button],
@@ -199,6 +223,16 @@ module.exports = {
 		for (let player of players) {
 			playerString += `<@${player.discord_id}> `;
 		}
+
+		if (command.options.recover) {
+			await interaction.update({
+				content: playerString,
+				embeds: [matchEmbed],
+				components: null,
+			});
+			return;
+		}
+
 		let message = await messageChannel.send({
 			content: playerString,
 			embeds: [matchEmbed],

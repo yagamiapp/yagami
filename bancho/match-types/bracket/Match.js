@@ -183,6 +183,13 @@ class MatchManager {
 			}
 			this.mappool.push(mapObj);
 		}
+
+		// Update state if no mp link
+		if (!this.mp) {
+			await this.updateState(-1);
+			return;
+		}
+
 		// Set Last Game Data
 		let matchNum = this.mp.match(/\d+/g);
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
@@ -191,12 +198,6 @@ class MatchManager {
 		 * @type {import("nodesu")}
 		 */
 		this.lastGameData = lastGame;
-
-		// Update state if no mp link
-		if (!this.mp) {
-			await this.updateState(-1);
-			return;
-		}
 
 		// Setup channel
 		this.channel = fetchChannel(this.mp);
@@ -1298,7 +1299,7 @@ class MatchManager {
 			}
 			embed
 				.setTitle(
-					`ARCHIVED: ${this.round.name}: (${this.teams[0].name}) vs (${this.teams[1].name})`
+					`ARCHIVED: ${this.round.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})`
 				)
 				.setColor("#AAAAAA")
 				.setURL(null)
@@ -1312,7 +1313,7 @@ class MatchManager {
 				);
 			embed.image = null;
 			let recoverButton = new MessageButton()
-				.setCustomId("recover_match?id=" + this.id)
+				.setCustomId("start_match?id=" + this.id + "&recover=true")
 				.setLabel("Recover Match")
 				.setStyle("SUCCESS");
 			let deleteButton = new MessageButton()
@@ -1323,7 +1324,11 @@ class MatchManager {
 				recoverButton,
 				deleteButton
 			);
-			await message.edit({ embeds: [embed], components: [components] });
+			await message.edit({
+				content: null,
+				embeds: [embed],
+				components: [components],
+			});
 			return;
 		}
 

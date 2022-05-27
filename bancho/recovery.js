@@ -8,7 +8,6 @@ module.exports.recover = async () => {
 			},
 		},
 	});
-	console.log(matches);
 
 	for (const match of matches) {
 		if (match.state < 8) {
