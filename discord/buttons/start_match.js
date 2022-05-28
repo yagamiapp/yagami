@@ -127,10 +127,7 @@ module.exports = {
 		}
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: match.id,
-					roundId: round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				state: 3,
@@ -206,10 +203,7 @@ module.exports = {
 
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: match.id,
-					roundId: round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				message_id: message.id,

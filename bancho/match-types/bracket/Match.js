@@ -216,10 +216,7 @@ class MatchManager {
 		// Update db object
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				mp_link: this.lobby.getHistoryUrl(),
@@ -936,10 +933,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				waiting_on: num,
@@ -959,10 +953,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				state: state,
