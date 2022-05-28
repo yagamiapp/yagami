@@ -50,7 +50,7 @@ module.exports = {
 		// Check that the team is not already in a running match
 		let duplicateCheck = await prisma.match.findFirst({
 			where: {
-				teams: {
+				Teams: {
 					some: {
 						OR: [
 							{
