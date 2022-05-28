@@ -76,7 +76,7 @@ model MapInPool {
 
 model Mappool {
   id        Int             @id @default(autoincrement())
-  maps      MapInPool[]
+  Maps      MapInPool[]
   global    Boolean         @default(false)
   Round     Round?
   Qualifier QualifierRound?
@@ -97,7 +97,7 @@ model Round {
   delete_warning String?
   show_mappool   Boolean
   Match          Match[]
-  tournament     Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  Tournament     Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   tournamentId   Int
   mappool        Mappool?   @relation(fields: [mappoolId], references: [id])
   mappoolId      Int?       @unique
@@ -158,7 +158,7 @@ model User {
   osu_pp                   Float
   OsuOauth                 OsuOauth?
   DiscordOauth             DiscordOauth?
-  inTeams                  UserInTeam[]
+  InTeams                  UserInTeam[]
   OwnerOfLobby             AutoHostRotate?
 }
 
@@ -187,7 +187,7 @@ model Guild {
   linked_role           String?
   player_role           String?
   match_results_channel String?
-  tournaments           Tournament[]
+  Tournaments           Tournament[]
   active_tournament     Int?
 }
 
@@ -206,7 +206,7 @@ model Team {
 
 model UserInTeam {
   discordId      String
-  user           User     @relation(fields: [discordId], references: [discord_id])
+  User           User     @relation(fields: [discordId], references: [discord_id])
   Team           Team     @relation(fields: [teamId], references: [id])
   teamId         Int
   delete_warning Boolean?
@@ -216,7 +216,7 @@ model UserInTeam {
 
 model Match {
   id            Int            @id @default(autoincrement())
-  teams         TeamInMatch[]
+  Teams         TeamInMatch[]
   start_time    DateTime?
   message_id    String?
   channel_id    String?
@@ -240,7 +240,7 @@ model ScrimSettings {
 model TeamInMatch {
   matchId    Int
   teamId     Int
-  match      Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  Match      Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
   Team       Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
   score      Int
   roll       Int?
@@ -270,7 +270,7 @@ model MapInMatch {
   pickedByMatchId Int?
   pickNumber      Int?
   pickTeamNumber  Int?
-  won_by          TeamInMatch? @relation(fields: [wonByMatchId, wonByTeamId], references: [matchId, teamId], name: "won")
+  WonBy           TeamInMatch? @relation(fields: [wonByMatchId, wonByTeamId], references: [matchId, teamId], name: "won")
   wonByTeamId     Int?
   wonByMatchId    Int?
   @@id([mapIdentifier, matchId])
@@ -308,7 +308,7 @@ model AutoHostRotate {
   max_length    Int?
   min_rank      Int?
   max_rank      Int?
-  playerOrder   AutoHostRotatePlayer[] @relation("queue")
+  PlayerOrder   AutoHostRotatePlayer[] @relation("queue")
   CurrentHost   AutoHostRotatePlayer?  @relation("current", fields: [currentHostId], references: [id])
   currentHostId Int?                   @unique
 }
