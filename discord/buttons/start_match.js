@@ -139,7 +139,7 @@ module.exports = {
 
 		let players = await prisma.user.findMany({
 			where: {
-				inTeams: {
+				InTeams: {
 					some: {
 						Team: {
 							InBracketMatches: {
