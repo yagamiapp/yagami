@@ -75,7 +75,7 @@ module.exports = {
 		}
 		// In case the player name is longer than 25 characters
 		console.log(options);
-		if (options.name.length > 25) {
+		if (options?.name?.length > 25) {
 			let embed = new MessageEmbed()
 				.setDescription(
 					`**Err**: The name of your team cannot be longer than 25 characters.`
