@@ -118,8 +118,6 @@ module.exports.authUser = async (query, req, res) => {
 	let embed = new MessageEmbed()
 		.setThumbnail(userData.avatar_url)
 		.setTitle("Authorization Success!")
-
-		.setImage(userData.cover_url)
 		.setDescription(
 			stripIndents`
 			Successfully connected discord account to \`${userData.username}\`!
@@ -132,6 +130,9 @@ module.exports.authUser = async (query, req, res) => {
 			`
 		)
 		.setColor("LUMINOUS_VIVID_PINK");
+	if (userData.cover_url) {
+		embed.setImage(userData.cover_url);
+	}
 
 	let guild = await fetchGuild(interaction.guildId);
 
