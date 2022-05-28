@@ -59,7 +59,7 @@ model Map {
   total_length         String?
   version              String?
   video                String?
-  in_pools             MapInPool[]
+  InPools              MapInPool[]
 }
 
 model MapInPool {
@@ -113,7 +113,7 @@ model Tournament {
   score_mode          Int
   team_mode           Int
   team_size           Int
-  XvX_mode            Int
+  x_v_x_mode          Int
   allow_registrations Boolean
   rounds              Round[]
   Guild               Guild?   @relation(fields: [Guild_id], references: [guild_id])
@@ -215,26 +215,32 @@ model UserInTeam {
 }
 
 model Match {
-  id          Int
-  teams       TeamInMatch[]
-  message_id  String?
-  channel_id  String?
-  mp_link     String?
-  waiting_on  Int? // Index of team in teams array
-  Round       Round         @relation(fields: [roundId], references: [id])
-  roundId     Int
-  MapsInMatch MapInMatch[]
-  state       Int
-  scrim       Boolean       @default(false)
+  id            Int            @id @default(autoincrement())
+  teams         TeamInMatch[]
+  start_time    DateTime?
+  message_id    String?
+  channel_id    String?
+  mp_link       String?
+  waiting_on    Int? // Index of team in teams array
+  Round         Round?         @relation(fields: [roundId], references: [id])
+  roundId       Int?
+  ScrimSettings ScrimSettings?
+  MapsInMatch   MapInMatch[]
+  state         Int
+  scrim         Boolean        @default(false)
+}
 
-  @@id([id, roundId])
+model ScrimSettings {
+  matchId Int   @id
+  Match   Match @relation(fields: [matchId], references: [id])
+  bans    Int
+  best_of Int
 }
 
 model TeamInMatch {
   matchId    Int
   teamId     Int
-  roundId    Int
-  match      Match        @relation(fields: [matchId, roundId], references: [id, roundId], onDelete: Cascade)
+  match      Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
   Team       Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
   score      Int
   roll       Int?
@@ -251,9 +257,8 @@ model TeamInMatch {
 
 model MapInMatch {
   Map           MapInPool @relation(fields: [mapIdentifier, poolId], references: [identifier, mappoolId], onDelete: Cascade)
-  Match         Match     @relation(fields: [matchId, roundId], references: [id, roundId], onDelete: Cascade)
+  Match         Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
   matchId       Int
-  roundId       Int
   mapIdentifier String
   poolId        Int
 
