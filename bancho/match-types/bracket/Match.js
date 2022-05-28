@@ -102,7 +102,7 @@ class MatchManager {
 		for (let team of dbTeams) {
 			let users = await prisma.user.findMany({
 				where: {
-					inTeams: {
+					InTeams: {
 						some: {
 							teamId: team.id,
 						},
@@ -143,7 +143,7 @@ class MatchManager {
 		for (const mapInMatch of mappool) {
 			let map = await prisma.map.findFirst({
 				where: {
-					in_pools: {
+					InPools: {
 						some: {
 							InMatches: {
 								some: {
@@ -217,10 +217,7 @@ class MatchManager {
 		// Update db object
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				mp_link: this.lobby.getHistoryUrl(),
@@ -232,7 +229,7 @@ class MatchManager {
 		await this.lobby.setSettings(
 			this.tournament.team_mode,
 			this.tournament.score_mode == 4 ? 3 : this.tournament.score_mode,
-			this.tournament.XvX_mode * 2 + 1
+			this.tournament.x_v_x_mode * 2 + 1
 		);
 
 		// Do onJoin for players currently in the lobby
@@ -333,7 +330,7 @@ class MatchManager {
 			let badTeams = [];
 			for (const key in lobbyCount) {
 				let teamCount = lobbyCount[key];
-				if (teamCount != this.tournament.XvX_mode) {
+				if (teamCount != this.tournament.x_v_x_mode) {
 					badTeams.push(key);
 				}
 			}
@@ -883,6 +880,117 @@ class MatchManager {
 			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapSetId} Beatconnect Mirror]`
 		);
 	}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async listCommand(msg) {
+		let command = msg.content.match(/^!list/g);
+		if (!command) return;
+
+		let team = this.teams[this.waiting_on];
+		let mapString = "";
+		for (let map of this.mappool) {
+			// Detect previous picks and bans
+			if (map.picked || map.banned) continue;
+			if (map.identifier.toUpperCase().includes("TB")) continue;
+			// Detect double picks
+			if (this.state == 0) {
+				let lastTeamPickMods = this.mappool
+					.filter((x) => x.pickedBy?.id == team.id)
+					.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber)
+					.map((x) => x.mods);
+				let lastTeamPick =
+					lastTeamPickMods[lastTeamPickMods.length - 1];
+				if (
+					(this.tournament.double_pick == 1 && lastTeamPick != "") ||
+					this.tournament.double_pick == 0
+				) {
+					if (lastTeamPick == map.mods) {
+						continue;
+					}
+				}
+			}
+			// Detect double bans
+			if (this.state == 7) {
+				let otherBans = this.mappool.filter(
+					(x) => x.bannedBy?.id == team.id
+				);
+				let otherBanMods = otherBans.map((ban) => ban.mods);
+				if (
+					(this.tournament.double_ban == 1 && map.mods != "") ||
+					this.tournament.double_ban == 0
+				) {
+					if (otherBanMods.includes(map.mods)) {
+						continue;
+					}
+				}
+			}
+			mapString +=
+				mapString.length > 0 ? `, ${map.identifier}` : map.identifier;
+		}
+
+		let type;
+		switch (this.state) {
+			case 7:
+				type = "bans";
+				break;
+			case 0:
+				type = "picks";
+				break;
+		}
+		await this.channel.sendMessage(`Available ${type}: ${mapString}`);
+	}
+
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async bansCommand(msg) {
+		let command = msg.content.match(/^!bans/g);
+		if (!command) return;
+
+		if (this.bans.length == 0) {
+			await this.channel.sendMessage("No bans have been chosen yet");
+			return;
+		}
+
+		let banString = "Bans: ";
+		for (const team of this.teams) {
+			let teamString = `${team.name}: `;
+			for (const ban of team.bans) {
+				// Check for a colon, if there is one, it's the first ban
+				teamString +=
+					teamString[teamString.length - 2] == ":"
+						? ban.identifier
+						: `, ${ban.identifier}`;
+			}
+			if (teamString.length == team.name.length + 2)
+				teamString = `${team.name}: None`;
+			banString += teamString + "; ";
+		}
+		await this.channel.sendMessage(banString);
+	}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async scoreCommand(msg) {
+		let command = msg.content.match(/^!score/g);
+		if (!command) return;
+
+		let team = this.teams[this.waiting_on];
+		let bestOfPhrase = `Best of ${this.round.best_of}`;
+		for (const team of this.teams) {
+			if (team.score == (this.round.best_of - 1) / 2) {
+				bestOfPhrase = `Match Point: ${team.name}`;
+			}
+		}
+
+		await this.channel.sendMessage(
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
+		);
+	}
 
 	/**
 	 * Picks a map in the lobby and adds it to the
@@ -942,10 +1050,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				waiting_on: num,
@@ -965,10 +1070,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				state: state,
@@ -985,7 +1087,13 @@ class MatchManager {
 			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
 
-		// this.msgListener(msg);
+		if ((this.state >= 0 && this.state <= 2) || this.state == 7) {
+			await this.listCommand(msg);
+			await this.bansCommand(msg);
+		}
+		if (this.state >= 0 && this.state <= 2) {
+			await this.scoreCommand(msg);
+		}
 
 		if (this.state == 4) {
 			await this.warmupListener(msg);

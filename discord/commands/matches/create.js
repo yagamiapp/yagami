@@ -132,7 +132,6 @@ module.exports = {
 
 		let match = await prisma.match.create({
 			data: {
-				roundId: round.id,
 				id: matches.length + 1,
 				state: 10,
 			},
@@ -205,7 +204,7 @@ module.exports = {
 			let teamString = "";
 			let members = await prisma.user.findMany({
 				where: {
-					inTeams: {
+					InTeams: {
 						some: {
 							teamId: team.id,
 						},
