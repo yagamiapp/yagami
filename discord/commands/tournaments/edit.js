@@ -138,10 +138,6 @@ module.exports = {
 
 		options.forEach((element) => {
 			let prop = element.name;
-			// Temporary fix
-			if (prop === "x_v_x_mode") {
-				prop = "XvX_mode";
-			}
 			tournament[prop] = element.value;
 		});
 

@@ -231,7 +231,7 @@ class MatchManager {
 		await this.lobby.setSettings(
 			this.tournament.team_mode,
 			this.tournament.score_mode == 4 ? 3 : this.tournament.score_mode,
-			this.tournament.XvX_mode * 2 + 1
+			this.tournament.x_v_x_mode * 2 + 1
 		);
 
 		// Do onJoin for players currently in the lobby
@@ -332,7 +332,7 @@ class MatchManager {
 			let badTeams = [];
 			for (const key in lobbyCount) {
 				let teamCount = lobbyCount[key];
-				if (teamCount != this.tournament.XvX_mode) {
+				if (teamCount != this.tournament.x_v_x_mode) {
 					badTeams.push(key);
 				}
 			}
