@@ -55,10 +55,7 @@ module.exports = {
 
 		await prisma.match.delete({
 			where: {
-				id_roundId: {
-					id: parseInt(command.options.id),
-					roundId: round.id,
-				},
+				id: parseInt(command.options.id),
 			},
 		});
 
