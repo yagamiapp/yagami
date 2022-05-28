@@ -2,6 +2,7 @@ const { stripIndents } = require("common-tags/lib");
 const { MessageButton, MessageEmbed, MessageActionRow } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 const { execute } = require("./match_start_list");
+const { MatchManager } = require("../../bancho/match-types/bracket/Match");
 
 module.exports = {
 	data: new MessageButton()
@@ -167,7 +168,7 @@ module.exports = {
 		}
 		await prisma.match.update({
 			where: {
-				id: this.id,
+				id: match.id,
 			},
 			data: {
 				state: 3,
@@ -237,6 +238,14 @@ module.exports = {
 			playerString += `<@${player.discord_id}> `;
 		}
 
+		let archiveTimer = setTimeout(async () => {
+			// Creating a match with state 3 will start archive mode
+			console.log("Archiving...");
+			let archive = new MatchManager(match.id, null);
+			await archive.createMatch();
+		}, 15 * 60 * 1000);
+		module.exports[`match-${match.id}`] = archiveTimer;
+
 		if (command.options.recover) {
 			await interaction.update({
 				content: playerString,
@@ -253,7 +262,7 @@ module.exports = {
 
 		await prisma.match.update({
 			where: {
-				id: this.id,
+				id: match.id,
 			},
 			data: {
 				message_id: message.id,

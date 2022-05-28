@@ -238,6 +238,9 @@ class MatchManager {
 			await this.joinHandler({ player });
 		}
 
+		// Start Warmups
+		this.init = true;
+
 		// Send invites to players outside of the lobby
 		let invitesToIgnore = players
 			.filter((player) => player)
@@ -265,10 +268,9 @@ class MatchManager {
 			"beatmap",
 			async (beatmap) => await this.beatmapHandler(beatmap)
 		);
-		// Start Warmups
-		this.init = true;
 		if (this.state == 3) {
 			await this.updateState(4);
+			await this.warmup();
 			return;
 		}
 
@@ -470,12 +472,7 @@ class MatchManager {
 		if (this.waiting_on == null) {
 			await this.updateWaitingOn(0);
 		}
-
-		// If current host is on warming up team, do nothing
 		let team = this.teams[this.waiting_on];
-		let host = this.lobby.getHost();
-		let user = team.getUserPos(host?.user?.id);
-		if (user != undefined || user != null) return;
 
 		if (team.warmed_up) {
 			await this.lobby.clearHost();
@@ -484,15 +481,20 @@ class MatchManager {
 			return;
 		}
 
+		// If current host is on warming up team, do nothing
+		let host = this.lobby.getHost();
+		let user = team.getUserPos(host?.user?.id);
+		if (user != undefined || user != null) return;
+
 		let slots = this.lobby.slots.filter((slot) => slot);
 
 		for (const player of team.players) {
 			let slotMap = slots.map((slot) => slot?.user?.username);
 			if (slotMap.includes(player.user.username)) {
+				await this.lobby.setHost(player.user.username);
 				if (!this.lobby.freemod) {
 					await this.lobby.setMods("Freemod");
 				}
-				await this.lobby.setHost(player.user.username);
 				await this.channel.sendMessage(
 					`${player.user.username} has been selected to choose the warmup for ${team.name}. Use !skip to skip your warmup`
 				);
