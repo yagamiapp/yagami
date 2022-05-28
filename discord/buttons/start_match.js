@@ -2,6 +2,7 @@ const { stripIndents } = require("common-tags/lib");
 const { MessageButton, MessageEmbed, MessageActionRow } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 const { execute } = require("./match_start_list");
+const { MatchManager } = require("../../bancho/match-types/bracket/Match");
 
 module.exports = {
 	data: new MessageButton()
@@ -16,6 +17,22 @@ module.exports = {
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
+
+		if (
+			command.options.recover &&
+			!interaction.memberPermissions.has("ADMINISTRATOR")
+		) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					"**Err:** You lack the permissions to perform this action"
+				)
+				.setColor("RED")
+				.setFooter({
+					text: "Please ping an admin to recover the match for you",
+				});
+			await interaction.reply({ embeds: [embed], ephemeral: true });
+			return;
+		}
 
 		let round = await prisma.round.findFirst({
 			where: {
@@ -62,9 +79,18 @@ module.exports = {
 						],
 					},
 				},
-				state: {
-					lte: 7,
-				},
+				AND: [
+					{
+						state: {
+							not: -1,
+						},
+					},
+					{
+						state: {
+							lte: 7,
+						},
+					},
+				],
 			},
 		});
 		if (duplicateCheck) {
@@ -80,12 +106,20 @@ module.exports = {
 			let button = new MessageActionRow().addComponents([
 				new MessageButton()
 					.setCustomId(
-						`match_start_list?round=${round.acronym}&index=${command.options.index}`
+						`match_start_list?round=${round.acronym}&index=${
+							command.options.index || 0
+						}`
 					)
 					.setLabel("Back")
 					.setStyle("DANGER"),
 			]);
-
+			if (command.options.recover) {
+				await interaction.reply({
+					embeds: [embed],
+					ephemeral: true,
+				});
+				return;
+			}
 			await interaction.update({ embeds: [embed], components: [button] });
 			return;
 		}
@@ -119,6 +153,13 @@ module.exports = {
 					.setStyle("DANGER"),
 			]);
 
+			if (command.options.recover) {
+				await interaction.reply({
+					embeds: [embed],
+					ephemeral: true,
+				});
+				return;
+			}
 			await interaction.update({
 				embeds: [embed],
 				components: [button],
@@ -127,7 +168,7 @@ module.exports = {
 		}
 		await prisma.match.update({
 			where: {
-				id: this.id,
+				id: match.id,
 			},
 			data: {
 				state: 3,
@@ -196,6 +237,24 @@ module.exports = {
 		for (let player of players) {
 			playerString += `<@${player.discord_id}> `;
 		}
+
+		let archiveTimer = setTimeout(async () => {
+			// Creating a match with state 3 will start archive mode
+			console.log("Archiving...");
+			let archive = new MatchManager(match.id, null);
+			await archive.createMatch();
+		}, 15 * 60 * 1000);
+		module.exports[`match-${match.id}`] = archiveTimer;
+
+		if (command.options.recover) {
+			await interaction.update({
+				content: playerString,
+				embeds: [matchEmbed],
+				components: [],
+			});
+			return;
+		}
+
 		let message = await messageChannel.send({
 			content: playerString,
 			embeds: [matchEmbed],
@@ -203,7 +262,7 @@ module.exports = {
 
 		await prisma.match.update({
 			where: {
-				id: this.id,
+				id: match.id,
 			},
 			data: {
 				message_id: message.id,

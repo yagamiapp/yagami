@@ -1,7 +1,7 @@
 const { prisma } = require("../../../prisma");
 const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const { Team } = require("./Team");
 const { convertEnumToAcro } = require("../../modEnum");
 const { Map } = require("./Map");
@@ -10,6 +10,7 @@ const { fetchChannel, fetchUser } = require("../../client");
 
 // State Enumeration
 let states = {
+	"-1": "Archived",
 	0: "Pick Phase",
 	1: "Ready Phase",
 	2: "Play Phase",
@@ -182,6 +183,13 @@ class MatchManager {
 			}
 			this.mappool.push(mapObj);
 		}
+
+		// Update state if no mp link
+		if (!this.mp) {
+			await this.updateState(-1);
+			return;
+		}
+
 		// Set Last Game Data
 		let matchNum = this.mp.match(/\d+/g);
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
@@ -190,13 +198,6 @@ class MatchManager {
 		 * @type {import("nodesu")}
 		 */
 		this.lastGameData = lastGame;
-
-		// Update state if no mp link
-		if (!this.mp) {
-			await this.updateState(3);
-			await this.updateMessage();
-			return;
-		}
 
 		// Setup channel
 		this.channel = fetchChannel(this.mp);
@@ -208,8 +209,8 @@ class MatchManager {
 			await this.channel.join();
 		} catch (e) {
 			console.log(`${this.mp} no longer exists`);
-			await this.updateState(3);
-			await this.updateMessage();
+			await this.updateState(-1);
+			return;
 		}
 		await this.lobby.clearHost();
 
@@ -236,6 +237,9 @@ class MatchManager {
 		for (let player of players) {
 			await this.joinHandler({ player });
 		}
+
+		// Start Warmups
+		this.init = true;
 
 		// Send invites to players outside of the lobby
 		let invitesToIgnore = players
@@ -264,10 +268,9 @@ class MatchManager {
 			"beatmap",
 			async (beatmap) => await this.beatmapHandler(beatmap)
 		);
-		// Start Warmups
-		this.init = true;
 		if (this.state == 3) {
 			await this.updateState(4);
+			await this.warmup();
 			return;
 		}
 
@@ -469,12 +472,7 @@ class MatchManager {
 		if (this.waiting_on == null) {
 			await this.updateWaitingOn(0);
 		}
-
-		// If current host is on warming up team, do nothing
 		let team = this.teams[this.waiting_on];
-		let host = this.lobby.getHost();
-		let user = team.getUserPos(host?.user?.id);
-		if (user != undefined || user != null) return;
 
 		if (team.warmed_up) {
 			await this.lobby.clearHost();
@@ -483,15 +481,20 @@ class MatchManager {
 			return;
 		}
 
+		// If current host is on warming up team, do nothing
+		let host = this.lobby.getHost();
+		let user = team.getUserPos(host?.user?.id);
+		if (user != undefined || user != null) return;
+
 		let slots = this.lobby.slots.filter((slot) => slot);
 
 		for (const player of team.players) {
 			let slotMap = slots.map((slot) => slot?.user?.username);
 			if (slotMap.includes(player.user.username)) {
+				await this.lobby.setHost(player.user.username);
 				if (!this.lobby.freemod) {
 					await this.lobby.setMods("Freemod");
 				}
-				await this.lobby.setHost(player.user.username);
 				await this.channel.sendMessage(
 					`${player.user.username} has been selected to choose the warmup for ${team.name}. Use !skip to skip your warmup`
 				);
@@ -599,6 +602,11 @@ class MatchManager {
 	async recover() {
 		if (this.state == 0) {
 			await this.pickPhase();
+			return;
+		}
+
+		if (this.state == 3) {
+			await this.updateState(-1);
 			return;
 		}
 
@@ -1160,12 +1168,15 @@ class MatchManager {
 
 		// Score line
 		if (state <= 2 || (state >= 5 && state <= 8)) {
-			description += `
+			embed.addField(
+				"Score",
+				`
 				${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
-				this.teams[0].score
-			} - ${this.teams[1].score} | ${this.teams[1].name} ${
-				emotes.teams[this.teams[1].id]
-			}\n`;
+					this.teams[0].score
+				} - ${this.teams[1].score} | ${this.teams[1].name} ${
+					emotes.teams[this.teams[1].id]
+				}`
+			);
 		}
 
 		// Individual Score Table
@@ -1395,45 +1406,43 @@ class MatchManager {
 		}
 
 		// If no match link
-		if (state == 3) {
+		if (state == -1) {
+			if (this.mp) {
+				embed.addField("Previous MP Link: ", this.mp);
+			}
 			embed
-				.setColor("RED")
+				.setTitle(
+					`ARCHIVED: ${this.round.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})`
+				)
+				.setColor("#AAAAAA")
 				.setURL(null)
 				.setDescription(
-					`
-            Uh oh!
-			We had some trouble finding the link to your match.
-			Here are the steps to create a new one:
-            `
-				)
-				.addField(
-					"Create the match",
 					stripIndents`
-                Select one member of your match to make the lobby, by sending a DM to \`BanchoBot\` on osu:
-                \`\`\`
-                !mp make ${this.tournament.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})
-                \`\`\`
-            `
-				)
-				.addField(
-					"Add yagami as a ref",
-					stripIndents`
-                Add the bot as a ref to your match:
-                \`\`\`
-                !mp addref ${process.env.banchoUsername}
-                \`\`\`
-            `
-				)
-				.addField(
-					"Point the bot to the match",
-					stripIndents`
-                Get the link to your match and paste it into the \`/match addlink\` command in this server
-                \`\`\`
-                /match addlink link:https://osu.ppy.sh/...
-				\`\`\`
-            `
+				**This match has been archived. Please select one of the options below to continue**
+				
+				**Recover Match:** I will ask for a new mp link from the players, and the match will start where it left off
+
+				**Delete Match:** The match will be deleted, this message will be kept for reference`
 				);
 			embed.image = null;
+			let recoverButton = new MessageButton()
+				.setCustomId("start_match?id=" + this.id + "&recover=true")
+				.setLabel("Recover Match")
+				.setStyle("SUCCESS");
+			let deleteButton = new MessageButton()
+				.setCustomId("delete_match?id=" + this.id)
+				.setLabel("Delete Match")
+				.setStyle("DANGER");
+			let components = new MessageActionRow().addComponents(
+				recoverButton,
+				deleteButton
+			);
+			await message.edit({
+				content: null,
+				embeds: [embed],
+				components: [components],
+			});
+			return;
 		}
 
 		// Warmup Phase
@@ -1454,7 +1463,7 @@ class MatchManager {
 			}
 		}
 
-		// Final Matfch Results
+		// Final Match Results
 		if (state >= 8) {
 			if (this.teams[0].score > this.teams[1].score) {
 				description = `

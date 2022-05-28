@@ -134,6 +134,7 @@ module.exports = {
 			data: {
 				id: matches.length + 1,
 				state: 10,
+				roundId: round.id,
 			},
 		});
 
@@ -146,12 +147,9 @@ module.exports = {
 							id: team.id,
 						},
 					},
-					match: {
+					Match: {
 						connect: {
-							id_roundId: {
-								id: match.id,
-								roundId: match.roundId,
-							},
+							id: match.id,
 						},
 					},
 					score: 0,
@@ -183,10 +181,7 @@ module.exports = {
 					},
 					Match: {
 						connect: {
-							id_roundId: {
-								id: match.id,
-								roundId: match.roundId,
-							},
+							id: match.id,
 						},
 					},
 				},
