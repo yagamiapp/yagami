@@ -244,7 +244,7 @@ module.exports = {
 			await interaction.update({
 				content: playerString,
 				embeds: [matchEmbed],
-				components: null,
+				components: [],
 			});
 			return;
 		}
