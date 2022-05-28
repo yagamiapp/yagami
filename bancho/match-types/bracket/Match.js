@@ -101,7 +101,7 @@ class MatchManager {
 		for (let team of dbTeams) {
 			let users = await prisma.user.findMany({
 				where: {
-					inTeams: {
+					InTeams: {
 						some: {
 							teamId: team.id,
 						},
@@ -142,7 +142,7 @@ class MatchManager {
 		for (const mapInMatch of mappool) {
 			let map = await prisma.map.findFirst({
 				where: {
-					in_pools: {
+					InPools: {
 						some: {
 							InMatches: {
 								some: {

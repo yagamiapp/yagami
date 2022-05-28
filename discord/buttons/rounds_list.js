@@ -52,7 +52,7 @@ module.exports = {
 			for (const map of pool) {
 				let data = await prisma.map.findFirst({
 					where: {
-						in_pools: {
+						inPools: {
 							some: {
 								mappoolId: map.mappoolId,
 							},
