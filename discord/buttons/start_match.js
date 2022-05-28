@@ -50,7 +50,7 @@ module.exports = {
 		// Check that the team is not already in a running match
 		let duplicateCheck = await prisma.match.findFirst({
 			where: {
-				teams: {
+				Teams: {
 					some: {
 						OR: [
 							{
@@ -127,10 +127,7 @@ module.exports = {
 		}
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: match.id,
-					roundId: round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				state: 3,
@@ -139,7 +136,7 @@ module.exports = {
 
 		let players = await prisma.user.findMany({
 			where: {
-				inTeams: {
+				InTeams: {
 					some: {
 						Team: {
 							InBracketMatches: {
@@ -206,10 +203,7 @@ module.exports = {
 
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: match.id,
-					roundId: round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				message_id: message.id,

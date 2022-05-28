@@ -20,7 +20,7 @@ module.exports = {
 					not: 3,
 				},
 
-				teams: {
+				Teams: {
 					some: {
 						Team: {
 							Members: {

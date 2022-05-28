@@ -23,7 +23,7 @@ module.exports = {
 
 		let matchId = await prisma.match.findFirst({
 			where: {
-				teams: {
+				Teams: {
 					some: {
 						Team: {
 							Members: {

@@ -101,7 +101,7 @@ class MatchManager {
 		for (let team of dbTeams) {
 			let users = await prisma.user.findMany({
 				where: {
-					inTeams: {
+					InTeams: {
 						some: {
 							teamId: team.id,
 						},
@@ -142,7 +142,7 @@ class MatchManager {
 		for (const mapInMatch of mappool) {
 			let map = await prisma.map.findFirst({
 				where: {
-					in_pools: {
+					InPools: {
 						some: {
 							InMatches: {
 								some: {
@@ -216,10 +216,7 @@ class MatchManager {
 		// Update db object
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				mp_link: this.lobby.getHistoryUrl(),
@@ -231,7 +228,7 @@ class MatchManager {
 		await this.lobby.setSettings(
 			this.tournament.team_mode,
 			this.tournament.score_mode == 4 ? 3 : this.tournament.score_mode,
-			this.tournament.XvX_mode * 2 + 1
+			this.tournament.x_v_x_mode * 2 + 1
 		);
 
 		// Do onJoin for players currently in the lobby
@@ -332,7 +329,7 @@ class MatchManager {
 			let badTeams = [];
 			for (const key in lobbyCount) {
 				let teamCount = lobbyCount[key];
-				if (teamCount != this.tournament.XvX_mode) {
+				if (teamCount != this.tournament.x_v_x_mode) {
 					badTeams.push(key);
 				}
 			}
@@ -936,10 +933,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				waiting_on: num,
@@ -959,10 +953,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				state: state,
