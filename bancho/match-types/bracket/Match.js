@@ -1226,11 +1226,6 @@ class MatchManager {
 		}
 
 		// Check for timer ends
-		console.log(
-			`${this.lastTimer} < ${Date.now()} - 5000 = ${
-				this.lastTimer < Date.now() - 5000
-			}`
-		);
 		if (
 			msg.message == "Countdown finished" &&
 			msg.user.ircUsername == "BanchoBot" &&
