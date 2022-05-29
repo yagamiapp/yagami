@@ -548,6 +548,8 @@ class MatchManager {
 		if (team.warmed_up) {
 			await this.lobby.clearHost();
 			await this.updateState(5);
+			let { team_mode, score_mode, slots } = this.lobbySettings;
+			await this.lobby.setSettings(team_mode, score_mode, slots);
 			await this.roll();
 			return;
 		}
