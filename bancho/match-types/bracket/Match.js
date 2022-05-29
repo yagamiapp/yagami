@@ -1083,11 +1083,32 @@ class MatchManager {
 		console.log(`Match ${this.id} state updated to ${states[state]}`);
 	}
 
+	/**
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
 	async msgHandler(msg) {
 		if (msg.self) return;
 		console.log(
 			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
+
+		// Archive match if bot loses access to lobby
+		if (msg.content.match(/^!mp close/g)) {
+			await this.updateState(-1);
+			return;
+		}
+
+		if (msg.content.match(/^!mp removeref/g)) {
+			try {
+				await this.channel.sendMessage(
+					`WARNING: Match will be automatically archived if the bot loses access to the lobby.`
+				);
+			} catch (e) {
+				console.log("Failed to send message, archiving lobby");
+				await this.updateState(-1);
+				return;
+			}
+		}
 
 		if ((this.state >= 0 && this.state <= 2) || this.state == 7) {
 			await this.listCommand(msg);
