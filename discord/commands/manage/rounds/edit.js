@@ -37,6 +37,11 @@ module.exports = {
 					"Whether the round's mappool is visible to players or not"
 				)
 		),
+	/**
+	 *
+	 * @param {import("discord.js").CommandInteraction} interaction
+	 * @returns
+	 */
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 		let guild = await fetchGuild(interaction.guildId);
@@ -46,7 +51,7 @@ module.exports = {
 		let round = await prisma.round.findFirst({
 			where: { acronym: acronym, tournamentId: tournament.id },
 		});
-		let options = interaction.options.data[0].options;
+		let options = interaction.options.data[0].options[0].options;
 
 		// In case the round doesn't exist
 		if (round == null) {
