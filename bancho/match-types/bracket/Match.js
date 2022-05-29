@@ -27,11 +27,11 @@ let states = {
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
 let timers = {
-	warmup: 180,
-	choose: 90,
-	pick: 120,
-	ban: 120,
-	ready: 120,
+	0: 120,
+	1: 120,
+	4: 180,
+	6: 90,
+	7: 120,
 };
 
 class MatchManager {
@@ -533,7 +533,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`You have ${timers.warmup / 60} minutes to start the warmup`
 				);
-				await this.lobby.startTimer(timers.warmup);
+				await this.lobby.startTimer(timers[this.state]);
 				return;
 			}
 		}
@@ -589,7 +589,7 @@ class MatchManager {
 		await this.channel.sendMessage(
 			`${team.name}, it is your turn to pick! Use !choose [first|second] [pick|ban] to choose the order`
 		);
-		await this.lobby.startTimer(timers.choose);
+		await this.startTimer();
 	}
 
 	async banPhase() {
@@ -611,7 +611,7 @@ class MatchManager {
 				this.round.bans - team.bans.length == 1 ? "ban" : "bans"
 			} left, Use !list to see the available bans`
 		);
-		await this.lobby.startTimer(timers.ban);
+		await this.startTimer();
 	}
 
 	async pickPhase() {
@@ -627,7 +627,7 @@ class MatchManager {
 			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
 		);
 		await this.channel.sendMessage("Use !pick [map] to pick a map");
-		await this.lobby.startTimer(timers.pick);
+		await this.startTimer();
 	}
 
 	async recover() {
@@ -1084,6 +1084,7 @@ class MatchManager {
 		}
 		await this.lobby.setMods(modString);
 		await this.updateState(1);
+		await this.startTimer();
 	}
 
 	async invitePlayer(name) {
@@ -1169,7 +1170,8 @@ class MatchManager {
 		// Check for timer ends
 		if (
 			msg.content == "Countdown finished" &&
-			msg.user.ircUsername == "BanchoBot"
+			msg.user.ircUsername == "BanchoBot" &&
+			this.lastTimer > Date.now() + 5000
 		) {
 			await this.timerHandler(false);
 			return;
@@ -1181,6 +1183,30 @@ class MatchManager {
 		) {
 			await this.timerHandler(true);
 			return;
+		}
+
+		// Check for ref abuse
+		if (msg.content.match(/^!mp timer|^!mp aborttimer/g)) {
+			this.lastTimer = Date.now();
+			await this.channel.sendMessage(
+				"Leave the mp commands alone. I've got it covered."
+			);
+
+			let team;
+			for (const teamTest of this.teams) {
+				if (teamTest.users.find((u) => u.osu_id == msg.user.id)) {
+					team = teamTest;
+				}
+			}
+
+			if (team == this.teams[this.waiting_on]) {
+				await this.channel.sendMessage(
+					"You have lost your priority for doing that."
+				);
+				await this.timerHandler(false);
+				return;
+			}
+			await this.startTimer();
 		}
 
 		if ((this.state >= 0 && this.state <= 2) || this.state == 7) {
@@ -1213,6 +1239,11 @@ class MatchManager {
 		if (this.state == 0) {
 			await this.pickListener(msg);
 		}
+	}
+
+	async startTimer() {
+		await this.lobby.startTimer(timers[this.state]);
+		this.lastTimer = Date.now();
 	}
 
 	async timerHandler(warn) {
