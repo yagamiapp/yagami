@@ -19,7 +19,7 @@ module.exports = {
 					"**Err**: There are no teams in this tournament."
 				)
 				.setColor("RED");
-			await interaction.reply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 
