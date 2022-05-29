@@ -70,6 +70,20 @@ module.exports = {
 				.setDescription(
 					"Set a custom color for your tournament e.g.(#0EB8B9)"
 				)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("double_pick")
+				.addChoice("No double picking", 0)
+				.addChoice("No double picking NM excluded", 1)
+				.addChoice("Double picking", 2)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("double_ban")
+				.addChoice("No double banning", 0)
+				.addChoice("No double banning NM excluded", 1)
+				.addChoice("Double banning", 2)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
