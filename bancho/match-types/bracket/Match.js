@@ -26,11 +26,6 @@ let states = {
 
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
-// There's currently a bug with local SQLite
-// Databases, where too many requests in
-// Succession will crash prisma.
-let prismaTimeout = 200;
-
 class MatchManager {
 	/**
 	 *
@@ -169,7 +164,7 @@ class MatchManager {
 			});
 			let mapObj = new Map(this, map, mapInMatch);
 			mapObj.setMapInPool(mapInPool);
-			// Give bans to teams
+			// Give picks, bans, and wins to teams
 			if (mapObj.banned) {
 				this.bans.push(mapObj);
 				await mapObj.bannedBy.addBan(mapObj);
@@ -194,12 +189,12 @@ class MatchManager {
 		let matchNum = this.mp.match(/\d+/g);
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
 		let lastGame = data.games[data.games.length - 1];
-		/**
-		 * @type {import("nodesu")}
-		 */
 		this.lastGameData = lastGame;
 
 		// Setup channel
+		/**
+		 * @type {import("bancho.js").BanchoMultiplayerChannel}
+		 */
 		this.channel = fetchChannel(this.mp);
 		/**
 		 * @type {import("bancho.js").BanchoLobby}
@@ -226,11 +221,17 @@ class MatchManager {
 		this.mp = this.lobby.getHistoryUrl();
 
 		// Setup lobby settings
-		await this.lobby.setSettings(
-			this.tournament.team_mode,
-			this.tournament.score_mode == 4 ? 3 : this.tournament.score_mode,
-			this.tournament.x_v_x_mode * 2 + 1
-		);
+		this.lobbySettings = {
+			team_mode: this.tournament.team_mode,
+			score_mode:
+				this.tournament.score_mode == 4
+					? 3
+					: this.tournament.score_mode,
+			slots: this.tournament.x_v_x_mode * 2 + 1,
+		};
+
+		let { team_mode, score_mode, slots } = this.lobbySettings;
+		await this.lobby.setSettings(team_mode, score_mode, slots);
 
 		// Do onJoin for players currently in the lobby
 		let players = this.lobby.slots.filter((x) => x);
@@ -238,7 +239,6 @@ class MatchManager {
 			await this.joinHandler({ player });
 		}
 
-		// Start Warmups
 		this.init = true;
 
 		// Send invites to players outside of the lobby
@@ -268,6 +268,8 @@ class MatchManager {
 			"beatmap",
 			async (beatmap) => await this.beatmapHandler(beatmap)
 		);
+
+		// Start Warmups
 		if (this.state == 3) {
 			await this.updateState(4);
 			await this.warmup();
@@ -359,7 +361,6 @@ class MatchManager {
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
 		let lastGame = data.games[data.games.length - 1];
 		this.lastGameData = lastGame;
-		this.updateMessage();
 
 		if (this.state == 4) {
 			let team = this.teams[this.waiting_on];
@@ -517,13 +518,10 @@ class MatchManager {
 			await this.channel.sendMessage(
 				"It's time to roll! I'll count the first roll from any player on each team."
 			);
-			await this.updateMessage();
 			return;
 		}
 
 		if (!teamRolls.includes(null)) {
-			await this.updateMessage();
-
 			// Check if all elements in array are the same
 			let rolls = [...new Set(teamRolls)];
 			if (rolls.length == 1) {
@@ -581,7 +579,6 @@ class MatchManager {
 				this.round.bans - team.bans.length == 1 ? "ban" : "bans"
 			} left, Use !list to see the available bans`
 		);
-		await this.updateMessage();
 	}
 
 	async pickPhase() {
@@ -683,6 +680,7 @@ class MatchManager {
 				);
 				this.rollVerification[msg.user.ircUsername] = null;
 				await this.roll();
+				await this.updateMessage();
 			}
 		}
 	}
@@ -1049,7 +1047,6 @@ class MatchManager {
 	 */
 	async updateWaitingOn(num) {
 		this.waiting_on = num;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
 				id: this.id,
@@ -1069,7 +1066,6 @@ class MatchManager {
 	async updateState(state) {
 		this.state = state;
 
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
 				id: this.id,
