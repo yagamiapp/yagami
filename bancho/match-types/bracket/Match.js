@@ -572,7 +572,9 @@ class MatchManager {
 					`${player.user.username} has been selected to choose the warmup for ${team.name}. Use !skip to skip your warmup`
 				);
 				await this.channel.sendMessage(
-					`You have ${timers.warmup / 60} minutes to start the warmup`
+					`You have ${
+						timers[this.state] / 60
+					} minutes to start the warmup`
 				);
 				await this.lobby.startTimer(timers[this.state]);
 				return;
