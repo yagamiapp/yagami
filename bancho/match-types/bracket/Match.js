@@ -1173,7 +1173,7 @@ class MatchManager {
 			msg.user.ircUsername == "BanchoBot" &&
 			this.lastTimer > Date.now() + 5000
 		) {
-			await this.timerHandler(false);
+			await this.timerHandler(false, true);
 			return;
 		}
 
@@ -1186,11 +1186,17 @@ class MatchManager {
 		}
 
 		// Check for ref abuse
-		if (msg.content.match(/^!mp timer|^!mp aborttimer/g)) {
-			this.lastTimer = Date.now();
+		if (msg.content.match(/^!mp/g)) {
 			await this.channel.sendMessage(
 				"Leave the mp commands alone. I've got it covered."
 			);
+		}
+
+		if (msg.content.match(/^!mp timer|^!mp aborttimer/g)) {
+			if (msg.content.match(/^!mp timer/g)) {
+				this.lastTimer = Date.now();
+				await this.lobby.abortTimer();
+			}
 
 			let team;
 			for (const teamTest of this.teams) {
@@ -1199,14 +1205,15 @@ class MatchManager {
 				}
 			}
 
-			if (team == this.teams[this.waiting_on]) {
+			if (team == this.teams[this.waiting_on] && timers[this.state]) {
 				await this.channel.sendMessage(
 					"You have lost your priority for doing that."
 				);
-				await this.timerHandler(false);
+				await this.timerHandler(false, true);
 				return;
 			}
 			await this.startTimer();
+			return;
 		}
 
 		if ((this.state >= 0 && this.state <= 2) || this.state == 7) {
@@ -1246,7 +1253,7 @@ class MatchManager {
 		this.lastTimer = Date.now();
 	}
 
-	async timerHandler(warn) {
+	async timerHandler(warn, excludeMessage) {
 		let team = this.teams[this.waiting_on];
 
 		let stateEnum = {
@@ -1268,9 +1275,12 @@ class MatchManager {
 		}
 
 		await this.updateWaitingOn(1 - this.waiting_on);
-		await this.channel.sendMessage(
-			`${team.name} took too long to ${stateText}!`
-		);
+		console.log(excludeMessage);
+		if (!excludeMessage) {
+			await this.channel.sendMessage(
+				`${team.name} took too long to ${stateText}!`
+			);
+		}
 
 		if (this.state == 4) {
 			await team.setWarmedUp(true);
