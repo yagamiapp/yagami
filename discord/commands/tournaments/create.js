@@ -75,6 +75,7 @@ module.exports = {
 		.addIntegerOption((option) =>
 			option
 				.setName("double_pick")
+				.setDescription("Whether double picks are allowed or not")
 				.addChoice("No double picking", 0)
 				.addChoice("No double picking NM excluded", 1)
 				.addChoice("Double picking", 2)
@@ -82,6 +83,7 @@ module.exports = {
 		.addIntegerOption((option) =>
 			option
 				.setName("double_ban")
+				.setDescription("Whether double bans are allowed or not")
 				.addChoice("No double banning", 0)
 				.addChoice("No double banning NM excluded", 1)
 				.addChoice("Double banning", 2)
