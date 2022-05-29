@@ -74,7 +74,6 @@ module.exports = {
 			return;
 		}
 		// In case the player name is longer than 25 characters
-		console.log(options);
 		if (options?.name?.length > 25) {
 			let embed = new MessageEmbed()
 				.setDescription(
@@ -82,7 +81,7 @@ module.exports = {
 				)
 				.setColor("RED")
 				.setFooter({
-					text: "If your team name is an emote, pick something else :",
+					text: "If your team name is an emote, pick something else :)",
 				});
 			await interaction.editReply({ embeds: [embed] });
 			return;
