@@ -1145,7 +1145,7 @@ class MatchManager {
 	async msgHandler(msg) {
 		if (msg.self) return;
 		console.log(
-			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
+			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.content}`
 		);
 
 		// Archive match if bot loses access to lobby
@@ -1176,7 +1176,7 @@ class MatchManager {
 		}
 
 		if (
-			msg.content == "Countdown ends in 1 minute" &&
+			msg.content == "Countdown ends in 30 seconds" &&
 			msg.user.ircUsername == "BanchoBot"
 		) {
 			await this.timerHandler(true);
@@ -1230,9 +1230,9 @@ class MatchManager {
 		if (!stateText) return;
 
 		if (warn) {
-			await this.channel.sendMessage(`
-			⚠ WARNING ⚠ ${team.name} will lose their priotity to ${stateText} in 1 minute.
-			`);
+			await this.channel.sendMessage(
+				`⚠ WARNING ⚠ ${team.name} will lose their priority to ${stateText} in 30 seconds.`
+			);
 			return;
 		}
 
