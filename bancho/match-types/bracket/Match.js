@@ -26,7 +26,6 @@ let states = {
 
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
-
 let maxWarmupLength = 300;
 
 let timers = {
@@ -413,6 +412,13 @@ class MatchManager {
 			let scoreString = "";
 			for (const team of this.teams) {
 				let score = team.calculateScore(team);
+
+				if ([2, 4].includes(this.tournament.score_mode)) {
+					score =
+						((score * 100) / this.tournament.x_v_x_mode).toFixed(
+							3
+						) + "%";
+				}
 				scoreString +=
 					scoreString == ""
 						? `${team.name} (${score.toLocaleString()})`
