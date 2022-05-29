@@ -22,14 +22,16 @@ module.exports = {
 			let embed = new MessageEmbed().setDescription(
 				"**Err**: There is no active tournament"
 			);
-			await interaction.reply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 
 		// In case there are no teams
 		if (!teams) {
 			let embed = new MessageEmbed()
-				.setDescription("**Err**: There are no teams in this tournament.")
+				.setDescription(
+					"**Err**: There are no teams in this tournament."
+				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
 			return;
