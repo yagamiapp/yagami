@@ -29,7 +29,7 @@ let nodesuClient = new Client(process.env.banchoAPIKey);
 let maxWarmupLength = 300;
 
 let timers = {
-	0: 120,
+	0: 30,
 	1: 120,
 	4: 180,
 	6: 90,
@@ -463,9 +463,9 @@ class MatchManager {
 						`The lobby will be closed in 90 seconds`
 					);
 					await this.lobby.startTimer(90);
-					setTimeout(() => {
-						this.lobby.closeLobby();
-						this.updateState(9);
+					setTimeout(async () => {
+						await this.lobby.closeLobby();
+						await this.updateState(9);
 					}, 90 * 1000);
 					return;
 				}
@@ -576,7 +576,7 @@ class MatchManager {
 						timers[this.state] / 60
 					} minutes to start the warmup`
 				);
-				await this.lobby.startTimer(timers[this.state]);
+				await this.startTimer(timers[this.state]);
 				return;
 			}
 		}
@@ -704,8 +704,8 @@ class MatchManager {
 		}
 
 		if (this.state == 8) {
-			this.lobby.closeLobby();
-			this.updateState(9);
+			await this.lobby.closeLobby();
+			await this.updateState(9);
 			return;
 		}
 	}
@@ -724,7 +724,7 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 		if (user == null) return;
 
-		let command = msg.content.match(/^!skip/g);
+		let command = msg.message.match(/^!skip/g);
 		if (command) {
 			let team = this.teams[this.waiting_on];
 			await team.setWarmedUp(true);
@@ -739,14 +739,14 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async rollListener(msg) {
-		if (msg.content.toLowerCase() == "!roll") {
+		if (msg.message.toLowerCase() == "!roll") {
 			this.rollVerification[msg.user.ircUsername] = true;
 			return;
 		}
 
 		if (msg.user.ircUsername != "BanchoBot") return;
 
-		let content = msg.content;
+		let content = msg.message;
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
 
 		if (roll && this.rollVerification[roll.groups.user]) {
@@ -781,10 +781,10 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 		user = team.getUser(user);
 		if (user == null) return;
-		let command = msg.content.match(
+		let command = msg.message.match(
 			/!choose (?<order>first|second) (?<type>pick|ban)/
 		);
-		if (!command && msg.content.startsWith("!choose")) {
+		if (!command && msg.message.startsWith("!choose")) {
 			await this.channel.sendMessage(
 				"Invalid command usage! Correct Usage: !choose [first|second] [pick|ban]"
 			);
@@ -809,7 +809,7 @@ class MatchManager {
 				let otherTeam = this.teams[1 - this.waiting_on];
 				await otherTeam.setPickOrder(1);
 			}
-			this.updateWaitingOn(1 - this.waiting_on);
+			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
 		}
 
@@ -845,7 +845,7 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 
 		if (user == null) return;
-		let command = msg.content.match(/!ban (?<map>\w+)/);
+		let command = msg.message.match(/!ban (?<map>\w+)/);
 
 		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
@@ -907,7 +907,7 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 
 		if (user == null) return;
-		let command = msg.content.match(/!pick (?<map>\w+)/);
+		let command = msg.message.match(/!pick (?<map>\w+)/);
 
 		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
@@ -980,7 +980,7 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async listCommand(msg) {
-		let command = msg.content.match(/^!list/g);
+		let command = msg.message.match(/^!list/g);
 		if (!command) return;
 
 		let team = this.teams[this.waiting_on];
@@ -1042,7 +1042,7 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async bansCommand(msg) {
-		let command = msg.content.match(/^!bans/g);
+		let command = msg.message.match(/^!bans/g);
 		if (!command) return;
 
 		if (this.bans.length == 0) {
@@ -1071,7 +1071,7 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async scoreCommand(msg) {
-		let command = msg.content.match(/^!score/g);
+		let command = msg.message.match(/^!score/g);
 		if (!command) return;
 
 		let team = this.teams[this.waiting_on];
@@ -1189,16 +1189,16 @@ class MatchManager {
 	async msgHandler(msg) {
 		if (msg.self) return;
 		console.log(
-			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.content}`
+			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
 
 		// Archive match if bot loses access to lobby
-		if (msg.content.match(/^!mp close/g)) {
+		if (msg.message.match(/^!mp close/g)) {
 			await this.updateState(-1);
 			return;
 		}
 
-		if (msg.content.match(/^!mp removeref/g)) {
+		if (msg.message.match(/^!mp removeref/g)) {
 			try {
 				await this.channel.sendMessage(
 					`WARNING: Match will be automatically archived if the bot loses access to the lobby.`
@@ -1211,17 +1211,22 @@ class MatchManager {
 		}
 
 		// Check for timer ends
+		console.log(
+			`${this.lastTimer} < ${Date.now()} - 5000 = ${
+				this.lastTimer < Date.now() - 5000
+			}`
+		);
 		if (
-			msg.content == "Countdown finished" &&
+			msg.message == "Countdown finished" &&
 			msg.user.ircUsername == "BanchoBot" &&
-			this.lastTimer > Date.now() + 5000
+			this.lastTimer < Date.now() - 5000
 		) {
-			await this.timerHandler(false, true);
+			await this.timerHandler(false);
 			return;
 		}
 
 		if (
-			msg.content == "Countdown ends in 30 seconds" &&
+			msg.message == "Countdown ends in 30 seconds" &&
 			msg.user.ircUsername == "BanchoBot"
 		) {
 			await this.timerHandler(true);
@@ -1229,18 +1234,17 @@ class MatchManager {
 		}
 
 		// Check for ref abuse
-		if (msg.content.match(/^!mp/g)) {
+		if (msg.message.match(/^!mp/g)) {
+			if (msg.message.match(/^!mp timer/g)) {
+				this.lastTimer = Date.now();
+				await this.lobby.abortTimer();
+			}
 			await this.channel.sendMessage(
 				"Leave the mp commands alone. I've got it covered. Too much abuse of mp commands will result in an automatic forfeit"
 			);
 		}
 
-		if (msg.content.match(/^!mp timer|^!mp aborttimer/g)) {
-			if (msg.content.match(/^!mp timer/g)) {
-				this.lastTimer = Date.now();
-				await this.lobby.abortTimer();
-			}
-
+		if (msg.message.match(/^!mp timer|^!mp aborttimer/g)) {
 			let team;
 			for (const teamTest of this.teams) {
 				if (teamTest.users.find((u) => u.osu_id == msg.user.id)) {
@@ -1318,7 +1322,6 @@ class MatchManager {
 		}
 
 		await this.updateWaitingOn(1 - this.waiting_on);
-		console.log(excludeMessage);
 		if (!excludeMessage) {
 			await this.channel.sendMessage(
 				`${team.name} took too long to ${stateText}!`
@@ -1395,6 +1398,11 @@ class MatchManager {
 					emotes.teams[this.teams[1].id]
 				}`
 			);
+		}
+
+		// Remove img on setup phases
+		if ([5, 6, 7].includes(state)) {
+			embed.image == null;
 		}
 
 		// Individual Score Table
@@ -1505,7 +1513,7 @@ class MatchManager {
 					parseInt(score.score).toLocaleString(),
 					parseInt(score.maxcombo).toLocaleString() + "x",
 					(accuracy * 100).toFixed(2) + "%",
-					`${mods == "" ? "" : "+" + mods.join("")}`,
+					`${mods == [""] ? "" : "+" + mods.join("")}`,
 				];
 
 				teamStrings[team.id].userScores.push(userScore);
