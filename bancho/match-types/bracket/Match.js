@@ -1412,7 +1412,7 @@ class MatchManager {
 
 		// Remove img on setup phases
 		if ([5, 6, 7].includes(state)) {
-			embed.image == null;
+			embed.image = null;
 		}
 
 		// Individual Score Table
