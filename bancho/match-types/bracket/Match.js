@@ -628,9 +628,13 @@ class MatchManager {
 			await this.banPhase();
 			return;
 		}
+		let typeOption = "[pick|ban]";
+		if (this.round.bans == 0) {
+			typeOption = "pick";
+		}
 
 		await this.channel.sendMessage(
-			`${team.name}, it is your turn to pick! Use !choose [first|second] [pick|ban] to choose the order`
+			`${team.name}, it is your turn to pick! Use "!choose [first|second] ${typeOption}" to choose the order`
 		);
 		await this.startTimer();
 	}
@@ -789,8 +793,12 @@ class MatchManager {
 				"Invalid command usage! Correct Usage: !choose [first|second] [pick|ban]"
 			);
 		}
-
 		if (!command) return;
+		if (this.round.bans == 0 && command.groups.type == "ban") {
+			await this.channel.sendMessage(
+				"There are no bans in this round, so you can't choose the ban order"
+			);
+		}
 
 		if (command.groups.type.toLowerCase() == "pick") {
 			if (team.pick_order) {
