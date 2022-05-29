@@ -618,7 +618,10 @@ class MatchManager {
 
 	async chooseOrder() {
 		let team = this.teams[this.waiting_on];
-		if (team.pick_order && team.ban_order) {
+
+		let banOrderChosen = team.ban_order != null || this.round.bans == 0;
+		let pickOrderChosen = team.pick_order != null;
+		if (banOrderChosen && pickOrderChosen) {
 			if (team.ban_order == 1) {
 				await this.updateWaitingOn(this.teams.indexOf(team));
 			} else {
@@ -628,9 +631,13 @@ class MatchManager {
 			await this.banPhase();
 			return;
 		}
+		let typeOption = "[pick|ban]";
+		if (this.round.bans == 0) {
+			typeOption = "pick";
+		}
 
 		await this.channel.sendMessage(
-			`${team.name}, it is your turn to pick! Use !choose [first|second] [pick|ban] to choose the order`
+			`${team.name}, it is your turn to pick! Use "!choose [first|second] ${typeOption}" to choose the order`
 		);
 		await this.startTimer();
 	}
@@ -789,8 +796,16 @@ class MatchManager {
 				"Invalid command usage! Correct Usage: !choose [first|second] [pick|ban]"
 			);
 		}
-
 		if (!command) return;
+		if (
+			this.round.bans == 0 &&
+			command.groups.type.toLowerCase() == "ban"
+		) {
+			await this.channel.sendMessage(
+				"There are no bans in this round, so you can't choose the ban order"
+			);
+			return;
+		}
 
 		if (command.groups.type.toLowerCase() == "pick") {
 			if (team.pick_order) {
