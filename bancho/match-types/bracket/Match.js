@@ -26,6 +26,8 @@ let states = {
 
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
+let maxWarmupLength = 300;
+
 class MatchManager {
 	/**
 	 *
@@ -229,6 +231,7 @@ class MatchManager {
 					: this.tournament.score_mode,
 			slots: this.tournament.x_v_x_mode * 2 + 1,
 		};
+		this.beatmap = this.lobby.beatmap;
 
 		let { team_mode, score_mode, slots } = this.lobbySettings;
 		await this.lobby.setSettings(team_mode, score_mode, slots);
@@ -268,6 +271,19 @@ class MatchManager {
 			"beatmap",
 			async (beatmap) => await this.beatmapHandler(beatmap)
 		);
+
+		// Smaller event handlers without their own function:
+		this.lobby.on("matchStarted", () => {
+			if (this.state == 4 && this.beatmap.hitLength > maxWarmupLength) {
+				let team = this.teams[this.waiting_on];
+				setTimeout(async () => {
+					await this.lobby.abortMatch();
+					await team.setWarmedUp(true);
+					await this.updateWaitingOn(1 - this.waiting_on);
+					await this.warmup();
+				}, 10000);
+			}
+		});
 
 		// Start Warmups
 		if (this.state == 3) {
@@ -464,9 +480,25 @@ class MatchManager {
 		}
 	}
 
+	/**
+	 *
+	 * @param {import("nodesu").Beatmap} beatmap
+	 */
 	async beatmapHandler(beatmap) {
 		this.beatmap = beatmap;
 		await this.updateMessage();
+		if (!beatmap) return;
+		if (this.state == 4) {
+			if (beatmap.hitLength > maxWarmupLength) {
+				await this.channel.sendMessage(
+					`Your warmup map must be shorter than ${maxWarmupLength} seconds. If the match is started, the match will be aborted and you will lose your warmup.`
+				);
+				return;
+			}
+			await this.channel.sendMessage(
+				`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.version}]] - [https://beatconnect.io/b/${beatmap.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${beatmap.beatmapset_id} chimu.moe Mirror]`
+			);
+		}
 	}
 
 	async warmup() {
