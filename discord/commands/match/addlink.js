@@ -23,7 +23,7 @@ module.exports = {
 
 		let matchId = await prisma.match.findFirst({
 			where: {
-				teams: {
+				Teams: {
 					some: {
 						Team: {
 							Members: {
@@ -76,6 +76,10 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 		}
 
+		let archiveTimeout = require("../../buttons/start_match")[
+			`match-${match.id}`
+		];
+		clearTimeout(archiveTimeout);
 		embed
 			.setTitle("Match loaded!")
 			.setColor("GREEN")

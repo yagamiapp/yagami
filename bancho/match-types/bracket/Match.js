@@ -1,7 +1,7 @@
 const { prisma } = require("../../../prisma");
 const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
 const { Team } = require("./Team");
 const { convertEnumToAcro } = require("../../modEnum");
 const { Map } = require("./Map");
@@ -10,6 +10,7 @@ const { fetchChannel, fetchUser } = require("../../client");
 
 // State Enumeration
 let states = {
+	"-1": "Archived",
 	0: "Pick Phase",
 	1: "Ready Phase",
 	2: "Play Phase",
@@ -101,7 +102,7 @@ class MatchManager {
 		for (let team of dbTeams) {
 			let users = await prisma.user.findMany({
 				where: {
-					inTeams: {
+					InTeams: {
 						some: {
 							teamId: team.id,
 						},
@@ -142,7 +143,7 @@ class MatchManager {
 		for (const mapInMatch of mappool) {
 			let map = await prisma.map.findFirst({
 				where: {
-					in_pools: {
+					InPools: {
 						some: {
 							InMatches: {
 								some: {
@@ -182,6 +183,13 @@ class MatchManager {
 			}
 			this.mappool.push(mapObj);
 		}
+
+		// Update state if no mp link
+		if (!this.mp) {
+			await this.updateState(-1);
+			return;
+		}
+
 		// Set Last Game Data
 		let matchNum = this.mp.match(/\d+/g);
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
@@ -190,13 +198,6 @@ class MatchManager {
 		 * @type {import("nodesu")}
 		 */
 		this.lastGameData = lastGame;
-
-		// Update state if no mp link
-		if (!this.mp) {
-			await this.updateState(3);
-			await this.updateMessage();
-			return;
-		}
 
 		// Setup channel
 		this.channel = fetchChannel(this.mp);
@@ -208,18 +209,15 @@ class MatchManager {
 			await this.channel.join();
 		} catch (e) {
 			console.log(`${this.mp} no longer exists`);
-			await this.updateState(3);
-			await this.updateMessage();
+			await this.updateState(-1);
+			return;
 		}
 		await this.lobby.clearHost();
 
 		// Update db object
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				mp_link: this.lobby.getHistoryUrl(),
@@ -231,7 +229,7 @@ class MatchManager {
 		await this.lobby.setSettings(
 			this.tournament.team_mode,
 			this.tournament.score_mode == 4 ? 3 : this.tournament.score_mode,
-			this.tournament.XvX_mode * 2 + 1
+			this.tournament.x_v_x_mode * 2 + 1
 		);
 
 		// Do onJoin for players currently in the lobby
@@ -239,6 +237,9 @@ class MatchManager {
 		for (let player of players) {
 			await this.joinHandler({ player });
 		}
+
+		// Start Warmups
+		this.init = true;
 
 		// Send invites to players outside of the lobby
 		let invitesToIgnore = players
@@ -267,10 +268,9 @@ class MatchManager {
 			"beatmap",
 			async (beatmap) => await this.beatmapHandler(beatmap)
 		);
-		// Start Warmups
-		this.init = true;
 		if (this.state == 3) {
 			await this.updateState(4);
+			await this.warmup();
 			return;
 		}
 
@@ -332,7 +332,7 @@ class MatchManager {
 			let badTeams = [];
 			for (const key in lobbyCount) {
 				let teamCount = lobbyCount[key];
-				if (teamCount != this.tournament.XvX_mode) {
+				if (teamCount != this.tournament.x_v_x_mode) {
 					badTeams.push(key);
 				}
 			}
@@ -460,7 +460,6 @@ class MatchManager {
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.updateState(0);
 			await this.pickPhase();
-			console.log(this);
 		}
 	}
 
@@ -473,12 +472,7 @@ class MatchManager {
 		if (this.waiting_on == null) {
 			await this.updateWaitingOn(0);
 		}
-
-		// If current host is on warming up team, do nothing
 		let team = this.teams[this.waiting_on];
-		let host = this.lobby.getHost();
-		let user = team.getUserPos(host?.user?.id);
-		if (user != undefined || user != null) return;
 
 		if (team.warmed_up) {
 			await this.lobby.clearHost();
@@ -487,15 +481,20 @@ class MatchManager {
 			return;
 		}
 
+		// If current host is on warming up team, do nothing
+		let host = this.lobby.getHost();
+		let user = team.getUserPos(host?.user?.id);
+		if (user != undefined || user != null) return;
+
 		let slots = this.lobby.slots.filter((slot) => slot);
 
 		for (const player of team.players) {
 			let slotMap = slots.map((slot) => slot?.user?.username);
 			if (slotMap.includes(player.user.username)) {
+				await this.lobby.setHost(player.user.username);
 				if (!this.lobby.freemod) {
 					await this.lobby.setMods("Freemod");
 				}
-				await this.lobby.setHost(player.user.username);
 				await this.channel.sendMessage(
 					`${player.user.username} has been selected to choose the warmup for ${team.name}. Use !skip to skip your warmup`
 				);
@@ -603,6 +602,11 @@ class MatchManager {
 	async recover() {
 		if (this.state == 0) {
 			await this.pickPhase();
+			return;
+		}
+
+		if (this.state == 3) {
+			await this.updateState(-1);
 			return;
 		}
 
@@ -875,7 +879,118 @@ class MatchManager {
 
 		await this.addPick(map);
 		await this.channel.sendMessage(
-			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapSetId} Beatconnect Mirror]`
+			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${map.beatmapset_id} chimu.moe Mirror]`
+		);
+	}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async listCommand(msg) {
+		let command = msg.content.match(/^!list/g);
+		if (!command) return;
+
+		let team = this.teams[this.waiting_on];
+		let mapString = "";
+		for (let map of this.mappool) {
+			// Detect previous picks and bans
+			if (map.picked || map.banned) continue;
+			if (map.identifier.toUpperCase().includes("TB")) continue;
+			// Detect double picks
+			if (this.state == 0) {
+				let lastTeamPickMods = this.mappool
+					.filter((x) => x.pickedBy?.id == team.id)
+					.sort((a, b) => a.pickTeamNumber - b.pickTeamNumber)
+					.map((x) => x.mods);
+				let lastTeamPick =
+					lastTeamPickMods[lastTeamPickMods.length - 1];
+				if (
+					(this.tournament.double_pick == 1 && lastTeamPick != "") ||
+					this.tournament.double_pick == 0
+				) {
+					if (lastTeamPick == map.mods) {
+						continue;
+					}
+				}
+			}
+			// Detect double bans
+			if (this.state == 7) {
+				let otherBans = this.mappool.filter(
+					(x) => x.bannedBy?.id == team.id
+				);
+				let otherBanMods = otherBans.map((ban) => ban.mods);
+				if (
+					(this.tournament.double_ban == 1 && map.mods != "") ||
+					this.tournament.double_ban == 0
+				) {
+					if (otherBanMods.includes(map.mods)) {
+						continue;
+					}
+				}
+			}
+			mapString +=
+				mapString.length > 0 ? `, ${map.identifier}` : map.identifier;
+		}
+
+		let type;
+		switch (this.state) {
+			case 7:
+				type = "bans";
+				break;
+			case 0:
+				type = "picks";
+				break;
+		}
+		await this.channel.sendMessage(`Available ${type}: ${mapString}`);
+	}
+
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async bansCommand(msg) {
+		let command = msg.content.match(/^!bans/g);
+		if (!command) return;
+
+		if (this.bans.length == 0) {
+			await this.channel.sendMessage("No bans have been chosen yet");
+			return;
+		}
+
+		let banString = "Bans: ";
+		for (const team of this.teams) {
+			let teamString = `${team.name}: `;
+			for (const ban of team.bans) {
+				// Check for a colon, if there is one, it's the first ban
+				teamString +=
+					teamString[teamString.length - 2] == ":"
+						? ban.identifier
+						: `, ${ban.identifier}`;
+			}
+			if (teamString.length == team.name.length + 2)
+				teamString = `${team.name}: None`;
+			banString += teamString + "; ";
+		}
+		await this.channel.sendMessage(banString);
+	}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async scoreCommand(msg) {
+		let command = msg.content.match(/^!score/g);
+		if (!command) return;
+
+		let team = this.teams[this.waiting_on];
+		let bestOfPhrase = `Best of ${this.round.best_of}`;
+		for (const team of this.teams) {
+			if (team.score == (this.round.best_of - 1) / 2) {
+				bestOfPhrase = `Match Point: ${team.name}`;
+			}
+		}
+
+		await this.channel.sendMessage(
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
 		);
 	}
 
@@ -937,10 +1052,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				waiting_on: num,
@@ -960,10 +1072,7 @@ class MatchManager {
 		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
-				id_roundId: {
-					id: this.id,
-					roundId: this.round.id,
-				},
+				id: this.id,
 			},
 			data: {
 				state: state,
@@ -980,7 +1089,13 @@ class MatchManager {
 			`[${msg.channel.name}] ${msg.user.ircUsername} >> ${msg.message}`
 		);
 
-		// this.msgListener(msg);
+		if ((this.state >= 0 && this.state <= 2) || this.state == 7) {
+			await this.listCommand(msg);
+			await this.bansCommand(msg);
+		}
+		if (this.state >= 0 && this.state <= 2) {
+			await this.scoreCommand(msg);
+		}
 
 		if (this.state == 4) {
 			await this.warmupListener(msg);
@@ -1013,7 +1128,6 @@ class MatchManager {
 	 */
 	async updateMessage() {
 		let state = this.state;
-		console.log(this);
 
 		let emotes = {
 			teams: {},
@@ -1049,16 +1163,20 @@ class MatchManager {
 			.setThumbnail(oldembed.thumbnail?.url)
 			.setURL(this.mp)
 			.setImage(oldembed.image?.url)
-			.setFooter({ text: "Current phase: " + states[this.state] });
+			.setFooter({ text: "Current phase: " + states[this.state] })
+			.setTimestamp();
 
 		// Score line
 		if (state <= 2 || (state >= 5 && state <= 8)) {
-			description += `
+			embed.addField(
+				"Score",
+				`
 				${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
-				this.teams[0].score
-			} - ${this.teams[1].score} | ${this.teams[1].name} ${
-				emotes.teams[this.teams[1].id]
-			}\n`;
+					this.teams[0].score
+				} - ${this.teams[1].score} | ${this.teams[1].name} ${
+					emotes.teams[this.teams[1].id]
+				}`
+			);
 		}
 
 		// Individual Score Table
@@ -1262,7 +1380,6 @@ class MatchManager {
 		}
 		// Handle Picks
 		let picks = this.picks.sort((a, b) => a.pickNumber - b.pickNumber);
-		console.log("Picks in order: ", picks);
 
 		if (this.teams[0].pick_order) {
 			embed.addField(
@@ -1289,45 +1406,43 @@ class MatchManager {
 		}
 
 		// If no match link
-		if (state == 3) {
+		if (state == -1) {
+			if (this.mp) {
+				embed.addField("Previous MP Link: ", this.mp);
+			}
 			embed
-				.setColor("RED")
+				.setTitle(
+					`ARCHIVED: ${this.round.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})`
+				)
+				.setColor("#AAAAAA")
 				.setURL(null)
 				.setDescription(
-					`
-            Uh oh!
-			We had some trouble finding the link to your match.
-			Here are the steps to create a new one:
-            `
-				)
-				.addField(
-					"Create the match",
 					stripIndents`
-                Select one member of your match to make the lobby, by sending a DM to \`BanchoBot\` on osu:
-                \`\`\`
-                !mp make ${this.tournament.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})
-                \`\`\`
-            `
-				)
-				.addField(
-					"Add yagami as a ref",
-					stripIndents`
-                Add the bot as a ref to your match:
-                \`\`\`
-                !mp addref ${process.env.banchoUsername}
-                \`\`\`
-            `
-				)
-				.addField(
-					"Point the bot to the match",
-					stripIndents`
-                Get the link to your match and paste it into the \`/match addlink\` command in this server
-                \`\`\`
-                /match addlink link:https://osu.ppy.sh/...
-				\`\`\`
-            `
+				**This match has been archived. Please select one of the options below to continue**
+				
+				**Recover Match:** I will ask for a new mp link from the players, and the match will start where it left off
+
+				**Delete Match:** The match will be deleted, this message will be kept for reference`
 				);
 			embed.image = null;
+			let recoverButton = new MessageButton()
+				.setCustomId("start_match?id=" + this.id + "&recover=true")
+				.setLabel("Recover Match")
+				.setStyle("SUCCESS");
+			let deleteButton = new MessageButton()
+				.setCustomId("delete_match?id=" + this.id)
+				.setLabel("Delete Match")
+				.setStyle("DANGER");
+			let components = new MessageActionRow().addComponents(
+				recoverButton,
+				deleteButton
+			);
+			await message.edit({
+				content: null,
+				embeds: [embed],
+				components: [components],
+			});
+			return;
 		}
 
 		// Warmup Phase
@@ -1348,15 +1463,9 @@ class MatchManager {
 			}
 		}
 
-		// Final Matfch Results
+		// Final Match Results
 		if (state >= 8) {
 			if (this.teams[0].score > this.teams[1].score) {
-				description = `
-					${emotes.teams[this.teams[0].id]} **${this.teams[0].name}** | ${
-					this.teams[0].score
-				} - ${this.teams[1].score} | ${this.teams[1].name} ${
-					emotes.teams[this.teams[1].id]
-				}`;
 				embed.color = this.teams[0].color;
 				embed.setThumbnail(this.teams[0].icon_url);
 			}

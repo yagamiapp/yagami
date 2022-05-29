@@ -307,8 +307,10 @@ class Team {
 		this.picks.push(map);
 		map.picked = true;
 		map.pickedBy = this;
-		map.pickNumber = this.match.picks.length + 1;
-		map.pickTeamNumber = this.picks.length + 1;
+		if (map.pickNumber == null) {
+			map.pickNumber = this.match.picks.length + 1;
+			map.pickTeamNumber = this.picks.length + 1;
+		}
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {

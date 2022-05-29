@@ -69,7 +69,7 @@ module.exports = {
 
 		let inviterMembers = await prisma.user.findMany({
 			where: {
-				inTeams: {
+				InTeams: {
 					some: {
 						teamId: inviterTeam.id,
 					},
@@ -101,7 +101,7 @@ module.exports = {
 		let duplicateCheck = await prisma.user.findFirst({
 			where: {
 				discord_id: invitee.id,
-				inTeams: {
+				InTeams: {
 					some: {
 						discordId: invitee.id,
 						teamId: inviterTeam.id,

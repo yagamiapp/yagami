@@ -45,7 +45,7 @@ module.exports = {
 			interaction.options.getString("mods") ||
 			identifier.match(/\w{2}/)[0];
 		let round = await prisma.round.findFirst({
-			where: { tournamentId: tournament.id },
+			where: { tournamentId: tournament.id, acronym },
 		});
 
 		// In case the round doesn't exist

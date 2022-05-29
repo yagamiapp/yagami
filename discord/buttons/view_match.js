@@ -42,7 +42,7 @@ module.exports = {
 			let teamString = "";
 			let members = await prisma.user.findMany({
 				where: {
-					inTeams: {
+					InTeams: {
 						some: {
 							teamId: team.id,
 						},

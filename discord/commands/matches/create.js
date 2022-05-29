@@ -132,9 +132,9 @@ module.exports = {
 
 		let match = await prisma.match.create({
 			data: {
-				roundId: round.id,
 				id: matches.length + 1,
 				state: 10,
+				roundId: round.id,
 			},
 		});
 
@@ -147,12 +147,9 @@ module.exports = {
 							id: team.id,
 						},
 					},
-					match: {
+					Match: {
 						connect: {
-							id_roundId: {
-								id: match.id,
-								roundId: match.roundId,
-							},
+							id: match.id,
 						},
 					},
 					score: 0,
@@ -184,10 +181,7 @@ module.exports = {
 					},
 					Match: {
 						connect: {
-							id_roundId: {
-								id: match.id,
-								roundId: match.roundId,
-							},
+							id: match.id,
 						},
 					},
 				},
@@ -205,7 +199,7 @@ module.exports = {
 			let teamString = "";
 			let members = await prisma.user.findMany({
 				where: {
-					inTeams: {
+					InTeams: {
 						some: {
 							teamId: team.id,
 						},

@@ -14,12 +14,16 @@ module.exports = {
 				.setRequired(true)
 		)
 		.addStringOption((option) =>
-			option.setName("name").setDescription("The name for your tournament")
+			option
+				.setName("name")
+				.setDescription("The name for your tournament")
 		)
 		.addIntegerOption((option) =>
 			option
 				.setName("score_mode")
-				.setDescription("Changes the way scores are handled in the lobby")
+				.setDescription(
+					"Changes the way scores are handled in the lobby"
+				)
 				.addChoice("Score", 0)
 				.addChoice("Combo", 1)
 				.addChoice("Accuracy", 2)
@@ -50,7 +54,9 @@ module.exports = {
 		.addIntegerOption((option) =>
 			option
 				.setName("x_v_x_mode")
-				.setDescription("How many players are playing against eachother")
+				.setDescription(
+					"How many players are playing against eachother"
+				)
 				.setMinValue(1)
 				.setMaxValue(8)
 		)
@@ -62,7 +68,23 @@ module.exports = {
 		.addStringOption((option) =>
 			option
 				.setName("color")
-				.setDescription("Set a custom color for your tournament e.g.(#0EB8B9)")
+				.setDescription(
+					"Set a custom color for your tournament e.g.(#0EB8B9)"
+				)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("double_pick")
+				.addChoice("No double picking", 0)
+				.addChoice("No double picking NM excluded", 1)
+				.addChoice("Double picking", 2)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("double_ban")
+				.addChoice("No double banning", 0)
+				.addChoice("No double banning NM excluded", 1)
+				.addChoice("Double banning", 2)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
@@ -97,7 +119,9 @@ module.exports = {
 				interaction.options.getString("icon_url") ??
 				"https://yagami.clxxiii.dev/static/yagami%20var.png",
 			allow_registrations: false,
-			XvX_mode: interaction.options.getInteger("x_v_x_mode") || 1,
+			x_v_x_mode: interaction.options.getInteger("x_v_x_mode") || 1,
+			double_pick: interaction.options.getInteger("double_pick") || 1,
+			double_ban: interaction.options.getInteger("double_ban") || 1,
 			Guild_id: interaction.guildId,
 		};
 
