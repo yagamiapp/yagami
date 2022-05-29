@@ -53,26 +53,36 @@ module.exports = {
 			if (!interaction.isCommand()) return;
 
 			// Craft message to send to console
+			let options = interaction.options.data;
+			let commandType = options[0]?.type;
+			let commandString;
+
+			if (commandType == "SUB_COMMAND_GROUP") {
+				options = options[0];
+				let commandGroup = options.name;
+				options = options.options[0];
+				let subcommand = options.name;
+				options = options.options;
+
+				commandString = `${interaction.commandName} ${commandGroup} ${subcommand}`;
+			} else if (commandType == "SUB_COMMAND") {
+				options = options[0];
+				let subcommand = options.name;
+				options = options.options;
+
+				commandString = `${interaction.commandName} ${subcommand}`;
+			} else {
+				commandString = interaction.commandName;
+			}
 
 			let optionString = "";
-			if (interaction.options.data[0]?.options) {
-				interaction.options.data[0].options.forEach((option) => {
-					optionString += `${option.name}: ${option.value}  `;
-				});
-			} else if (interaction.options.data) {
-				interaction.options.data.forEach((option) => {
-					optionString += `${option.name}: ${option.value}  `;
-				});
-			}
-			let subcommand;
-			try {
-				subcommand = interaction.options.getSubcommand();
-			} catch {
-				subcommand = "";
-			}
+			options.forEach((option) => {
+				optionString += `${option.name}: ${option.value} `;
+			});
+
 			let guild = interaction.guild.nameAcronym ?? "DM Channel";
 			console.log(
-				`[${guild}] ${interaction.user.username}#${interaction.user.discriminator} >> /${interaction.commandName} ${subcommand} ${optionString}`
+				`[${guild}] ${interaction.user.username}#${interaction.user.discriminator} >> /${commandString} ${optionString}`
 			);
 
 			const command = bot.commands.get(interaction.commandName);

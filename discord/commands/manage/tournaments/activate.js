@@ -1,6 +1,6 @@
 let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { prisma } = require("../../../prisma");
+const { prisma } = require("../../../../prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("activate")
@@ -39,7 +39,9 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setTitle("Active Tournament Updated!")
-			.setDescription(`Active tournament switched to \`${tournament.name}\``)
+			.setDescription(
+				`Active tournament switched to \`${tournament.name}\``
+			)
 			.setColor("GREEN");
 
 		await interaction.editReply({ embeds: [embed] });

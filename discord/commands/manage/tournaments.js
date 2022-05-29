@@ -1,19 +1,18 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandSubcommandGroupBuilder } = require("@discordjs/builders");
 const fs = require("fs");
 
 // Subcommand Handler
-let data = new SlashCommandBuilder()
-	.setName("rounds")
-	.setDescription("Configuring agent for the rounds in your tournament")
-	.setDefaultPermission(false);
+let data = new SlashCommandSubcommandGroupBuilder()
+	.setName("tournaments")
+	.setDescription("Configuring agent for your tournament");
 let subcommands = {};
 
 const subcommandFiles = fs
-	.readdirSync("./discord/commands/rounds")
+	.readdirSync("./discord/commands/manage/tournaments")
 	.filter((file) => file.endsWith(".js"));
 
 for (const file of subcommandFiles) {
-	const subcommand = require(`./rounds/${file}`);
+	const subcommand = require(`./tournaments/${file}`);
 	data.addSubcommand(subcommand.data);
 	subcommands[subcommand.data.name] = subcommand;
 }
