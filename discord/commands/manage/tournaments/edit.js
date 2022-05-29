@@ -89,7 +89,7 @@ module.exports = {
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
-		let options = interaction.options.data[0].options;
+		let options = interaction.options.data[0].options[0].options;
 
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
