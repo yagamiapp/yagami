@@ -1,11 +1,17 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const { fetchGuild, prisma } = require("../../../prisma");
+const { fetchGuild, prisma } = require("../../../../prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("edit")
-		.setDescription("Edits your team")
+		.setDescription("Edits the team")
+		.addUserOption((option) =>
+			option
+				.setName("user")
+				.setDescription("A user from the team to edit")
+				.setRequired(true)
+		)
 		.addStringOption((option) =>
 			option.setName("name").setDescription("The name of the team")
 		)
@@ -26,9 +32,10 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
-		let optionArr = interaction.options.data[0].options;
+		let optionArr = interaction.options.data[0].options[0].options;
 		let options = {};
 		for (const option of optionArr) {
+			if (option.name === "user") continue;
 			options[option.name] = option.value;
 		}
 
@@ -36,7 +43,7 @@ module.exports = {
 			where: {
 				Members: {
 					some: {
-						discordId: interaction.user.id,
+						discordId: interaction.options.getUser("user").id,
 					},
 				},
 				tournamentId: tournament.id,
@@ -46,9 +53,7 @@ module.exports = {
 		// In case the user is not in a team
 		if (!team) {
 			let embed = new MessageEmbed()
-				.setDescription(
-					`**Err**: You cannot edit your team unless you are the owner of the team`
-				)
+				.setDescription(`**Err**: That user is not in a team`)
 				.setColor("RED");
 			interaction.editReply({ embeds: [embed] });
 			return;
@@ -57,17 +62,7 @@ module.exports = {
 		if (!tournament.allow_registrations) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					"**Err**: You cannot edit your team while registration is closed."
-				)
-				.setColor("RED");
-			await interaction.editReply({ embeds: [embed] });
-			return;
-		}
-		// In case the team size is 1
-		if (tournament.team_size == 1) {
-			let embed = new MessageEmbed()
-				.setDescription(
-					`**Err**: You cannot edit your team if the team size is 1.`
+					"**Err**: You cannot edit teams while registration is closed."
 				)
 				.setColor("RED");
 			await interaction.editReply({ embeds: [embed] });
@@ -77,7 +72,7 @@ module.exports = {
 		if (options?.name?.length > 25) {
 			let embed = new MessageEmbed()
 				.setDescription(
-					`**Err**: The name of your team cannot be longer than 25 characters.`
+					`**Err**: The name of the team cannot be longer than 25 characters.`
 				)
 				.setColor("RED")
 				.setFooter({

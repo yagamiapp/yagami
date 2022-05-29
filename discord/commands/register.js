@@ -61,7 +61,7 @@ module.exports = {
 		let team = {
 			name: user.osu_username + "'s team",
 			icon_url: "https://s.ppy.sh/a/" + user.osu_id,
-			color: "#F88000",
+			color: tournament.color || "#F88000",
 			tournamentId: tournament.id,
 		};
 
@@ -82,7 +82,7 @@ module.exports = {
 			let embed = new MessageEmbed()
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)
-				.setColor("#F88000")
+				.setColor(team.color || "#F88000")
 				.setThumbnail(team.icon_url);
 
 			await interaction.editReply({ embeds: [embed] });
