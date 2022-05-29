@@ -1188,7 +1188,7 @@ class MatchManager {
 		// Check for ref abuse
 		if (msg.content.match(/^!mp/g)) {
 			await this.channel.sendMessage(
-				"Leave the mp commands alone. I've got it covered."
+				"Leave the mp commands alone. I've got it covered. Too much abuse of mp commands will result in an automatic forfeit"
 			);
 		}
 
