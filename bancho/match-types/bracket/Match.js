@@ -618,7 +618,10 @@ class MatchManager {
 
 	async chooseOrder() {
 		let team = this.teams[this.waiting_on];
-		if (team.pick_order && team.ban_order) {
+
+		let banOrderChosen = team.ban_order != null || this.round.bans == 0;
+		let pickOrderChosen = team.pick_order != null;
+		if (banOrderChosen && pickOrderChosen) {
 			if (team.ban_order == 1) {
 				await this.updateWaitingOn(this.teams.indexOf(team));
 			} else {
@@ -794,10 +797,14 @@ class MatchManager {
 			);
 		}
 		if (!command) return;
-		if (this.round.bans == 0 && command.groups.type == "ban") {
+		if (
+			this.round.bans == 0 &&
+			command.groups.type.toLowerCase() == "ban"
+		) {
 			await this.channel.sendMessage(
 				"There are no bans in this round, so you can't choose the ban order"
 			);
+			return;
 		}
 
 		if (command.groups.type.toLowerCase() == "pick") {
