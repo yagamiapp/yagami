@@ -1188,7 +1188,7 @@ class MatchManager {
 			.setTimestamp();
 
 		// Score line
-		if (state <= 2 || (state >= 5 && state <= 8)) {
+		if (state <= 2 || (state >= 5 && state <= 7)) {
 			embed.addField(
 				"Score",
 				`
