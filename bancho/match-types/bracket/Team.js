@@ -98,7 +98,6 @@ class Team {
 	compareTo(team) {
 		let teamScore = this.calculateScore(this);
 		let otherTeamScore = this.calculateScore(team);
-		console.log(`${teamScore} - ${otherTeamScore}`);
 		let scoreDiff = teamScore - otherTeamScore;
 		return scoreDiff;
 	}
@@ -135,7 +134,7 @@ class Team {
 							parseInt(score.count50) +
 							parseInt(score.countmiss));
 					accuracy = accuracy / divisor;
-					scoreSum += parseInt(accuracy);
+					scoreSum += accuracy;
 				}
 			}
 		}

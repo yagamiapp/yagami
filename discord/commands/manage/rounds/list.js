@@ -1,7 +1,7 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
-let { execute } = require("../../buttons/rounds_list");
-const { fetchGuild, prisma } = require("../../../prisma");
+let { execute } = require("../../../buttons/rounds_list");
+const { fetchGuild, prisma } = require("../../../../prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()

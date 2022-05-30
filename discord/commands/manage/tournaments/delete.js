@@ -1,7 +1,7 @@
 const { stripIndents } = require("common-tags/lib");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const { prisma } = require("../../../prisma");
+const { prisma } = require("../../../../prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("delete")
@@ -77,8 +77,9 @@ module.exports = {
 			}
 		}, 60000);
 
-		let embed = new MessageEmbed().setColor("DARK_RED").setTitle("⚠ WARNING ⚠")
-			.setDescription(stripIndents`
+		let embed = new MessageEmbed()
+			.setColor("DARK_RED")
+			.setTitle("⚠ WARNING ⚠").setDescription(stripIndents`
                     Deleting a tournament is **IRREVERSIBLE** and **CANNOT** be undone.
 
                     All of your matches, teams, mappools, and settings will be **lost FOREVER!**

@@ -26,10 +26,15 @@ let states = {
 
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
-// There's currently a bug with local SQLite
-// Databases, where too many requests in
-// Succession will crash prisma.
-let prismaTimeout = 200;
+let maxWarmupLength = 300;
+
+let timers = {
+	0: 120,
+	1: 120,
+	4: 180,
+	6: 90,
+	7: 120,
+};
 
 class MatchManager {
 	/**
@@ -45,6 +50,13 @@ class MatchManager {
 		this.rollVerification = {};
 	}
 
+	/*
+	 * ==============================================
+	 *
+	 *                 MATCH CREATION
+	 *
+	 * ==============================================
+	 */
 	async createMatch() {
 		// Get match from DB and assign values
 		let match = await prisma.match.findFirst({
@@ -169,7 +181,7 @@ class MatchManager {
 			});
 			let mapObj = new Map(this, map, mapInMatch);
 			mapObj.setMapInPool(mapInPool);
-			// Give bans to teams
+			// Give picks, bans, and wins to teams
 			if (mapObj.banned) {
 				this.bans.push(mapObj);
 				await mapObj.bannedBy.addBan(mapObj);
@@ -194,12 +206,12 @@ class MatchManager {
 		let matchNum = this.mp.match(/\d+/g);
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
 		let lastGame = data.games[data.games.length - 1];
-		/**
-		 * @type {import("nodesu")}
-		 */
 		this.lastGameData = lastGame;
 
 		// Setup channel
+		/**
+		 * @type {import("bancho.js").BanchoMultiplayerChannel}
+		 */
 		this.channel = fetchChannel(this.mp);
 		/**
 		 * @type {import("bancho.js").BanchoLobby}
@@ -226,11 +238,18 @@ class MatchManager {
 		this.mp = this.lobby.getHistoryUrl();
 
 		// Setup lobby settings
-		await this.lobby.setSettings(
-			this.tournament.team_mode,
-			this.tournament.score_mode == 4 ? 3 : this.tournament.score_mode,
-			this.tournament.x_v_x_mode * 2 + 1
-		);
+		this.lobbySettings = {
+			team_mode: this.tournament.team_mode,
+			score_mode:
+				this.tournament.score_mode == 4
+					? 3
+					: this.tournament.score_mode,
+			slots: this.tournament.x_v_x_mode * 2 + 1,
+		};
+		this.beatmap = this.lobby.beatmap;
+
+		let { team_mode, score_mode, slots } = this.lobbySettings;
+		await this.lobby.setSettings(team_mode, score_mode, slots);
 
 		// Do onJoin for players currently in the lobby
 		let players = this.lobby.slots.filter((x) => x);
@@ -238,7 +257,6 @@ class MatchManager {
 			await this.joinHandler({ player });
 		}
 
-		// Start Warmups
 		this.init = true;
 
 		// Send invites to players outside of the lobby
@@ -268,6 +286,21 @@ class MatchManager {
 			"beatmap",
 			async (beatmap) => await this.beatmapHandler(beatmap)
 		);
+
+		// Smaller event handlers without their own function:
+		this.lobby.on("matchStarted", () => {
+			if (this.state == 4 && this.beatmap.hitLength > maxWarmupLength) {
+				let team = this.teams[this.waiting_on];
+				setTimeout(async () => {
+					await this.lobby.abortMatch();
+					await team.setWarmedUp(true);
+					await this.updateWaitingOn(1 - this.waiting_on);
+					await this.warmup();
+				}, 10000);
+			}
+		});
+
+		// Start Warmups
 		if (this.state == 3) {
 			await this.updateState(4);
 			await this.warmup();
@@ -277,6 +310,15 @@ class MatchManager {
 		await this.recover();
 		await this.updateMessage();
 	}
+
+	/*
+	 * ==============================================
+	 *
+	 *                EVENT HANDLERS
+	 *
+	 * ==============================================
+	 */
+
 	/**
 	 *
 	 * @param {import("bancho.js").BanchoLobbyPlayer} event
@@ -359,7 +401,6 @@ class MatchManager {
 		let data = await nodesuClient.multi.getMatch(matchNum[0]);
 		let lastGame = data.games[data.games.length - 1];
 		this.lastGameData = lastGame;
-		this.updateMessage();
 
 		if (this.state == 4) {
 			let team = this.teams[this.waiting_on];
@@ -371,6 +412,13 @@ class MatchManager {
 			let scoreString = "";
 			for (const team of this.teams) {
 				let score = team.calculateScore(team);
+
+				if ([2, 4].includes(this.tournament.score_mode)) {
+					score =
+						((score * 100) / this.tournament.x_v_x_mode).toFixed(
+							3
+						) + "%";
+				}
 				scoreString +=
 					scoreString == ""
 						? `${team.name} (${score.toLocaleString()})`
@@ -415,9 +463,9 @@ class MatchManager {
 						`The lobby will be closed in 90 seconds`
 					);
 					await this.lobby.startTimer(90);
-					setTimeout(() => {
-						this.lobby.closeLobby();
-						this.updateState(9);
+					setTimeout(async () => {
+						await this.lobby.closeLobby();
+						await this.updateState(9);
 					}, 90 * 1000);
 					return;
 				}
@@ -463,11 +511,34 @@ class MatchManager {
 		}
 	}
 
+	/**
+	 *
+	 * @param {import("nodesu").Beatmap} beatmap
+	 */
 	async beatmapHandler(beatmap) {
 		this.beatmap = beatmap;
 		await this.updateMessage();
+		if (!beatmap) return;
+		if (this.state == 4) {
+			if (beatmap.hitLength > maxWarmupLength) {
+				await this.channel.sendMessage(
+					`Your warmup map must be shorter than ${maxWarmupLength} seconds. If the match is started, the match will be aborted and you will lose your warmup.`
+				);
+				return;
+			}
+			await this.channel.sendMessage(
+				`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.version}]] - [https://beatconnect.io/b/${beatmap.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${beatmap.beatmapset_id} chimu.moe Mirror]`
+			);
+		}
 	}
 
+	/*
+	 * ==============================================
+	 *
+	 *                PHASE FUNCTIONS
+	 *
+	 * ==============================================
+	 */
 	async warmup() {
 		if (this.waiting_on == null) {
 			await this.updateWaitingOn(0);
@@ -477,6 +548,8 @@ class MatchManager {
 		if (team.warmed_up) {
 			await this.lobby.clearHost();
 			await this.updateState(5);
+			let { team_mode, score_mode, slots } = this.lobbySettings;
+			await this.lobby.setSettings(team_mode, score_mode, slots);
 			await this.roll();
 			return;
 		}
@@ -499,9 +572,11 @@ class MatchManager {
 					`${player.user.username} has been selected to choose the warmup for ${team.name}. Use !skip to skip your warmup`
 				);
 				await this.channel.sendMessage(
-					`You have 3 minutes to start the warmup`
+					`You have ${
+						timers[this.state] / 60
+					} minutes to start the warmup`
 				);
-				await this.lobby.startTimer(180);
+				await this.startTimer(timers[this.state]);
 				return;
 			}
 		}
@@ -517,13 +592,10 @@ class MatchManager {
 			await this.channel.sendMessage(
 				"It's time to roll! I'll count the first roll from any player on each team."
 			);
-			await this.updateMessage();
 			return;
 		}
 
 		if (!teamRolls.includes(null)) {
-			await this.updateMessage();
-
 			// Check if all elements in array are the same
 			let rolls = [...new Set(teamRolls)];
 			if (rolls.length == 1) {
@@ -546,7 +618,10 @@ class MatchManager {
 
 	async chooseOrder() {
 		let team = this.teams[this.waiting_on];
-		if (team.pick_order && team.ban_order) {
+
+		let banOrderChosen = team.ban_order != null || this.round.bans == 0;
+		let pickOrderChosen = team.pick_order != null;
+		if (banOrderChosen && pickOrderChosen) {
 			if (team.ban_order == 1) {
 				await this.updateWaitingOn(this.teams.indexOf(team));
 			} else {
@@ -556,10 +631,15 @@ class MatchManager {
 			await this.banPhase();
 			return;
 		}
+		let typeOption = "[pick|ban]";
+		if (this.round.bans == 0) {
+			typeOption = "pick";
+		}
 
 		await this.channel.sendMessage(
-			`${team.name}, it is your turn to pick! Use !choose [first|second] [pick|ban] to choose the order`
+			`${team.name}, it is your turn to pick! Use "!choose [first|second] ${typeOption}" to choose the order`
 		);
+		await this.startTimer();
 	}
 
 	async banPhase() {
@@ -568,7 +648,7 @@ class MatchManager {
 			// If team 0 is the first picker, 1 - 1 = 0:
 			// If team 1 is the first picker, 2 - 1 = 1:
 			let firstPicker = this.teams[0].pick_order - 1;
-			this.updateWaitingOn(firstPicker);
+			await this.updateWaitingOn(firstPicker);
 			await this.updateState(0);
 			await this.pickPhase();
 			return;
@@ -581,7 +661,7 @@ class MatchManager {
 				this.round.bans - team.bans.length == 1 ? "ban" : "bans"
 			} left, Use !list to see the available bans`
 		);
-		await this.updateMessage();
+		await this.startTimer();
 	}
 
 	async pickPhase() {
@@ -597,6 +677,7 @@ class MatchManager {
 			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
 		);
 		await this.channel.sendMessage("Use !pick [map] to pick a map");
+		await this.startTimer();
 	}
 
 	async recover() {
@@ -630,11 +711,19 @@ class MatchManager {
 		}
 
 		if (this.state == 8) {
-			this.lobby.closeLobby();
-			this.updateState(9);
+			await this.lobby.closeLobby();
+			await this.updateState(9);
 			return;
 		}
 	}
+
+	/*
+	 * ==============================================
+	 *
+	 *           PHASE MESSAGE LISTENERS
+	 *
+	 * ==============================================
+	 */
 
 	async warmupListener(msg) {
 		if (this.waiting_on == null) return;
@@ -642,10 +731,11 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 		if (user == null) return;
 
-		let command = msg.content.match(/^!skip/g);
+		let command = msg.message.match(/^!skip/g);
 		if (command) {
 			let team = this.teams[this.waiting_on];
 			await team.setWarmedUp(true);
+			await this.lobby.abortTimer();
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
 		}
@@ -656,14 +746,14 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async rollListener(msg) {
-		if (msg.content.toLowerCase() == "!roll") {
+		if (msg.message.toLowerCase() == "!roll") {
 			this.rollVerification[msg.user.ircUsername] = true;
 			return;
 		}
 
 		if (msg.user.ircUsername != "BanchoBot") return;
 
-		let content = msg.content;
+		let content = msg.message;
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
 
 		if (roll && this.rollVerification[roll.groups.user]) {
@@ -683,6 +773,7 @@ class MatchManager {
 				);
 				this.rollVerification[msg.user.ircUsername] = null;
 				await this.roll();
+				await this.updateMessage();
 			}
 		}
 	}
@@ -697,16 +788,24 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 		user = team.getUser(user);
 		if (user == null) return;
-		let command = msg.content.match(
+		let command = msg.message.match(
 			/!choose (?<order>first|second) (?<type>pick|ban)/
 		);
-		if (!command && msg.content.startsWith("!choose")) {
+		if (!command && msg.message.startsWith("!choose")) {
 			await this.channel.sendMessage(
 				"Invalid command usage! Correct Usage: !choose [first|second] [pick|ban]"
 			);
 		}
-
 		if (!command) return;
+		if (
+			this.round.bans == 0 &&
+			command.groups.type.toLowerCase() == "ban"
+		) {
+			await this.channel.sendMessage(
+				"There are no bans in this round, so you can't choose the ban order"
+			);
+			return;
+		}
 
 		if (command.groups.type.toLowerCase() == "pick") {
 			if (team.pick_order) {
@@ -725,7 +824,7 @@ class MatchManager {
 				let otherTeam = this.teams[1 - this.waiting_on];
 				await otherTeam.setPickOrder(1);
 			}
-			this.updateWaitingOn(1 - this.waiting_on);
+			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
 		}
 
@@ -761,7 +860,7 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 
 		if (user == null) return;
-		let command = msg.content.match(/!ban (?<map>\w+)/);
+		let command = msg.message.match(/!ban (?<map>\w+)/);
 
 		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
@@ -823,7 +922,7 @@ class MatchManager {
 		let user = team.getUserPos(msg.user.id);
 
 		if (user == null) return;
-		let command = msg.content.match(/!pick (?<map>\w+)/);
+		let command = msg.message.match(/!pick (?<map>\w+)/);
 
 		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
@@ -882,12 +981,21 @@ class MatchManager {
 			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${map.beatmapset_id} chimu.moe Mirror]`
 		);
 	}
+
+	/*
+	 * ==============================================
+	 *
+	 *                MATCH COMMANDS
+	 *
+	 * ==============================================
+	 */
+
 	/**
 	 *
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async listCommand(msg) {
-		let command = msg.content.match(/^!list/g);
+		let command = msg.message.match(/^!list/g);
 		if (!command) return;
 
 		let team = this.teams[this.waiting_on];
@@ -949,7 +1057,7 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async bansCommand(msg) {
-		let command = msg.content.match(/^!bans/g);
+		let command = msg.message.match(/^!bans/g);
 		if (!command) return;
 
 		if (this.bans.length == 0) {
@@ -978,7 +1086,7 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async scoreCommand(msg) {
-		let command = msg.content.match(/^!score/g);
+		let command = msg.message.match(/^!score/g);
 		if (!command) return;
 
 		let team = this.teams[this.waiting_on];
@@ -993,6 +1101,14 @@ class MatchManager {
 			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
 		);
 	}
+
+	/*
+	 * ==============================================
+	 *
+	 *                STATE UPDATERS
+	 *
+	 * ==============================================
+	 */
 
 	/**
 	 * Picks a map in the lobby and adds it to the
@@ -1026,6 +1142,7 @@ class MatchManager {
 		}
 		await this.lobby.setMods(modString);
 		await this.updateState(1);
+		await this.startTimer();
 	}
 
 	async invitePlayer(name) {
@@ -1049,7 +1166,6 @@ class MatchManager {
 	 */
 	async updateWaitingOn(num) {
 		this.waiting_on = num;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
 				id: this.id,
@@ -1069,7 +1185,6 @@ class MatchManager {
 	async updateState(state) {
 		this.state = state;
 
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.match.update({
 			where: {
 				id: this.id,
@@ -1093,12 +1208,12 @@ class MatchManager {
 		);
 
 		// Archive match if bot loses access to lobby
-		if (msg.content.match(/^!mp close/g)) {
+		if (msg.message.match(/^!mp close/g)) {
 			await this.updateState(-1);
 			return;
 		}
 
-		if (msg.content.match(/^!mp removeref/g)) {
+		if (msg.message.match(/^!mp removeref/g)) {
 			try {
 				await this.channel.sendMessage(
 					`WARNING: Match will be automatically archived if the bot loses access to the lobby.`
@@ -1108,6 +1223,54 @@ class MatchManager {
 				await this.updateState(-1);
 				return;
 			}
+		}
+
+		// Check for timer ends
+		if (
+			msg.message == "Countdown finished" &&
+			msg.user.ircUsername == "BanchoBot" &&
+			this.lastTimer < Date.now() - 5000
+		) {
+			await this.timerHandler(false);
+			return;
+		}
+
+		if (
+			msg.message == "Countdown ends in 30 seconds" &&
+			msg.user.ircUsername == "BanchoBot"
+		) {
+			await this.timerHandler(true);
+			return;
+		}
+
+		// Check for ref abuse
+		if (msg.message.match(/^!mp/g)) {
+			if (msg.message.match(/^!mp timer/g)) {
+				this.lastTimer = Date.now();
+				await this.lobby.abortTimer();
+			}
+			await this.channel.sendMessage(
+				"Leave the mp commands alone. I've got it covered. Too much abuse of mp commands will result in an automatic forfeit"
+			);
+		}
+
+		if (msg.message.match(/^!mp timer|^!mp aborttimer/g)) {
+			let team;
+			for (const teamTest of this.teams) {
+				if (teamTest.users.find((u) => u.osu_id == msg.user.id)) {
+					team = teamTest;
+				}
+			}
+
+			if (team == this.teams[this.waiting_on] && timers[this.state]) {
+				await this.channel.sendMessage(
+					"You have lost your priority for doing that."
+				);
+				await this.timerHandler(false, true);
+				return;
+			}
+			await this.startTimer();
+			return;
 		}
 
 		if ((this.state >= 0 && this.state <= 2) || this.state == 7) {
@@ -1142,6 +1305,54 @@ class MatchManager {
 		}
 	}
 
+	async startTimer() {
+		await this.lobby.startTimer(timers[this.state]);
+		this.lastTimer = Date.now();
+	}
+
+	async timerHandler(warn, excludeMessage) {
+		let team = this.teams[this.waiting_on];
+
+		let stateEnum = {
+			0: "pick",
+			4: "choose a warmup",
+			5: "roll",
+			6: "choose",
+			7: "ban",
+		};
+
+		let stateText = stateEnum[this.state];
+		if (!stateText) return;
+
+		if (warn) {
+			await this.channel.sendMessage(
+				`⚠ WARNING ⚠ ${team.name} will lose their priority to ${stateText} in 30 seconds.`
+			);
+			return;
+		}
+
+		await this.updateWaitingOn(1 - this.waiting_on);
+		if (!excludeMessage) {
+			await this.channel.sendMessage(
+				`${team.name} took too long to ${stateText}!`
+			);
+		}
+
+		if (this.state == 4) {
+			await team.setWarmedUp(true);
+		}
+
+		await this.recover();
+	}
+
+	/*
+	 * ==============================================
+	 *
+	 *            UPDATE MESSAGE FUNCTION
+	 *
+	 * ==============================================
+	 */
+
 	/**
 	 * Updates the log message
 	 * @function
@@ -1151,23 +1362,22 @@ class MatchManager {
 		let state = this.state;
 
 		let emotes = {
-			teams: {},
-			grades: {},
+			teams: {
+				[this.teams[0].id]: ":red_square:",
+				[this.teams[1].id]: ":blue_square:",
+			},
+			grades: {
+				SSH: "<:rank_SSH:979114277929631764>",
+				SS: "<:rank_SS:979114272955179069>",
+				SH: "<:rank_SH:979114267850727465>",
+				S: "<:rank_S:979114262502973450>",
+				A: "<:rank_A:979114140465516645>",
+				B: "<:rank_B:979114234233372752>",
+				C: "<:rank_C:979114239736299570>",
+				D: "<:rank_D:979114244777857096>",
+				F: "<:rank_F:979114251337744504>",
+			},
 			loading: "<a:loading:970406520124764200>",
-		};
-		emotes.teams[this.teams[0].id] = ":red_square:";
-		emotes.teams[this.teams[1].id] = ":blue_square:";
-
-		emotes.grades = {
-			SSH: "<:rank_SSH:979114277929631764>",
-			SS: "<:rank_SS:979114272955179069>",
-			SH: "<:rank_SH:979114267850727465>",
-			S: "<:rank_S:979114262502973450>",
-			A: "<:rank_A:979114140465516645>",
-			B: "<:rank_B:979114234233372752>",
-			C: "<:rank_C:979114239736299570>",
-			D: "<:rank_D:979114244777857096>",
-			F: "<:rank_F:979114251337744504>",
 		};
 
 		let channel = await discord.channels.fetch(this.channel_id);
@@ -1198,6 +1408,11 @@ class MatchManager {
 					emotes.teams[this.teams[1].id]
 				}`
 			);
+		}
+
+		// Remove img on setup phases
+		if ([5, 6, 7].includes(state)) {
+			embed.image = null;
 		}
 
 		// Individual Score Table
@@ -1308,7 +1523,7 @@ class MatchManager {
 					parseInt(score.score).toLocaleString(),
 					parseInt(score.maxcombo).toLocaleString() + "x",
 					(accuracy * 100).toFixed(2) + "%",
-					`${mods == "" ? "" : "+" + mods.join("")}`,
+					`${mods == [""] ? "" : "+" + mods.join("")}`,
 				];
 
 				teamStrings[team.id].userScores.push(userScore);

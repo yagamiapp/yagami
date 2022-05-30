@@ -1,6 +1,6 @@
 let { MessageEmbed } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { fetchGuild, prisma } = require("../../../prisma");
+const { fetchGuild, prisma } = require("../../../../prisma");
 let { stripIndents } = require("common-tags");
 
 module.exports = {
@@ -74,6 +74,7 @@ module.exports = {
 		.addIntegerOption((option) =>
 			option
 				.setName("double_pick")
+				.setDescription("Whether double picks are allowed or not")
 				.addChoice("No double picking", 0)
 				.addChoice("No double picking NM excluded", 1)
 				.addChoice("Double picking", 2)
@@ -81,13 +82,14 @@ module.exports = {
 		.addIntegerOption((option) =>
 			option
 				.setName("double_ban")
+				.setDescription("Whether double bans are allowed or not")
 				.addChoice("No double banning", 0)
 				.addChoice("No double banning NM excluded", 1)
 				.addChoice("Double banning", 2)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
-		let options = interaction.options.data[0].options;
+		let options = interaction.options.data[0].options[0].options;
 
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;

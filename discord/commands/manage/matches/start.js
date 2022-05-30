@@ -1,7 +1,7 @@
 let { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
-let { fetchGuild, prisma } = require("../../../prisma");
-let { execute } = require("../../buttons/match_start_list");
+let { fetchGuild, prisma } = require("../../../../prisma");
+let { execute } = require("../../../buttons/match_start_list");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -33,7 +33,9 @@ module.exports = {
 		let round = await prisma.round.findFirst({
 			where: {
 				tournamentId: tournament.id,
-				acronym: interaction.options.getString("round_acronym").toUpperCase(),
+				acronym: interaction.options
+					.getString("round_acronym")
+					.toUpperCase(),
 			},
 		});
 
@@ -49,6 +51,8 @@ module.exports = {
 			return;
 		}
 
-		await execute(interaction, { options: { index: 0, round: round.acronym } });
+		await execute(interaction, {
+			options: { index: 0, round: round.acronym },
+		});
 	},
 };
