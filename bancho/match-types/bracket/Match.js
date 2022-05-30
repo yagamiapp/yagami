@@ -29,7 +29,7 @@ let nodesuClient = new Client(process.env.banchoAPIKey);
 let maxWarmupLength = 300;
 
 let timers = {
-	0: 30,
+	0: 120,
 	1: 120,
 	4: 180,
 	6: 90,
