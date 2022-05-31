@@ -288,7 +288,7 @@ class MatchManager {
 		);
 
 		// Smaller event handlers without their own function:
-		this.lobby.on("matchStarted", () => {
+		this.lobby.on("matchStarted", async () => {
 			if (this.state == 4 && this.beatmap.hitLength > maxWarmupLength) {
 				let team = this.teams[this.waiting_on];
 				setTimeout(async () => {
@@ -297,6 +297,10 @@ class MatchManager {
 					await this.updateWaitingOn(1 - this.waiting_on);
 					await this.warmup();
 				}, 10000);
+			}
+
+			if (this.state == 4) {
+				await this.lobby.abortTimer();
 			}
 		});
 
