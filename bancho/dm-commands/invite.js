@@ -11,7 +11,7 @@ module.exports = {
 	 * @param {import("../MatchManager").MatchManager}
 	 */
 	async exec(msg, options, client) {
-		let username = msg.user.username;
+		let id = (await msg.user.fetchFromAPI()).id;
 		let match = await prisma.match.findFirst({
 			where: {
 				state: {
@@ -25,8 +25,8 @@ module.exports = {
 						Team: {
 							Members: {
 								some: {
-									user: {
-										osu_username: username,
+									User: {
+										osu_id: id,
 									},
 								},
 							},
@@ -38,7 +38,7 @@ module.exports = {
 
 		let channel = await client.fetchChannel(match.mp_link);
 		await msg.user.sendMessage("Sending another invite:");
-		await channel.sendMessage(`!mp invite #${msg.user.id}`);
+		await channel.sendMessage(`!mp invite #${id}`);
 
 		// let matc = await msg.channel.sendMessage("Pong!");
 	},
