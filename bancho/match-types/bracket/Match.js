@@ -269,7 +269,7 @@ class MatchManager {
 
 			for (const user of users) {
 				if (!invitesToIgnore.includes(user.osu_username)) {
-					await this.invitePlayer(user.osu_username);
+					await this.invitePlayer(`#${user.osu_id}`);
 				}
 			}
 		}
