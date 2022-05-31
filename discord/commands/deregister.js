@@ -21,6 +21,15 @@ module.exports = {
 			},
 		});
 
+		if (!tournament.allow_registrations) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: You cannot deregister while registrations are disabled.`
+				)
+				.setColor("RED");
+			await interaction.editReply({ embeds: [embed] });
+		}
+
 		if (!team) {
 			let embed = new MessageEmbed()
 				.setDescription(
@@ -30,6 +39,30 @@ module.exports = {
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
+
+		let matchCheck = await prisma.match.findFirst({
+			where: {
+				Teams: {
+					some: {
+						teamId: team.id,
+					},
+				},
+				state: {
+					gte: 0,
+					lte: 7,
+				},
+			},
+		});
+		if (matchCheck) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: You cannot deregister while your team is match.`
+				)
+				.setColor("RED");
+			interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		let members = await prisma.user.findMany({
 			where: {
 				InTeams: {

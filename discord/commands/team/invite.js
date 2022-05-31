@@ -147,6 +147,30 @@ module.exports = {
 			return;
 		}
 
+		// If the team is in an active match
+		let matchCheck = await prisma.match.findFirst({
+			where: {
+				Teams: {
+					some: {
+						teamId: team.id,
+					},
+				},
+				state: {
+					gte: 0,
+					lte: 7,
+				},
+			},
+		});
+		if (matchCheck) {
+			let embed = new MessageEmbed()
+				.setDescription(
+					`**Err**: You cannot invite while your team is match.`
+				)
+				.setColor("RED");
+			interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
 		let dm = await invitee.createDM();
 		let inviteAccept = new MessageActionRow().addComponents(
 			new MessageButton()
