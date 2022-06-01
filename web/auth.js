@@ -11,7 +11,6 @@ const { prisma, fetchGuild } = require("../prisma");
  * @param {import('express').Response} res
  */
 module.exports.authUser = async (query, req, res) => {
-	console.log("Authorizing...");
 	let osuReqBody = {
 		client_id: process.env.osuClientId,
 		client_secret: process.env.osuClientSecret,
@@ -47,12 +46,14 @@ module.exports.authUser = async (query, req, res) => {
 	});
 	userData = userData.data;
 
-	if (linkCommand[query.state] == null) {
+	let { interaction, user, interval } = linkCommand[query.state];
+
+	if (interaction == null) {
 		res.writeHead(400);
+		res.write("Your auth code has expired");
 		res.end();
 		return;
 	}
-	let { interaction, user, interval } = linkCommand[query.state];
 
 	let userPayload = {
 		discord_id: user.id,
@@ -134,10 +135,12 @@ module.exports.authUser = async (query, req, res) => {
 		embed.setImage(userData.cover_url);
 	}
 
-	let guild = await fetchGuild(interaction.guildId);
+	let dbGuild = await fetchGuild(interaction.guildId);
+	let guild = await interaction.guild;
+	let role = await guild.roles.cache.get(dbGuild.linked_role);
 
-	if (guild.linked_role != null && interaction.member.manageable) {
-		interaction.member.edit({ roles: [guild.linked_role] });
+	if (role && role.editable && interaction.member.manageable) {
+		interaction.member.edit({ roles: [role] });
 	}
 
 	await interaction.editReply({ embeds: [embed] });

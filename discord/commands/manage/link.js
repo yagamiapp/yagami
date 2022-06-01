@@ -1,0 +1,84 @@
+const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
+const { stripIndents } = require("common-tags/lib");
+const { prisma } = require("../../../prisma");
+const { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+
+// Subcommand Handler
+let data = new SlashCommandSubcommandBuilder()
+	.setName("link")
+	.setDescription("Manage settings for linking accounts")
+	.addChannelOption((option) =>
+		option
+			.addChannelType(0)
+			.setName("channel")
+			.setDescription("The channel to send the link message to")
+	)
+	.addRoleOption((option) =>
+		option.setName("role").setDescription("The role to add to users")
+	);
+
+module.exports = {
+	data,
+	/**
+	 *
+	 * @param {import("discord.js").CommandInteraction} interaction
+	 */
+	async execute(interaction) {
+		await interaction.deferReply({ ephemeral: true });
+		let channel = interaction.options.getChannel("channel");
+		let role = interaction.options.getRole("role");
+
+		let finishEmbed = new MessageEmbed()
+			.setTitle("Settings changed")
+			.setColor("#F88000");
+
+		if (channel) {
+			console.log(channel.permissionsFor(interaction.guild.me));
+
+			let icon = interaction.guild.iconURL({
+				dynamic: true,
+				format: "jpg",
+				size: 128,
+			});
+
+			let button = new MessageButton()
+				.setLabel("Link Account")
+				.setStyle("PRIMARY")
+				.setCustomId("link");
+			let embed = new MessageEmbed()
+				.setDescription(
+					stripIndents`
+            In order to use this bot, you must first link your account.
+
+            Use \`/link\`, or click the button below, to link your account.
+                `
+				)
+				.setColor("#F88000")
+				.setAuthor({
+					name: interaction.guild.name,
+					iconURL: icon,
+				});
+			let row = new MessageActionRow().addComponents([button]);
+			await channel.send({ embeds: [embed], components: [row] });
+			finishEmbed.addField(
+				"Channel",
+				`Link channel set to <#${channel.id}>`
+			);
+		}
+
+		if (role) {
+			await prisma.guild.update({
+				where: {
+					guild_id: interaction.guildId,
+				},
+				data: {
+					linked_role: role.id,
+				},
+			});
+
+			finishEmbed.addField("Role", `Link role set to <@&${role.id}>`);
+		}
+
+		await interaction.editReply({ embeds: [finishEmbed] });
+	},
+};
