@@ -210,7 +210,7 @@ model UserInTeam {
   User           User     @relation(fields: [discordId], references: [discord_id])
   Team           Team     @relation(fields: [teamId], references: [id])
   teamId         Int
-  member_order   Int
+  member_order   Int      @default(0)
   delete_warning Boolean?
 
   @@id([discordId, teamId])
