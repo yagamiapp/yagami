@@ -246,6 +246,7 @@ model TeamInMatch {
   roll       Int?
   pick_order Int?
   ban_order  Int?
+  aborts     Int          @default(0)
   warmed_up  Boolean      @default(false)
   Bans       MapInMatch[] @relation("banned")
   Wins       MapInMatch[] @relation("won")
