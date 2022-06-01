@@ -1,8 +1,7 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { stripIndents } = require("common-tags/lib");
-const { prisma, fetchGuild } = require("../../../prisma");
+const { prisma } = require("../../../prisma");
 const { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
-const fs = require("fs");
 
 // Subcommand Handler
 let data = new SlashCommandSubcommandBuilder()

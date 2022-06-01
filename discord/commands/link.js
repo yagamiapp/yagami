@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed, GuildMember } = require("discord.js");
-const { fetchGuild, prisma } = require("../../prisma");
+const { MessageEmbed } = require("discord.js");
+const { prisma } = require("../../prisma");
 const crypto = require("crypto");
 
 module.exports = {
