@@ -33,8 +33,6 @@ module.exports = {
 			.setColor("#F88000");
 
 		if (channel) {
-			console.log(channel.permissionsFor(interaction.guild.me));
-
 			let icon = interaction.guild.iconURL({
 				dynamic: true,
 				format: "jpg",
@@ -59,7 +57,17 @@ module.exports = {
 					iconURL: icon,
 				});
 			let row = new MessageActionRow().addComponents([button]);
-			await channel.send({ embeds: [embed], components: [row] });
+			try {
+				await channel.send({ embeds: [embed], components: [row] });
+			} catch (e) {
+				let embed = new MessageEmbed()
+					.setDescription(
+						"**Err:** Cannot send message in given channel"
+					)
+					.setColor("RED");
+				await interaction.editReply({ embeds: [embed] });
+				return;
+			}
 			finishEmbed.addField(
 				"Channel",
 				`Link channel set to <#${channel.id}>`
