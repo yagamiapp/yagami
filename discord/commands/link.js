@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
 const { prisma } = require("../../prisma");
 const crypto = require("crypto");
+const { stripIndents } = require("common-tags/lib");
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -30,10 +31,28 @@ module.exports = {
 			).linked_role;
 			let role = interaction.guild.roles.cache.get(roleId);
 			if (role && role.editable && member.manageable) {
-				await member.edit({ roles: [role] });
+				await member.roles.add(role);
 			}
 
-			await interaction.editReply("Link successful!");
+			let embed = new MessageEmbed()
+				.setThumbnail(`https://s.ppy.sh/a/${duplicate.osu_id}`)
+				.setTitle("Authorization Success!")
+				.setDescription(
+					stripIndents`
+			Successfully connected discord account to \`${duplicate.osu_username}\`!
+			
+			**Rank**: \`#${duplicate.osu_pp_rank} (${duplicate.osu_pp} pp)\`
+			**Accuracy**: \`${duplicate.osu_hit_accuracy}%\` | **Level**: \`${
+						duplicate.osu_level
+					}.${duplicate.osu_level_progress}\`
+			**Total Score**: \`${duplicate.osu_total_score.toLocaleString()}\`
+			`
+				)
+				.setColor("LUMINOUS_VIVID_PINK");
+			if (duplicate.osu_cover_url) {
+				embed.setImage(duplicate.osu_cover_url);
+			}
+			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 

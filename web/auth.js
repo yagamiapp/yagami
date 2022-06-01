@@ -140,7 +140,7 @@ module.exports.authUser = async (query, req, res) => {
 	let role = await guild.roles.cache.get(dbGuild.linked_role);
 
 	if (role && role.editable && interaction.member.manageable) {
-		interaction.member.edit({ roles: [role] });
+		await interaction.member.roles.add(role);
 	}
 
 	await interaction.editReply({ embeds: [embed] });
