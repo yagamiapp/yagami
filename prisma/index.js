@@ -24,4 +24,21 @@ module.exports = {
 		});
 		return guild;
 	},
+	/**
+	 *
+	 * @param {import("@prisma/client").User} token
+	 */
+	async refreshOsuToken(token) {
+		let lastUpdate = await prisma.user.findUnique({
+			where: {
+				discord_id: token.discord_id,
+			},
+		});
+	},
+	async refreshTokens() {
+		let osuTokens = await prisma.osuOauth.findMany();
+		for (const token of osuTokens) {
+			await module.exports.refreshOsuToken(token);
+		}
+	},
 };
