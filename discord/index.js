@@ -3,11 +3,7 @@ const fs = require("fs");
 const join = require("./join");
 
 const bot = new Client({
-	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.DIRECT_MESSAGES,
-		Intents.FLAGS.GUILD_MEMBERS,
-	],
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES],
 });
 
 module.exports = {
