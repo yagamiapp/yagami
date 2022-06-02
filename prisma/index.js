@@ -105,7 +105,7 @@ module.exports = {
 
 		if (userData.authentication == "basic") {
 			module.exports.refreshOsuToken(token, true);
-			return;
+			return true;
 		}
 
 		let userPayload = {
@@ -133,9 +133,12 @@ module.exports = {
 	},
 	async refreshTokens() {
 		let osuTokens = await prisma.osuOauth.findMany();
+		let ratelimit = false;
 		for (const token of osuTokens) {
+			if (ratelimit) continue;
 			await new Promise((resolve) => setTimeout(resolve, 2000));
-			await module.exports.refreshOsuToken(token);
+			let ratelimitUpdate = await module.exports.refreshOsuToken(token);
+			ratelimit = ratelimit || ratelimitUpdate;
 		}
 	},
 };
