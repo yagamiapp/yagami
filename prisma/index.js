@@ -129,6 +129,7 @@ module.exports = {
 	async refreshTokens() {
 		let osuTokens = await prisma.osuOauth.findMany();
 		for (const token of osuTokens) {
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 			await module.exports.refreshOsuToken(token);
 		}
 	},
