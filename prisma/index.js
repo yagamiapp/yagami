@@ -90,14 +90,14 @@ module.exports = {
 			validateStatus: () => true,
 		});
 
-		if (userData.error) {
-			console.log(userData.error);
-			return;
-		}
-
 		if (userData.status == 429) {
 			console.log("Ratelimited");
 			return true;
+		}
+
+		if (userData.error) {
+			console.log(userData.error);
+			return;
 		}
 
 		userData = userData.data;
