@@ -1,6 +1,7 @@
 const web = require("./web");
 const discord = require("./discord");
 const bancho = require("./bancho");
+const { refreshTokens } = require("./prisma");
 require("dotenv").config();
 
 if (!process.env.disableWeb) {
@@ -12,3 +13,4 @@ if (!process.env.disableDiscord) {
 if (!process.env.disableBancho) {
 	bancho.init();
 }
+refreshTokens();
