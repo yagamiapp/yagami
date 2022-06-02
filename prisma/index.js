@@ -101,7 +101,6 @@ module.exports = {
 		}
 
 		userData = userData.data;
-		console.log("User Data", userData);
 
 		if (userData.authentication == "basic") {
 			return;
