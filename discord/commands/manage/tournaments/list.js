@@ -1,7 +1,6 @@
 const { fetchGuild } = require("../../../../prisma");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
-let { stripIndents } = require("common-tags");
 
 let enums = {
 	score_mode: {
