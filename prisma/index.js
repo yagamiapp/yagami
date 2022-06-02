@@ -95,6 +95,11 @@ module.exports = {
 			return;
 		}
 
+		if (userData.status == 429) {
+			console.log("Ratelimited");
+			return;
+		}
+
 		userData = userData.data;
 		console.log("User Data", userData);
 
