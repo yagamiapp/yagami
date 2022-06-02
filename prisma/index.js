@@ -29,10 +29,10 @@ module.exports = {
 	 *
 	 * @param {import("@prisma/client").OsuOauth} token
 	 */
-	async refreshOsuToken(token) {
+	async refreshOsuToken(token, force) {
 		let refreshTime = token.last_update.getTime() + token.expires_in * 1000;
 		let time = refreshTime - Date.now();
-		if (time <= 0) {
+		if (time <= 0 || force) {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 			let response = await axios({
 				method: "POST",
@@ -96,6 +96,11 @@ module.exports = {
 		}
 
 		userData = userData.data;
+
+		if (userData.authentication == "basic") {
+			module.exports.refreshOsuToken(token, true);
+			return;
+		}
 
 		let userPayload = {
 			osu_id: userData.id,
