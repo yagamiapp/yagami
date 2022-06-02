@@ -3,6 +3,32 @@ const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
 let { stripIndents } = require("common-tags");
 
+let enums = {
+	score_mode: {
+		0: "Score",
+		1: "Combo",
+		2: "Accuracy",
+		3: "ScoreV2",
+		4: "ScoreV2 Accuracy",
+	},
+	team_mode: {
+		0: "Head to Head",
+		1: "Tag Team",
+		2: "TeamVS",
+		3: "Tag Team VS",
+	},
+	double_pick: {
+		0: "No",
+		1: "NM Excluded",
+		2: "Yes",
+	},
+	double_ban: {
+		0: "No",
+		1: "NM Excluded",
+		2: "Yes",
+	},
+};
+
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("list")
@@ -27,31 +53,49 @@ module.exports = {
 		let active_tournament = guild.active_tournament;
 
 		let embed = new MessageEmbed()
-			.setTitle("Tournaments in this server:")
 			.setColor(active_tournament.color || "#F88000")
 			.setThumbnail(
 				active_tournament.icon_url ||
 					"https://yagami.clxxiii.dev/static/yagami%20var.png"
 			)
-			.setDescription(
-				stripIndents`
-				Active Tournament: **${active_tournament.name}**
-				\`\`\`
-				Acronym: ${active_tournament.acronym}
-				Score Mode: ${active_tournament.score_mode}
-				Team Mode: ${active_tournament.team_mode}
-				Force NF: ${active_tournament.force_nf}
-				Team Size: ${active_tournament.team_size}
-				\`\`\`
-				`
+			.setTitle(
+				`${active_tournament.acronym}: ${active_tournament.name}`
 			);
+
+		let description = "";
+		for (const key in active_tournament) {
+			let prop = active_tournament[key];
+			if (prop == null) continue;
+			let ignoredProps = [
+				"icon_url",
+				"color",
+				"name",
+				"id",
+				"Guild_id",
+				"acronym",
+			];
+			if (ignoredProps.includes(key) || key.includes("multiplier"))
+				continue;
+
+			if (enums[key] != null) {
+				prop = enums[key][prop];
+			}
+			let name = key;
+			// Capitalize String
+			name = name.charAt(0).toUpperCase() + name.slice(1);
+			name = name.replace(/_/g, " ");
+
+			description += `**${name}**: ${prop}\n`;
+		}
+
+		embed.setDescription(description);
 
 		let tourneyString = "";
 		for (const tournament of tournaments) {
 			if (tournament.id != active_tournament.id)
 				tourneyString += `[${tournament.acronym}]: ${tournament.name}`;
 		}
-		if (!(tourneyString == "")) {
+		if (tourneyString != "") {
 			embed.addField("Other Tournaments", tourneyString);
 		}
 
