@@ -97,7 +97,7 @@ module.exports = {
 
 		if (userData.status == 429) {
 			console.log("Ratelimited");
-			return;
+			return true;
 		}
 
 		userData = userData.data;
@@ -105,7 +105,7 @@ module.exports = {
 
 		if (userData.authentication == "basic") {
 			module.exports.refreshOsuToken(token, true);
-			return true;
+			return;
 		}
 
 		let userPayload = {
