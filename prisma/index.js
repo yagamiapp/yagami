@@ -104,7 +104,6 @@ module.exports = {
 		console.log("User Data", userData);
 
 		if (userData.authentication == "basic") {
-			module.exports.refreshOsuToken(token, true);
 			return;
 		}
 
