@@ -493,17 +493,10 @@ class MatchManager {
 					await this.channel.sendMessage(
 						`It's a tie so far, time for the tiebreaker!`
 					);
-					let tb = await prisma.mapInPool.findFirst({
-						where: {
-							InMatches: {
-								some: {
-									matchId: this.id,
-								},
-							},
-							identifier: tiebreakers[0].mapIdentifier,
-						},
-					});
-					await this.addPick(tb);
+					let tb = this.mappool.filter((x) =>
+						x.identifier.toUpperCase().includes("TB")
+					);
+					await this.addPick(tb[0]);
 					await this.updateState(1);
 					return;
 				}
