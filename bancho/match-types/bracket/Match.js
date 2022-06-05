@@ -671,7 +671,7 @@ class MatchManager {
 		}
 
 		await this.channel.sendMessage(
-			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} // Next pick: ${team.name}`
 		);
 		await this.channel.sendMessage("Use !pick [map] to pick a map");
 		await this.startTimer();
@@ -1095,7 +1095,7 @@ class MatchManager {
 		}
 
 		await this.channel.sendMessage(
-			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} // Next pick: ${team.name}`
 		);
 	}
 
