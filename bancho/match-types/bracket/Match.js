@@ -146,6 +146,10 @@ class MatchManager {
 		 * @type {Map[]}
 		 */
 		this.picks = [];
+		/**
+		 * @type {Map[]}
+		 */
+		this.wins = [];
 		let mappool = await prisma.mapInMatch.findMany({
 			where: {
 				matchId: this.id,
@@ -191,6 +195,7 @@ class MatchManager {
 				await mapObj.pickedBy.addPick(mapObj);
 			}
 			if (mapObj.won) {
+				this.wins.push(mapObj);
 				await mapObj.wonBy.addWin(mapObj);
 			}
 			this.mappool.push(mapObj);
