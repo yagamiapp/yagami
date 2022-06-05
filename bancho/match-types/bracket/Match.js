@@ -1419,10 +1419,8 @@ class MatchManager {
 
 		// Individual Score Table
 		if (
-			([0, 1].includes(state) &&
-				this.lastGameData &&
-				this.picks.length > 0) ||
-			(state == 4 && this.lastGameData)
+			([4, 5, 6, 7].includes(state) || this.wins >= 1) &&
+			![1, 2].includes(state)
 		) {
 			let leaderboard = "";
 			let lastMap = (
