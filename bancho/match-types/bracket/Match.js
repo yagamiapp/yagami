@@ -1573,6 +1573,23 @@ class MatchManager {
 		}
 
 		// Lobby Player List
+		if ([1, 2].includes(state)) {
+			let leaderboard = "";
+
+			let players = this.lobby.slots.map((x) => x.user.username);
+			for (const team of this.teams) {
+				let inLobbyPlayers = team.users.filter((x) =>
+					players.includes(x.osu_username)
+				);
+
+				leaderboard += `${emotes.teams[team.id]} **${team.name}**\n`;
+				for (const user of inLobbyPlayers) {
+					leaderboard += `\`${user.osu_username}\`\n`;
+				}
+				leaderboard += "\n";
+			}
+			description += "\n" + leaderboard;
+		}
 
 		// Match Rolls
 		if (state >= 5 && state <= 7) {
