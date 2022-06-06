@@ -82,6 +82,10 @@ clientId=
 BUG_CHANNEL_ID=
 # This can be changed to a different location if you wish
 DATABASE_URL="file:./dev.sqlite"
+# A github secret to be used in webhooks
+GITHUB_SECRET=
+# The branch that will be updated when a commit is made to it
+GITHUB_PROD_BRANCH=
 ```
 
 Next, setup prisma and if you'd like, run prisma studio in a new terminal window
