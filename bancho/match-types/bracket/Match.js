@@ -1591,6 +1591,13 @@ class MatchManager {
 			description += "\n" + leaderboard;
 		}
 
+		// Match In Progress
+		if (state == 2) {
+			description += `\n${emotes.loading} **Map in progress**: ${
+				this.picks[this.picks - 1].identifier
+			}`;
+		}
+
 		// Match Rolls
 		if (state >= 5 && state <= 7) {
 			description += "\n";
