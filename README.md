@@ -86,6 +86,8 @@ DATABASE_URL="file:./dev.sqlite"
 GITHUB_SECRET=
 # The branch that will be updated when a commit is made to it
 GITHUB_PROD_BRANCH=
+# The channel to send log messages to
+LOG_CHANNEL
 ```
 
 Next, setup prisma and if you'd like, run prisma studio in a new terminal window
