@@ -762,7 +762,7 @@ class MatchManager {
 		if (msg.user.ircUsername != "BanchoBot") return;
 
 		let content = msg.message;
-		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
+		let roll = content.match(/(?<user>.+) rolls (?<roll>\d+) point\(s\)/);
 		let username = roll.groups.user.replace(" ", "_");
 
 		if (roll && this.rollVerification[username]) {
