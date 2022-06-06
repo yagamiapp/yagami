@@ -457,12 +457,14 @@ class MatchManager {
 				let winner = this.teams[1];
 				await winner.addScore();
 				await winner.addWin(lastMap);
+				this.wins.push(lastMap);
 			}
 
 			if (compareScore >= 0) {
 				let winner = this.teams[0];
 				await winner.addScore();
 				await winner.addWin(lastMap);
+				this.wins.push(lastMap);
 			}
 
 			let scoreToWin = (this.round.best_of + 1) / 2;
