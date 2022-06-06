@@ -767,6 +767,7 @@ class MatchManager {
 		if (!roll) return;
 
 		let username = roll.groups.user.replace(" ", "_");
+		console.log({ rollVerification: this.rollVerification, username });
 
 		if (this.rollVerification[username]) {
 			let team;
