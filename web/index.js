@@ -29,22 +29,39 @@ module.exports.init = () => {
 
 	app.post("/reload", (req, res) => {
 		// lgtm [js/missing-rate-limiting]
+		let ref = req.body.ref;
+		if (!ref) return;
 
 		// Check github secret hash
 		var hmac = crypto.createHmac("sha256", process.env.GITHUB_SECRET);
 		hmac.update(JSON.stringify(req.body), "utf-8");
 
 		var xub = "X-Hub-Signature-256";
-		var received = req.headers[xub] || req.headers[xub.toLowerCase()];
-		var expected = "sha256=" + hmac.digest("hex");
+		var received = Buffer.from(
+			req.headers[xub] || req.headers[xub.toLowerCase()],
+			"utf8"
+		);
+		var expected = Buffer.from("sha256=" + hmac.digest("hex"), "utf8");
 
-		if (received != expected) {
+		if (!crypto.timingSafeEqual(received, expected)) {
 			console.error(
 				"Wrong secret. Expected %s, received %s",
 				expected,
 				received
 			);
 			res.status(403).end();
+			return;
+		}
+
+		let branch = ref.match(/^refs\/heads\/(?<branch>\S+)/)?.groups?.branch;
+		if (branch != process.env.GITHUB_PROD_BRANCH) {
+			res.status(200)
+				.send(
+					JSON.stringify({
+						message: `Commit not made to ${process.env.GITHUB_PROD_BRANCH} branch, ignoring request`,
+					})
+				)
+				.end();
 			return;
 		}
 
