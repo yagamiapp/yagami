@@ -251,7 +251,7 @@ module.exports = {
 			console.log(`Current Guilds: ${guildString}`);
 		});
 
-		let logChannel = await bot.channels.fetch("767464530405228574");
+		let logChannel = await bot.channels.fetch(process.env.LOG_CHANNEL);
 		await logger.setChannel(logChannel);
 	},
 	bot,
