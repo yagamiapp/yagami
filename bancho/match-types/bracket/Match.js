@@ -133,6 +133,12 @@ class MatchManager {
 			this.teams.push(newTeam);
 		}
 
+		let channel = await discord.channels.fetch(this.channel_id);
+		/**
+		 * @type {import("discord.js").Message}
+		 */
+		this.message = await channel.messages.fetch(this.message_id);
+
 		// Get mappool from DB
 		/**
 		 * @type {Map[]}
@@ -1764,7 +1770,7 @@ class MatchManager {
 		if (!(description == "")) {
 			embed.setDescription(description);
 		}
-		await message.edit({ embeds: [embed] });
+		await this.message.edit({ embeds: [embed] });
 	}
 }
 
