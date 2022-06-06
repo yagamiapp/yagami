@@ -8,13 +8,17 @@ module.exports = {
 		.setStyle("PRIMARY"),
 	async execute(interaction, command) {
 		if (interaction.user.id != "265144290240495617") return;
-		let button = new MessageButton()
-			.setDisabled(true)
-			.setCustomId("restart_bot")
-			.setLabel("Restarting...")
-			.setStyle("SECONDARY");
-		await interaction.update({
-			components: [new MessageActionRow().addComponents(button)],
+
+		await pm2.pullAndReload("yagami", (err, meta) => {
+			if (err) {
+				console.log(`Failed to reload server: ${err.msg}`);
+				return;
+			}
+			if (meta.rev) {
+				console.log("Successfully updated");
+			}
 		});
+
+		await interaction.reply({ ephemeral: true, content: "Restarting..." });
 	},
 };
