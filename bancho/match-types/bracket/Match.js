@@ -763,9 +763,12 @@ class MatchManager {
 
 		let content = msg.message;
 		let roll = content.match(/(?<user>.+) rolls (?<roll>\d+) point\(s\)/);
+		console.log(roll);
+		if (!roll) return;
+
 		let username = roll.groups.user.replace(" ", "_");
 
-		if (roll && this.rollVerification[username]) {
+		if (this.rollVerification[username]) {
 			let team;
 			for (const teamTest of this.teams) {
 				let userList = teamTest.users.map((user) => user.osu_username);
