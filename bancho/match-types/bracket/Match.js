@@ -309,6 +309,10 @@ class MatchManager {
 			}
 		});
 
+		this.lobby.on("playerLeft", async () => {
+			await this.updateMessage();
+		});
+
 		// Start Warmups
 		if (this.state == 3) {
 			await this.updateState(4);
@@ -358,6 +362,7 @@ class MatchManager {
 		if (this.state == 4 && this.init) {
 			await this.warmup();
 		}
+		await this.updateMessage();
 	}
 
 	async readyHandler() {
@@ -1565,6 +1570,32 @@ class MatchManager {
 				}
 			}
 			description += "\n" + leaderboard;
+		}
+
+		// Lobby Player List
+		if ([1, 2].includes(state)) {
+			let leaderboard = "";
+
+			let players = this.lobby.slots.map((x) => x.user.username);
+			for (const team of this.teams) {
+				let inLobbyPlayers = team.users.filter((x) =>
+					players.includes(x.osu_username)
+				);
+
+				leaderboard += `${emotes.teams[team.id]} **${team.name}**\n`;
+				for (const user of inLobbyPlayers) {
+					leaderboard += `\`${user.osu_username}\`\n`;
+				}
+				leaderboard += "\n";
+			}
+			description += "\n" + leaderboard;
+		}
+
+		// Match In Progress
+		if (state == 2) {
+			description += `\n${emotes.loading} **Map in progress**: ${
+				this.picks[this.picks - 1].identifier
+			}`;
 		}
 
 		// Match Rolls
