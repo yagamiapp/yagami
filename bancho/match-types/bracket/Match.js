@@ -754,7 +754,7 @@ class MatchManager {
 	 */
 	async rollListener(msg) {
 		if (msg.message.toLowerCase() == "!roll") {
-			this.rollVerification[msg.user.ircUsername] = true;
+			this.rollVerification[msg.user.username] = true;
 			return;
 		}
 
@@ -1577,7 +1577,9 @@ class MatchManager {
 		if ([1, 2].includes(state)) {
 			let leaderboard = "";
 
-			let players = this.lobby.slots.map((x) => x.user.username);
+			let players = this.lobby.slots
+				.filter((x) => x)
+				.map((x) => x.user.username);
 			for (const team of this.teams) {
 				let inLobbyPlayers = team.users.filter((x) =>
 					players.includes(x.osu_username)
