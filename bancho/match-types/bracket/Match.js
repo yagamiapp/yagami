@@ -754,7 +754,8 @@ class MatchManager {
 	 */
 	async rollListener(msg) {
 		if (msg.message.toLowerCase() == "!roll") {
-			this.rollVerification[msg.user.username] = true;
+			let username = msg.user.ircUsername.replace(" ", "_");
+			this.rollVerification[username] = true;
 			return;
 		}
 
@@ -762,8 +763,9 @@ class MatchManager {
 
 		let content = msg.message;
 		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
+		let username = roll.groups.user.replace(" ", "_");
 
-		if (roll && this.rollVerification[roll.groups.user]) {
+		if (roll && this.rollVerification[username]) {
 			let team;
 			for (const teamTest of this.teams) {
 				let userList = teamTest.users.map((user) => user.osu_username);
