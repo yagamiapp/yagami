@@ -149,4 +149,22 @@ module.exports = {
 			console.log("CANNOT SEND MESSAGE IN LOG CHANNEL!!!");
 		}
 	},
+	/**
+	 *
+	 * @param {import("discord.js").Client} client
+	 */
+	async init(client) {
+		let embed = new MessageEmbed()
+			.setTitle("Bot Online!")
+			.setThumbnail(client.user.displayAvatarURL())
+			.setDescription(`\`${client.user.tag}\` is now online!`)
+			.setColor("GREEN")
+			.addField("Restart Time", `<t:${(Date.now() / 1000).toFixed(0)}:R>`)
+			.setTimestamp();
+		try {
+			await channel.send({ embeds: [embed] });
+		} catch {
+			console.log("CANNOT SEND MESSAGE IN LOG CHANNEL!!!");
+		}
+	},
 };

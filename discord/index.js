@@ -253,6 +253,7 @@ module.exports = {
 
 		let logChannel = await bot.channels.fetch(process.env.LOG_CHANNEL);
 		await logger.setChannel(logChannel);
+		await logger.init(bot);
 	},
 	bot,
 };
