@@ -1,4 +1,4 @@
-const { MessageButton, MessageEmbed, MessageActionRow } = require("discord.js");
+const { MessageButton } = require("discord.js");
 const pm2 = require("pm2");
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 	async execute(interaction, command) {
 		if (interaction.user.id != "265144290240495617") return;
 
-		await pm2.pullAndReload("yagami", (err, meta) => {
+		pm2.restart("yagami", (err, meta) => {
 			if (err) {
 				console.log(`Failed to reload server: ${err.msg}`);
 				return;
