@@ -1597,7 +1597,7 @@ class MatchManager {
 		// Match In Progress
 		if (state == 2) {
 			description += `\n${emotes.loading} **Map in progress**: ${
-				this.picks[this.picks - 1].identifier
+				this.picks[this.picks.length - 1].identifier
 			}`;
 		}
 
