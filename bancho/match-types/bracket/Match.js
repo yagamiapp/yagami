@@ -1425,7 +1425,8 @@ class MatchManager {
 		// Individual Score Table
 		if (
 			([4, 5, 6, 7].includes(state) || this.wins >= 1) &&
-			![1, 2].includes(state)
+			![1, 2].includes(state) &&
+			this.lastGameData
 		) {
 			let leaderboard = "";
 			let lastMap = (
