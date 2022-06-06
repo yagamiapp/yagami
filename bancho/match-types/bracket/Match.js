@@ -1438,7 +1438,7 @@ class MatchManager {
 
 		// Individual Score Table
 		if (
-			([4, 5, 6, 7].includes(state) || this.wins >= 1) &&
+			([4, 5, 6, 7].includes(state) || this.wins.length >= 1) &&
 			state != 1 &&
 			this.lastGameData
 		) {
