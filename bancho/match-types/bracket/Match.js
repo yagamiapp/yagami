@@ -309,6 +309,10 @@ class MatchManager {
 			}
 		});
 
+		this.lobby.on("playerLeft", async () => {
+			await this.updateMessage();
+		});
+
 		// Start Warmups
 		if (this.state == 3) {
 			await this.updateState(4);
@@ -358,6 +362,7 @@ class MatchManager {
 		if (this.state == 4 && this.init) {
 			await this.warmup();
 		}
+		await this.updateMessage();
 	}
 
 	async readyHandler() {
@@ -1566,6 +1571,8 @@ class MatchManager {
 			}
 			description += "\n" + leaderboard;
 		}
+
+		// Lobby Player List
 
 		// Match Rolls
 		if (state >= 5 && state <= 7) {
