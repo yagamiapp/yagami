@@ -1439,7 +1439,7 @@ class MatchManager {
 		// Individual Score Table
 		if (
 			([4, 5, 6, 7].includes(state) || this.wins >= 1) &&
-			![1, 2].includes(state) &&
+			state != 1 &&
 			this.lastGameData
 		) {
 			let leaderboard = "";
@@ -1588,7 +1588,7 @@ class MatchManager {
 		}
 
 		// Lobby Player List
-		if ([1, 2].includes(state)) {
+		if (this.state == 1) {
 			let leaderboard = "";
 
 			let players = this.lobby.slots
