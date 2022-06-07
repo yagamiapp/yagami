@@ -63,13 +63,14 @@ model Map {
 }
 
 model MapInPool {
-  identifier String // NM1, NM2 etc.
-  mods       String
-  Map        Map          @relation(fields: [mapId], references: [beatmap_id])
-  mapId      String
-  Mappool    Mappool      @relation(fields: [mappoolId], references: [id])
-  mappoolId  Int
-  InMatches  MapInMatch[]
+  identifier  String // NM1, NM2 etc.
+  mods        String
+  Map         Map          @relation(fields: [mapId], references: [beatmap_id])
+  mapId       String
+  modPriority Int          @default(0)
+  Mappool     Mappool      @relation(fields: [mappoolId], references: [id])
+  mappoolId   Int
+  InMatches   MapInMatch[]
 
   @@id([identifier, mappoolId])
 }
@@ -250,6 +251,7 @@ model TeamInMatch {
   pick_order Int?
   ban_order  Int?
   aborts     Int          @default(0)
+  faults     Int          @default(0)
   warmed_up  Boolean      @default(false)
   Bans       MapInMatch[] @relation("banned")
   Wins       MapInMatch[] @relation("won")
