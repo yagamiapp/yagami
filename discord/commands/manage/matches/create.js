@@ -132,7 +132,6 @@ module.exports = {
 
 		let match = await prisma.match.create({
 			data: {
-				id: matches.length + 1,
 				state: 10,
 				roundId: round.id,
 			},
