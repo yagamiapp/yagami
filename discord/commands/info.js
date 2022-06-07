@@ -60,7 +60,7 @@ module.exports = {
 				"Statistics",
 				stripIndents`
 					> ➣ Servers:  **${interaction.client.guilds.cache.size}**
-					> ➣ Total Matches Tracked: **${matches}**
+					> ➣ Total Matches Tracked: **${matches.length}**
 				`
 			);
 		embed
