@@ -122,7 +122,7 @@ module.exports = {
 			let mapID = maps[i];
 			let map = await fetchMap(mapID);
 
-			let modType = map.identifier.match(/\w{2}/g)[0];
+			let modType = identifier.match(/\w{2}/g)[0];
 			let modPriority = modPrioEnum[modType];
 			if (modPriority == undefined) modPriority = 7;
 

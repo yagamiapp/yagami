@@ -113,7 +113,7 @@ module.exports = {
 		let mapID = interaction.options.getString("map").match(/\d+$/);
 		let map = await fetchMap(mapID[0]);
 
-		let modType = map.identifier.match(/\w{2}/g)[0];
+		let modType = identifier.match(/\w{2}/g)[0];
 		let modPriority = modPrioEnum[modType];
 		if (modPriority == undefined) modPriority = 7;
 
