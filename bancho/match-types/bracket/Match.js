@@ -161,6 +161,11 @@ class MatchManager {
 			where: {
 				matchId: this.id,
 			},
+			orderBy: {
+				Map: {
+					modPriority: "asc",
+				},
+			},
 		});
 
 		for (const mapInMatch of mappool) {
