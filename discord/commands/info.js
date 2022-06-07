@@ -20,7 +20,9 @@ module.exports = {
 		let uptime = Date.now() - start_time;
 		let uptimeSplits = {
 			days: Math.floor(uptime / (1000 * 60 * 60 * 24)),
-			hours: Math.floor((uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+			hours: Math.floor(
+				(uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+			),
 			mins: Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60)),
 			secs: Math.floor((uptime % (1000 * 60)) / 1000),
 		};
@@ -66,7 +68,7 @@ module.exports = {
 				"Developer",
 				stripIndents`
 				<@265144290240495617>
-				[Discord](no) | [Twitter](https://twitter.com/clxxiii1) | [GitHub](https://github.com/clxxiii) | [osu!](https://osu.ppy.sh/users/10962678)
+				[Discord](https://yagami.clxxiii.dev/discord) | [Twitter](https://twitter.com/clxxiii1) | [GitHub](https://github.com/clxxiii) | [osu!](https://osu.ppy.sh/users/10962678)
 				`
 			)
 			.setTimestamp()
