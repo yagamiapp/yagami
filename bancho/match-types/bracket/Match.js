@@ -407,7 +407,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`The following teams do not have the correct amount of players: ${teamString}`
 				);
-				return;
+				// return;
 			}
 
 			await this.updateState(2);
