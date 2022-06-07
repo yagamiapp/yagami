@@ -271,7 +271,7 @@ module.exports = {
 		});
 
 		execute(interaction, {
-			options: { round: round.acronym, index: command.options.index },
+			options: { index: command.options.index },
 		});
 	},
 };
