@@ -1,18 +1,16 @@
 const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
 const fs = require("fs");
 const join = require("./join");
+const logger = require("./logger");
 
 const bot = new Client({
-	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.DIRECT_MESSAGES,
-		Intents.FLAGS.GUILD_MEMBERS,
-	],
+	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES],
 });
 
 module.exports = {
 	async init() {
 		await bot.login(process.env.discordToken);
+
 		// Make Collection of commands
 		bot.commands = new Collection();
 		const commandFiles = fs
@@ -51,6 +49,7 @@ module.exports = {
 		// Command Handler
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isCommand()) return;
+			await logger.log(interaction);
 
 			// Craft message to send to console
 			let options = interaction.options.data;
@@ -103,7 +102,7 @@ module.exports = {
 					.setDescription(
 						"**Err**: There was an error while executing this command!"
 					);
-
+				await logger.error(error, interaction);
 				if (interaction.replied || interaction.deferred) {
 					await interaction.editReply({
 						embeds: [embed],
@@ -120,6 +119,7 @@ module.exports = {
 		// Button Handler
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isButton()) return;
+			await logger.log(interaction);
 
 			// Restructure command id into command object
 			let command = {};
@@ -157,6 +157,7 @@ module.exports = {
 					.setDescription(
 						"**Err**: There was an error while executing this button!"
 					);
+				await logger.error(error, interaction);
 				if (interaction.replied || interaction.deferred) {
 					await interaction.editReply({
 						embeds: [embed],
@@ -174,6 +175,7 @@ module.exports = {
 		// Modal Handler
 		bot.on("interactionCreate", async (interaction) => {
 			if (!interaction.isModalSubmit()) return;
+			await logger.log(interaction);
 
 			// Restructure command id into command object
 			let command = {};
@@ -211,6 +213,7 @@ module.exports = {
 					.setDescription(
 						"**Err**: There was an error while executing this modal!"
 					);
+				await logger.error(error, interaction);
 				if (interaction.replied || interaction.deferred) {
 					await interaction.editReply({
 						embeds: [embed],
@@ -247,6 +250,10 @@ module.exports = {
 			guildString = guildString.slice(0, -2);
 			console.log(`Current Guilds: ${guildString}`);
 		});
+
+		let logChannel = await bot.channels.fetch(process.env.LOG_CHANNEL);
+		await logger.setChannel(logChannel);
+		await logger.init(bot);
 	},
 	bot,
 };

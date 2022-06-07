@@ -76,8 +76,6 @@ module.exports = {
 			}),
 		];
 
-		let matches = await prisma.match.findMany({});
-
 		// In case the given acronym is not valid
 		if (!round) {
 			let embed = new MessageEmbed()
@@ -132,7 +130,6 @@ module.exports = {
 
 		let match = await prisma.match.create({
 			data: {
-				id: matches.length + 1,
 				state: 10,
 				roundId: round.id,
 			},

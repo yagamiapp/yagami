@@ -7,18 +7,22 @@ module.exports = {
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
-		let round = await prisma.round.findFirst({
+		let matches = await prisma.match.findMany({
 			where: {
-				tournamentId: tournament.id,
-				acronym: command.options.round,
+				Round: {
+					Tournament: {
+						id: tournament.id,
+					},
+				},
 			},
 		});
-		let matches = await prisma.match.findMany({
-			where: { roundId: round.id, OR: [{ state: 3 }, { state: 10 }] },
-		});
+
+		// Add a local tournament match ID to each match
 		for (let i = 0; i < matches.length; i++) {
-			matches[i].roundId = i + 1;
+			matches[i].tournamentId = i + 1;
 		}
+
+		matches = matches.filter((x) => [3, 10].includes(x.state));
 
 		// Group elements into groups of 2
 		let groups = [];
@@ -81,11 +85,11 @@ module.exports = {
 
 		let embed = new MessageEmbed()
 			.setColor(tournament.color)
-			.setTitle(`${round.acronym}: Matches to start`)
+			.setTitle(`Matches to start`)
 			.setDescription(
 				stripIndents`
 			The following matches have not been started yet, 
-			click the respectivebutton to start them.
+			click the respective button to start them.
             `
 			)
 			.setThumbnail(tournament.icon_url);
@@ -103,31 +107,32 @@ module.exports = {
 				},
 			});
 
+			let round = await prisma.round.findFirst({
+				where: {
+					id: match.roundId,
+				},
+			});
+
 			embed.addField(
-				"Match " + match.id,
+				`${round.acronym}: Match ${match.tournamentId}`,
 				`${teams[0].name} vs ${teams[1].name}`,
 				true
 			);
 			let startButton = new MessageButton()
-				.setLabel("Start match " + match.id)
+				.setLabel("Start match " + match.tournamentId)
 				.setCustomId("start_match?id=" + match.id + "&index=" + index)
 				.setStyle("SUCCESS");
 			if (match.state != 10) {
 				startButton
-					.setLabel("Started match " + match.id)
+					.setLabel("Started match " + match.tournamentId)
 					.setDisabled(true);
 			}
 			startButtons.addComponents([startButton]);
 			viewButtons.addComponents([
 				new MessageButton()
-					.setLabel("View match " + match.id)
+					.setLabel("View match " + match.tournamentId)
 					.setCustomId(
-						"view_match?id=" +
-							match.id +
-							"&index=" +
-							index +
-							"&round=" +
-							command.options.round
+						"view_match?id=" + match.id + "&index=" + index
 					)
 					.setStyle("SECONDARY"),
 			]);

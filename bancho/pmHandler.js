@@ -32,9 +32,11 @@ module.exports = {
 		if (message.match(commandRegex)) {
 			message = message.substring(1);
 			let args = message.split(" ");
-			console.log(args);
 
 			if (args[0] == "!mp") return;
+
+			let command = commands[args[0]];
+
 			if (!command) return;
 			let options = args.splice(1, 1);
 			try {

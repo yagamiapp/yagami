@@ -163,8 +163,9 @@ model User {
 }
 
 model OsuOauth {
-  User          User   @relation(fields: [discord_id], references: [discord_id])
-  discord_id    String @id
+  User          User     @relation(fields: [discord_id], references: [discord_id])
+  discord_id    String   @id
+  last_update   DateTime @default(now())
   access_token  String
   expires_in    Int
   refresh_token String
@@ -182,13 +183,14 @@ model DiscordOauth {
 }
 
 model Guild {
-  guild_id              String       @id
-  change_nickname       Boolean
-  linked_role           String?
-  player_role           String?
-  match_results_channel String?
-  Tournaments           Tournament[]
-  active_tournament     Int?
+  guild_id               String       @id
+  change_nickname        Boolean
+  linked_role            String?
+  player_role            String?
+  match_results_channel  String?
+  manager_admin_disabled Boolean      @default(false)
+  Tournaments            Tournament[]
+  active_tournament      Int?
 }
 
 model Team {
@@ -209,6 +211,7 @@ model UserInTeam {
   User           User     @relation(fields: [discordId], references: [discord_id])
   Team           Team     @relation(fields: [teamId], references: [id])
   teamId         Int
+  member_order   Int      @default(0)
   delete_warning Boolean?
 
   @@id([discordId, teamId])
@@ -246,6 +249,7 @@ model TeamInMatch {
   roll       Int?
   pick_order Int?
   ban_order  Int?
+  aborts     Int          @default(0)
   warmed_up  Boolean      @default(false)
   Bans       MapInMatch[] @relation("banned")
   Wins       MapInMatch[] @relation("won")

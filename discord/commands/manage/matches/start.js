@@ -1,18 +1,12 @@
 let { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 let { MessageEmbed } = require("discord.js");
-let { fetchGuild, prisma } = require("../../../../prisma");
+let { fetchGuild } = require("../../../../prisma");
 let { execute } = require("../../../buttons/match_start_list");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("start")
-		.setDescription("Starts a match")
-		.addStringOption((option) =>
-			option
-				.setName("round_acronym")
-				.setDescription("The acronym of the round to start")
-				.setRequired(true)
-		),
+		.setDescription("Starts a match"),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 		let guild = await fetchGuild(interaction.guildId);
@@ -30,29 +24,8 @@ module.exports = {
 			return;
 		}
 
-		let round = await prisma.round.findFirst({
-			where: {
-				tournamentId: tournament.id,
-				acronym: interaction.options
-					.getString("round_acronym")
-					.toUpperCase(),
-			},
-		});
-
-		// In case there is no round with the given acronym
-		if (!round) {
-			let embed = new MessageEmbed()
-				.setDescription("**Err**: No round with the given acronym.")
-				.setColor("RED")
-				.setFooter({
-					text: "You can make a new round with /round create",
-				});
-			await interaction.editReply({ embeds: [embed] });
-			return;
-		}
-
 		await execute(interaction, {
-			options: { index: 0, round: round.acronym },
+			options: { index: 0 },
 		});
 	},
 };

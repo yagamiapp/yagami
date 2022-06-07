@@ -133,6 +133,12 @@ class MatchManager {
 			this.teams.push(newTeam);
 		}
 
+		let channel = await discord.channels.fetch(this.channel_id);
+		/**
+		 * @type {import("discord.js").Message}
+		 */
+		this.message = await channel.messages.fetch(this.message_id);
+
 		// Get mappool from DB
 		/**
 		 * @type {Map[]}
@@ -146,6 +152,10 @@ class MatchManager {
 		 * @type {Map[]}
 		 */
 		this.picks = [];
+		/**
+		 * @type {Map[]}
+		 */
+		this.wins = [];
 		let mappool = await prisma.mapInMatch.findMany({
 			where: {
 				matchId: this.id,
@@ -191,6 +201,7 @@ class MatchManager {
 				await mapObj.pickedBy.addPick(mapObj);
 			}
 			if (mapObj.won) {
+				this.wins.push(mapObj);
 				await mapObj.wonBy.addWin(mapObj);
 			}
 			this.mappool.push(mapObj);
@@ -269,7 +280,7 @@ class MatchManager {
 
 			for (const user of users) {
 				if (!invitesToIgnore.includes(user.osu_username)) {
-					await this.invitePlayer(user.osu_username);
+					await this.invitePlayer(`#${user.osu_id}`);
 				}
 			}
 		}
@@ -288,7 +299,7 @@ class MatchManager {
 		);
 
 		// Smaller event handlers without their own function:
-		this.lobby.on("matchStarted", () => {
+		this.lobby.on("matchStarted", async () => {
 			if (this.state == 4 && this.beatmap.hitLength > maxWarmupLength) {
 				let team = this.teams[this.waiting_on];
 				setTimeout(async () => {
@@ -298,6 +309,14 @@ class MatchManager {
 					await this.warmup();
 				}, 10000);
 			}
+
+			if (this.state == 4) {
+				await this.lobby.abortTimer();
+			}
+		});
+
+		this.lobby.on("playerLeft", async () => {
+			await this.updateMessage();
 		});
 
 		// Start Warmups
@@ -349,6 +368,7 @@ class MatchManager {
 		if (this.state == 4 && this.init) {
 			await this.warmup();
 		}
+		await this.updateMessage();
 	}
 
 	async readyHandler() {
@@ -443,12 +463,14 @@ class MatchManager {
 				let winner = this.teams[1];
 				await winner.addScore();
 				await winner.addWin(lastMap);
+				this.wins.push(lastMap);
 			}
 
 			if (compareScore >= 0) {
 				let winner = this.teams[0];
 				await winner.addScore();
 				await winner.addWin(lastMap);
+				this.wins.push(lastMap);
 			}
 
 			let scoreToWin = (this.round.best_of + 1) / 2;
@@ -489,17 +511,10 @@ class MatchManager {
 					await this.channel.sendMessage(
 						`It's a tie so far, time for the tiebreaker!`
 					);
-					let tb = await prisma.mapInPool.findFirst({
-						where: {
-							InMatches: {
-								some: {
-									matchId: this.id,
-								},
-							},
-							identifier: tiebreakers[0].mapIdentifier,
-						},
-					});
-					await this.addPick(tb);
+					let tb = this.mappool.filter((x) =>
+						x.identifier.toUpperCase().includes("TB")
+					);
+					await this.addPick(tb[0]);
 					await this.updateState(1);
 					return;
 				}
@@ -674,7 +689,7 @@ class MatchManager {
 		}
 
 		await this.channel.sendMessage(
-			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} // Next pick: ${team.name}`
 		);
 		await this.channel.sendMessage("Use !pick [map] to pick a map");
 		await this.startTimer();
@@ -747,16 +762,20 @@ class MatchManager {
 	 */
 	async rollListener(msg) {
 		if (msg.message.toLowerCase() == "!roll") {
-			this.rollVerification[msg.user.ircUsername] = true;
+			let username = msg.user.ircUsername.replace(" ", "_");
+			this.rollVerification[username] = true;
 			return;
 		}
 
 		if (msg.user.ircUsername != "BanchoBot") return;
 
 		let content = msg.message;
-		let roll = content.match(/(?<user>\w+) rolls (?<roll>\d+) point\(s\)/);
+		let roll = content.match(/(?<user>.+) rolls (?<roll>\d+) point\(s\)/);
+		if (!roll) return;
 
-		if (roll && this.rollVerification[roll.groups.user]) {
+		let username = roll.groups.user.replaceAll(" ", "_");
+
+		if (this.rollVerification[username]) {
 			let team;
 			for (const teamTest of this.teams) {
 				let userList = teamTest.users.map((user) => user.osu_username);
@@ -1098,7 +1117,7 @@ class MatchManager {
 		}
 
 		await this.channel.sendMessage(
-			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} //Next pick: ${team.name}`
+			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} // Next pick: ${team.name}`
 		);
 	}
 
@@ -1417,10 +1436,9 @@ class MatchManager {
 
 		// Individual Score Table
 		if (
-			([0, 1].includes(state) &&
-				this.lastGameData &&
-				this.picks.length > 0) ||
-			(state == 4 && this.lastGameData)
+			([4, 5, 6, 7].includes(state) || this.wins.length >= 1) &&
+			state != 1 &&
+			this.lastGameData
 		) {
 			let leaderboard = "";
 			let lastMap = (
@@ -1565,6 +1583,34 @@ class MatchManager {
 				}
 			}
 			description += "\n" + leaderboard;
+		}
+
+		// Lobby Player List
+		if (this.state == 1) {
+			let leaderboard = "";
+
+			let players = this.lobby.slots
+				.filter((x) => x)
+				.map((x) => x.user.username);
+			for (const team of this.teams) {
+				let inLobbyPlayers = team.users.filter((x) =>
+					players.includes(x.osu_username)
+				);
+
+				leaderboard += `${emotes.teams[team.id]} **${team.name}**\n`;
+				for (const user of inLobbyPlayers) {
+					leaderboard += `\`${user.osu_username}\`\n`;
+				}
+				leaderboard += "\n";
+			}
+			description += "\n" + leaderboard;
+		}
+
+		// Match In Progress
+		if (state == 2) {
+			description += `\n${emotes.loading} **Map in progress**: ${
+				this.picks[this.picks.length - 1].identifier
+			}`;
 		}
 
 		// Match Rolls
@@ -1722,7 +1768,7 @@ class MatchManager {
 		if (!(description == "")) {
 			embed.setDescription(description);
 		}
-		await message.edit({ embeds: [embed] });
+		await this.message.edit({ embeds: [embed] });
 	}
 }
 
