@@ -1,10 +1,5 @@
 const { prisma } = require("../../../prisma");
 
-// There's currently a bug with local SQLite
-// Databases, where too many requests in
-// Succession will crash prisma.
-let prismaTimeout = 300;
-
 class Team {
 	/**
 	 *
