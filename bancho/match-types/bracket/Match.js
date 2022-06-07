@@ -1407,7 +1407,9 @@ class MatchManager {
 		let oldembed = message.embeds[0];
 		let description = "";
 		let embed = new MessageEmbed()
-			.setTitle(oldembed.title)
+			.setTitle(
+				`${this.round.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})`
+			)
 			.setColor(this.tournament.color)
 			.setAuthor(oldembed.author)
 			.setThumbnail(oldembed.thumbnail?.url)
