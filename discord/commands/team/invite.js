@@ -152,7 +152,7 @@ module.exports = {
 			where: {
 				Teams: {
 					some: {
-						teamId: team.id,
+						teamId: inviterTeam.id,
 					},
 				},
 				state: {
