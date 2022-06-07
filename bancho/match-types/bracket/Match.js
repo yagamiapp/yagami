@@ -410,10 +410,10 @@ class MatchManager {
 				for (const team of badTeams) {
 					teamString += this.teams[team].name + " ";
 				}
-				await this.channel.sendMessage(
-					`The following teams do not have the correct amount of players: ${teamString}`
-				);
-				return;
+				// await this.channel.sendMessage(
+				// 	`The following teams do not have the correct amount of players: ${teamString}`
+				// );
+				// return;
 			}
 
 			this.abortAllowed = true;
