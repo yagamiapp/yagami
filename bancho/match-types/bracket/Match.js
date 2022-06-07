@@ -419,6 +419,7 @@ class MatchManager {
 			this.abortAllowed = true;
 			setTimeout(() => (this.abortAllowed = false), 35 * 1000);
 
+			await this.abortTimer(false);
 			await this.updateState(2);
 			await this.lobby.startMatch(5);
 			await this.channel.sendMessage("glhf!");
@@ -759,7 +760,7 @@ class MatchManager {
 		if (command) {
 			let team = this.teams[this.waiting_on];
 			await team.setWarmedUp(true);
-			await this.lobby.abortTimer();
+			await this.abortTimer(true);
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
 		}
@@ -893,6 +894,7 @@ class MatchManager {
 		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
 		let map = this.mappool.find((x) => x.identifier == mapString);
+
 		if (!map) {
 			await this.channel.sendMessage(
 				`Map ${command.groups.map} not found`
@@ -931,6 +933,7 @@ class MatchManager {
 			return;
 		}
 
+		await this.abortTimer(false);
 		this.bans.push(map);
 		await team.addBan(map);
 		await this.channel.sendMessage(
@@ -1004,6 +1007,7 @@ class MatchManager {
 			return;
 		}
 
+		await this.abortTimer(false);
 		await this.addPick(map);
 		await this.channel.sendMessage(
 			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${map.beatmapset_id} chimu.moe Mirror]`
@@ -1275,16 +1279,7 @@ class MatchManager {
 			}
 		}
 
-		// Check for timer ends
-		if (
-			msg.message == "Countdown finished" &&
-			msg.user.ircUsername == "BanchoBot" &&
-			this.lastTimer < Date.now() - 5000
-		) {
-			await this.timerHandler(false);
-			return;
-		}
-
+		// Check for timer warning
 		if (
 			msg.message == "Countdown ends in 30 seconds" &&
 			msg.user.ircUsername == "BanchoBot"
@@ -1361,8 +1356,17 @@ class MatchManager {
 	}
 
 	async startTimer() {
-		await this.lobby.startTimer(timers[this.state]);
+		let timerLength = timers[this.state];
+		await this.lobby.startTimer(timerLength);
+		this.timer = setTimeout(() => {
+			this.timerHandler();
+		}, (timerLength + 5) * 1000);
 		this.lastTimer = Date.now();
+	}
+
+	async abortTimer(inMatch) {
+		if (inMatch) await this.lobby.abortTimer();
+		clearTimeout(this.timer);
 	}
 
 	async timerHandler(warn, excludeMessage) {
