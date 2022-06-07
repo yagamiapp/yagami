@@ -1327,7 +1327,7 @@ class MatchManager {
 		}
 
 		if (this.state == 2) {
-			await this.abortCommand();
+			await this.abortCommand(msg);
 			return;
 		}
 
