@@ -771,11 +771,9 @@ class MatchManager {
 
 		let content = msg.message;
 		let roll = content.match(/(?<user>.+) rolls (?<roll>\d+) point\(s\)/);
-		console.log(roll);
 		if (!roll) return;
 
 		let username = roll.groups.user.replaceAll(" ", "_");
-		console.log({ rollVerification: this.rollVerification, username });
 
 		if (this.rollVerification[username]) {
 			let team;
