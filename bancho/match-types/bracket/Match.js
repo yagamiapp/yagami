@@ -27,6 +27,7 @@ let states = {
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
 let maxWarmupLength = 300;
+let maxAborts = 1;
 
 let timers = {
 	0: 120,
@@ -409,6 +410,9 @@ class MatchManager {
 				);
 				return;
 			}
+
+			this.abortAllowed = true;
+			setTimeout(() => (this.abortAllowed = false), 35 * 1000);
 
 			await this.updateState(2);
 			await this.lobby.startMatch(5);
@@ -1120,6 +1124,28 @@ class MatchManager {
 			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} // Next pick: ${team.name}`
 		);
 	}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async abortCommand(msg) {
+		let command = msg.message.match(/^!abort/g);
+		if (!command || !this.abortAllowed) return;
+
+		let team;
+		for (const teamTest of this.teams) {
+			let userList = teamTest.users.map((user) => user.osu_username);
+			if (userList.includes(msg.user.username)) {
+				team = teamTest;
+			}
+		}
+		if (!team || team.aborts >= maxAborts) return;
+
+		await this.lobby.abortMatch();
+		await this.updateState(1);
+		await team.addAbort();
+		await this.channel.sendMessage(`${team.name} has aborted the match`);
+	}
 
 	/*
 	 * ==============================================
@@ -1298,6 +1324,11 @@ class MatchManager {
 		}
 		if (this.state >= 0 && this.state <= 2) {
 			await this.scoreCommand(msg);
+		}
+
+		if (this.state == 2) {
+			await this.abortCommand();
+			return;
 		}
 
 		if (this.state == 4) {
