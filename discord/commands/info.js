@@ -33,7 +33,7 @@ module.exports = {
 			(uptimeSplits.secs != 0 ? `${uptimeSplits.secs} secs` : "");
 
 		// TODO: Right align text
-		let tournaments = await prisma.tournament.count();
+		let matches = await prisma.match.findMany();
 
 		let embed = new MessageEmbed()
 			.setColor("#F88000")
@@ -60,7 +60,7 @@ module.exports = {
 				"Statistics",
 				stripIndents`
 					> ➣ Servers:  **${interaction.client.guilds.cache.size}**
-					> ➣ Tournaments: **${tournaments}**
+					> ➣ Total Matches Tracked: **${matches}**
 				`
 			);
 		embed
