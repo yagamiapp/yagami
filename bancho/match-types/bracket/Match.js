@@ -392,8 +392,11 @@ class MatchManager {
 			.filter((x) => userMap.includes(x.user.id));
 
 		// If the team has max players, kick the user
-		if (inLobbyPlayers.length > this.tournament.x_v_x_mode) {
-			await this.lobby.kickPlayer(`#${event.player.user.username}`);
+		if (
+			inLobbyPlayers.length > this.tournament.x_v_x_mode &&
+			this.state != 4
+		) {
+			await this.lobby.kickPlayer(`#${event.player.user.id}`);
 			return;
 		}
 
@@ -829,6 +832,7 @@ class MatchManager {
 		}
 
 		if (this.state == 4) {
+			await this.lobby.setSize(16);
 			await this.warmup();
 			return;
 		}
