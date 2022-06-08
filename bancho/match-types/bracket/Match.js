@@ -371,7 +371,7 @@ class MatchManager {
 			}
 		}
 		if (user == null) {
-			await this.channel.lobby.kickPlayer(event.player.user.username);
+			await this.channel.lobby.kickPlayer(event.player.user.id);
 			return;
 		}
 
