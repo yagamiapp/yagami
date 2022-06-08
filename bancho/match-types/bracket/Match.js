@@ -1327,7 +1327,7 @@ class MatchManager {
 	 * position with the player in that slot
 	 */
 	async swap() {
-		if (this.swaps.length == 0) {
+		if (this.swaps.length == 0 || this.state == 2) {
 			this.swapping = false;
 			return;
 		}
