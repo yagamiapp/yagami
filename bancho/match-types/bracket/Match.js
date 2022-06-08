@@ -1362,7 +1362,7 @@ class MatchManager {
 		}
 
 		this.swaps.splice(0, 1);
-		this.swap();
+		await this.swap();
 	}
 	/**
 	 *
