@@ -378,10 +378,10 @@ class MatchManager {
 		// Put the user on the right team
 		if ([2, 3].includes(this.tournament.team_mode)) {
 			if (team == this.teams[0]) {
-				await this.lobby.changeTeam(`#${user.osu_id}`, "Red");
+				await this.lobby.changeTeam(event.player, "Red");
 			}
 			if (team == this.teams[1]) {
-				await this.lobby.changeTeam(`#${user.osu_id}`, "Blue");
+				await this.lobby.changeTeam(event.player, "Blue");
 			}
 		}
 
