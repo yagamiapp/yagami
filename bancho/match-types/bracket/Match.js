@@ -317,7 +317,7 @@ class MatchManager {
 			}
 
 			if (this.state == 4) {
-				await this.abortTimer(false);
+				await this.abortTimer();
 			}
 		});
 
@@ -1356,6 +1356,7 @@ class MatchManager {
 	}
 
 	async startTimer() {
+		clearTimeout(this.timer);
 		let timerLength = timers[this.state];
 		await this.lobby.startTimer(timerLength);
 		this.timer = setTimeout(() => {
