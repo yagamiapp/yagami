@@ -49,6 +49,7 @@ class MatchManager {
 		this.mp = mp;
 		this.init = false;
 		this.rollVerification = {};
+		this.swaps = [];
 	}
 
 	/*
@@ -242,6 +243,8 @@ class MatchManager {
 			return;
 		}
 		await this.lobby.clearHost();
+		await this.lobby.abortTimer();
+		await this.lobby.lockSlots();
 
 		// Update db object
 		await prisma.match.update({
@@ -291,6 +294,7 @@ class MatchManager {
 			}
 		}
 
+		this.swapping = true;
 		// Setup event handlers
 		this.channel.on("message", async (msg) => await this.msgHandler(msg));
 		this.lobby.on(
@@ -325,6 +329,8 @@ class MatchManager {
 			await this.updateMessage();
 		});
 
+		this.swap();
+
 		// Start Warmups
 		if (this.state == 3) {
 			await this.updateState(4);
@@ -350,6 +356,9 @@ class MatchManager {
 	 */
 	async joinHandler(event) {
 		let user;
+		/**
+		 * @type {Team}
+		 */
 		let team;
 		for (let teamTest of this.teams) {
 			let userTest = teamTest.getUserPos(event.player.user._id);
@@ -364,11 +373,36 @@ class MatchManager {
 			return;
 		}
 
-		if (team == this.teams[0]) {
-			console.log("Team 0");
+		// Put the user on the right team
+		if ([2, 3].includes(this.tournament.team_mode)) {
+			if (team == this.teams[0]) {
+				await this.lobby.changeTeam(`#${user.osu_id}`, "red");
+			}
+			if (team == this.teams[1]) {
+				await this.lobby.changeTeam(`#${user.osu_id}`, "blue");
+			}
 		}
+
+		// Get users from the team that are already in the lobby
+		let userMap = team.users.map((x) => x.osu_id);
+		let inLobbyPlayers = this.lobby.slots
+			.filter((x) => x)
+			.filter((x) => userMap.includes(x.user.id));
+
+		// If the team has max players, kick the user
+		if (inLobbyPlayers.length > this.tournament.x_v_x_mode) {
+			await this.lobby.kickPlayer(`#${event.player.user.username}`);
+			return;
+		}
+
+		let slot = inLobbyPlayers.length;
+		// Move the player to the lower slots if team 2
 		if (team == this.teams[1]) {
-			console.log("Team 1");
+			slot += this.tournament.x_v_x_mode;
+		}
+		this.swaps.push({ player: event.player, slot });
+		if (!this.swapping) {
+			await this.swap();
 		}
 
 		if (this.state == 4 && this.init) {
@@ -1209,10 +1243,45 @@ class MatchManager {
 	/**
 	 * Moves a player to a different slot, or swaps their
 	 * position with the player in that slot
-	 * @param {import("bancho.js").BanchoLobbyPlayer} player
-	 * @param {number} slot
 	 */
-	async swapPlayer(player, slot) {}
+	async swap() {
+		if (this.swaps.length == 0) {
+			this.swapping = false;
+			return;
+		}
+		this.swapping = true;
+		let swap = this.swaps[0];
+		/**
+		 * @type {import("bancho.js").BanchoLobbyPlayer}
+		 */
+		let player = swap.player;
+		/**
+		 * @type {number}
+		 */
+		let slot = swap.slot - 1;
+
+		let slotMap = this.lobby.slots.map((x) => x?.user?.id);
+		let playerSlot = slotMap.indexOf(player.user.id);
+
+		let slots = this.lobby.slots;
+
+		if (playerSlot != slot) {
+			if (slots[slot] == null) {
+				await this.lobby.movePlayer(player, slot);
+			}
+
+			if (slots[slot] != null) {
+				let player2 = slots[slot];
+				let swapSlot = this.tournament.x_v_x_mode * 2;
+				await this.lobby.movePlayer(player2, swapSlot);
+				await this.lobby.movePlayer(player, slot);
+				await this.lobby.movePlayer(player2, playerSlot);
+			}
+		}
+
+		this.swaps.splice(0, 1);
+		this.swap();
+	}
 	/**
 	 *
 	 * @param {number} num The team that you're waiting on
