@@ -87,6 +87,13 @@ module.exports = {
 				.addChoice("No double banning", 0)
 				.addChoice("No double banning NM excluded", 1)
 				.addChoice("Double banning", 2)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("fm_mods")
+				.setDescription("How many mods are required per-team for FM")
+				.setMinValue(0)
+				.setMaxValue(8)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
@@ -124,6 +131,7 @@ module.exports = {
 			x_v_x_mode: interaction.options.getInteger("x_v_x_mode") || 1,
 			double_pick: interaction.options.getInteger("double_pick") || 1,
 			double_ban: interaction.options.getInteger("double_ban") || 1,
+			fm_mods: interaction.options.getInteger("fm_mods") || 1,
 			Guild_id: interaction.guildId,
 		};
 
