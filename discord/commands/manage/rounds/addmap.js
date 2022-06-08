@@ -3,6 +3,18 @@ let { MessageEmbed } = require("discord.js");
 const { fetchGuild, prisma } = require("../../../../prisma");
 const { fetchMap } = require("../../../../bancho/fetchMap.js");
 
+let modPrioEnum = {
+	NM: 0,
+	HD: 1,
+	HR: 2,
+	DT: 3,
+	HT: 4,
+	EZ: 5,
+	FL: 6,
+	FM: 8,
+	TB: 9,
+};
+
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("addmap")
@@ -99,8 +111,11 @@ module.exports = {
 		}
 
 		let mapID = interaction.options.getString("map").match(/\d+$/);
-
 		let map = await fetchMap(mapID[0]);
+
+		let modType = identifier.match(/\w{2}/g)[0];
+		let modPriority = modPrioEnum[modType];
+		if (modPriority == undefined) modPriority = 7;
 
 		await prisma.mapInPool.create({
 			data: {
@@ -108,6 +123,7 @@ module.exports = {
 				mapId: map.beatmap_id,
 				identifier: identifier,
 				mods: mods,
+				modPriority,
 			},
 		});
 

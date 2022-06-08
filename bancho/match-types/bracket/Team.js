@@ -1,10 +1,5 @@
 const { prisma } = require("../../../prisma");
 
-// There's currently a bug with local SQLite
-// Databases, where too many requests in
-// Succession will crash prisma.
-let prismaTimeout = 300;
-
 class Team {
 	/**
 	 *
@@ -45,48 +40,7 @@ class Team {
 		this.pick_order = team.pick_order;
 		this.warmed_up = team.warmed_up;
 		this.score = team.score;
-
-		// let picks = await prisma.mapInMatch.findMany({
-		// 	where: {
-		// 		pickedByTeamId: this.id,
-		// 		matchId: this.match.id,
-		// 	},
-		// });
-		// this.picks = [];
-		// for (const pick of picks) {
-		// 	let map = this.match.mappool.find(
-		// 		(x) => x.identifier == pick.mapIdentifier
-		// 	);
-		// 	this.picks.push(map);
-		// }
-
-		// let bans = await prisma.mapInMatch.findMany({
-		// 	where: {
-		// 		bannedByTeamId: this.id,
-		// 		matchId: this.match.id,
-		// 	},
-		// });
-		// this.bans = [];
-		// for (const ban of bans) {
-		// 	let map = this.match.mappool.find(
-		// 		(x) => x.identifier == ban.mapIdentifier
-		// 	);
-		// 	this.picks.push(map);
-		// }
-
-		// let wins = await prisma.mapInMatch.findMany({
-		// 	where: {
-		// 		wonByTeamId: this.id,
-		// 		matchId: this.match.id,
-		// 	},
-		// });
-		// this.wins = [];
-		// for (const win of wins) {
-		// 	let map = this.match.mappool.find(
-		// 		(x) => x.identifier == win.mapIdentifier
-		// 	);
-		// 	this.picks.push(map);
-		// }
+		this.aborts = team.aborts;
 	}
 	/**
 	 * Compares one team to another based on the score mode
@@ -180,7 +134,6 @@ class Team {
 	 */
 	async setWarmedUp(b) {
 		this.warmed_up = b;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -196,7 +149,6 @@ class Team {
 
 	async setRoll(num) {
 		this.roll = num;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -212,7 +164,6 @@ class Team {
 
 	async setScore(num) {
 		this.score = num;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -228,7 +179,6 @@ class Team {
 
 	async addScore() {
 		this.score++;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -241,9 +191,24 @@ class Team {
 			},
 		});
 	}
+
+	async addAbort() {
+		this.aborts++;
+		await prisma.teamInMatch.update({
+			where: {
+				teamId_matchId: {
+					teamId: this.id,
+					matchId: this.match.id,
+				},
+			},
+			data: {
+				aborts: this.aborts,
+			},
+		});
+	}
+
 	async setPickOrder(num) {
 		this.pick_order = num;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {
@@ -258,7 +223,6 @@ class Team {
 	}
 	async setBanOrder(num) {
 		this.ban_order = num;
-		await new Promise((resolve) => setTimeout(resolve, prismaTimeout));
 		await prisma.teamInMatch.update({
 			where: {
 				teamId_matchId: {

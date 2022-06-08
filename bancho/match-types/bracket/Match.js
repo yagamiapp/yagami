@@ -27,6 +27,7 @@ let states = {
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
 let maxWarmupLength = 300;
+let maxAborts = 1;
 
 let timers = {
 	0: 120,
@@ -159,6 +160,11 @@ class MatchManager {
 		let mappool = await prisma.mapInMatch.findMany({
 			where: {
 				matchId: this.id,
+			},
+			orderBy: {
+				Map: {
+					modPriority: "asc",
+				},
 			},
 		});
 
@@ -311,7 +317,7 @@ class MatchManager {
 			}
 
 			if (this.state == 4) {
-				await this.lobby.abortTimer();
+				await this.abortTimer();
 			}
 		});
 
@@ -404,12 +410,16 @@ class MatchManager {
 				for (const team of badTeams) {
 					teamString += this.teams[team].name + " ";
 				}
-				await this.channel.sendMessage(
-					`The following teams do not have the correct amount of players: ${teamString}`
-				);
-				return;
+				// await this.channel.sendMessage(
+				// 	`The following teams do not have the correct amount of players: ${teamString}`
+				// );
+				// return;
 			}
 
+			this.abortAllowed = true;
+			setTimeout(() => (this.abortAllowed = false), 35 * 1000);
+
+			await this.abortTimer(false);
 			await this.updateState(2);
 			await this.lobby.startMatch(5);
 			await this.channel.sendMessage("glhf!");
@@ -750,7 +760,7 @@ class MatchManager {
 		if (command) {
 			let team = this.teams[this.waiting_on];
 			await team.setWarmedUp(true);
-			await this.lobby.abortTimer();
+			await this.abortTimer(true);
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.warmup();
 		}
@@ -884,6 +894,7 @@ class MatchManager {
 		if (!command) return;
 		let mapString = command.groups.map.toUpperCase();
 		let map = this.mappool.find((x) => x.identifier == mapString);
+
 		if (!map) {
 			await this.channel.sendMessage(
 				`Map ${command.groups.map} not found`
@@ -922,6 +933,7 @@ class MatchManager {
 			return;
 		}
 
+		await this.abortTimer(false);
 		this.bans.push(map);
 		await team.addBan(map);
 		await this.channel.sendMessage(
@@ -995,6 +1007,7 @@ class MatchManager {
 			return;
 		}
 
+		await this.abortTimer(false);
 		await this.addPick(map);
 		await this.channel.sendMessage(
 			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${map.beatmapset_id} chimu.moe Mirror]`
@@ -1120,6 +1133,28 @@ class MatchManager {
 			`${this.teams[0].name} | ${this.teams[0].score} - ${this.teams[1].score} | ${this.teams[1].name} // ${bestOfPhrase} // Next pick: ${team.name}`
 		);
 	}
+	/**
+	 *
+	 * @param {import("bancho.js").BanchoMessage} msg
+	 */
+	async abortCommand(msg) {
+		let command = msg.message.match(/^!abort/g);
+		if (!command || !this.abortAllowed) return;
+
+		let team;
+		for (const teamTest of this.teams) {
+			let userList = teamTest.users.map((user) => user.osu_username);
+			if (userList.includes(msg.user.username)) {
+				team = teamTest;
+			}
+		}
+		if (!team || team.aborts >= maxAborts) return;
+
+		await this.lobby.abortMatch();
+		await this.updateState(1);
+		await team.addAbort();
+		await this.channel.sendMessage(`${team.name} has aborted the match`);
+	}
 
 	/*
 	 * ==============================================
@@ -1244,16 +1279,7 @@ class MatchManager {
 			}
 		}
 
-		// Check for timer ends
-		if (
-			msg.message == "Countdown finished" &&
-			msg.user.ircUsername == "BanchoBot" &&
-			this.lastTimer < Date.now() - 5000
-		) {
-			await this.timerHandler(false);
-			return;
-		}
-
+		// Check for timer warning
 		if (
 			msg.message == "Countdown ends in 30 seconds" &&
 			msg.user.ircUsername == "BanchoBot"
@@ -1266,7 +1292,7 @@ class MatchManager {
 		if (msg.message.match(/^!mp/g)) {
 			if (msg.message.match(/^!mp timer/g)) {
 				this.lastTimer = Date.now();
-				await this.lobby.abortTimer();
+				await this.abortTimer();
 			}
 			await this.channel.sendMessage(
 				"Leave the mp commands alone. I've got it covered. Too much abuse of mp commands will result in an automatic forfeit"
@@ -1300,6 +1326,11 @@ class MatchManager {
 			await this.scoreCommand(msg);
 		}
 
+		if (this.state == 2) {
+			await this.abortCommand(msg);
+			return;
+		}
+
 		if (this.state == 4) {
 			await this.warmupListener(msg);
 			return;
@@ -1325,8 +1356,18 @@ class MatchManager {
 	}
 
 	async startTimer() {
-		await this.lobby.startTimer(timers[this.state]);
+		clearTimeout(this.timer);
+		let timerLength = timers[this.state];
+		await this.lobby.startTimer(timerLength);
+		this.timer = setTimeout(() => {
+			this.timerHandler();
+		}, (timerLength + 5) * 1000);
 		this.lastTimer = Date.now();
+	}
+
+	async abortTimer(inMatch) {
+		if (inMatch) await this.lobby.abortTimer();
+		clearTimeout(this.timer);
 	}
 
 	async timerHandler(warn, excludeMessage) {
@@ -1407,7 +1448,9 @@ class MatchManager {
 		let oldembed = message.embeds[0];
 		let description = "";
 		let embed = new MessageEmbed()
-			.setTitle(oldembed.title)
+			.setTitle(
+				`${this.round.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})`
+			)
 			.setColor(this.tournament.color)
 			.setAuthor(oldembed.author)
 			.setThumbnail(oldembed.thumbnail?.url)
@@ -1430,14 +1473,14 @@ class MatchManager {
 		}
 
 		// Remove img on setup phases
-		if ([5, 6, 7].includes(state)) {
+		if ([3, 5, 6, 7].includes(state)) {
 			embed.image = null;
 		}
 
 		// Individual Score Table
 		if (
 			([4, 5, 6, 7].includes(state) || this.wins.length >= 1) &&
-			state != 1 &&
+			[1, 9].includes(state) &&
 			this.lastGameData
 		) {
 			let leaderboard = "";

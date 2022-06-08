@@ -44,6 +44,7 @@ module.exports = {
 					},
 				},
 			},
+			orderBy: { modPriority: "asc" },
 		});
 
 		// TODO: Order pool by identifier in this order: NM, HD, HR, DT, EZ, FL, FM, TB
