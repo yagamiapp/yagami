@@ -317,7 +317,7 @@ class MatchManager {
 			}
 
 			if (this.state == 4) {
-				await this.lobby.abortTimer();
+				await this.abortTimer(false);
 			}
 		});
 
@@ -1292,7 +1292,7 @@ class MatchManager {
 		if (msg.message.match(/^!mp/g)) {
 			if (msg.message.match(/^!mp timer/g)) {
 				this.lastTimer = Date.now();
-				await this.lobby.abortTimer();
+				await this.abortTimer();
 			}
 			await this.channel.sendMessage(
 				"Leave the mp commands alone. I've got it covered. Too much abuse of mp commands will result in an automatic forfeit"
