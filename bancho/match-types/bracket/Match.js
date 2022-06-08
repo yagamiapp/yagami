@@ -26,6 +26,8 @@ let states = {
 
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
+// Mods that count as a "User with a mod" in FM rules
+let allowedFMMods = ["ez", "hd", "hr", "fl"];
 let maxWarmupLength = 300;
 let maxAborts = 1;
 
@@ -448,6 +450,82 @@ class MatchManager {
 					`The following teams do not have the correct amount of players: ${teamString}`
 				);
 				return;
+			}
+
+			let freemod = this.picks[this.picks.length - 1].mods
+				.toUpperCase()
+				.includes("FREEMOD");
+			if (freemod) {
+				await this.lobby.updateSettings();
+				if (this.tournament.force_nf) {
+					let noNF = [];
+					for (const player of this.lobby.slots) {
+						if (!player) continue;
+
+						let nf =
+							player.mods.filter((x) => x.shortMod == "nf")
+								.length == 0;
+						if (nf) {
+							noNF.push(player.user.username);
+						}
+					}
+
+					if (noNF.length > 0) {
+						let noNFString = "";
+						for (const user of noNF) {
+							noNFString +=
+								noNFString == "" ? `${user}` : `, ${user}`;
+						}
+						await this.channel.sendMessage(
+							`The following players do not have the NF mod: ${noNFString}`
+						);
+						return;
+					}
+				}
+
+				let freemodCount = {};
+				for (const team of this.teams) {
+					let teamIndex = this.teams.indexOf(team);
+					for (const slot of this.lobby.slots) {
+						if (!slot) continue;
+
+						let userMap = team.users.map((x) => x.osu_username);
+						if (userMap.includes(slot.user.username)) {
+							let modMap = slot.mods.map((x) => x.shortMod);
+							if (modMap.some((x) => allowedFMMods.includes(x))) {
+								freemodCount[teamIndex] =
+									freemodCount[teamIndex] == null
+										? 1
+										: freemodCount[teamIndex] + 1;
+							}
+						}
+					}
+					if (freemodCount[teamIndex] == null) {
+						freemodCount[teamIndex] = 0;
+					}
+				}
+
+				for (const key in freemodCount) {
+					let teamCount = freemodCount[key];
+					if (teamCount < this.tournament.fm_mods) {
+						badTeams.push(key);
+					}
+				}
+
+				if (badTeams.length >= 1) {
+					let teamString = "";
+					for (const team of badTeams) {
+						teamString += this.teams[team].name + " ";
+					}
+					await this.channel.sendMessage(
+						`The following teams do not meet FM requirements: ${teamString}`
+					);
+					let s = this.tournament.fm_mods == 1 ? "" : "s";
+					await this.channel.sendMessage(
+						`Teams must have at least ${this.tournament.fm_mods} player${s} with a mod`
+					);
+					return;
+				}
 			}
 
 			this.abortAllowed = true;

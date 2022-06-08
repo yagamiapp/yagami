@@ -86,6 +86,13 @@ module.exports = {
 				.addChoice("No double banning", 0)
 				.addChoice("No double banning NM excluded", 1)
 				.addChoice("Double banning", 2)
+		)
+		.addIntegerOption((option) =>
+			option
+				.setName("fm_mods")
+				.setDescription("How many mods are required per-team for FM")
+				.setMinValue(0)
+				.setMaxValue(8)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
