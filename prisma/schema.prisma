@@ -120,6 +120,7 @@ model Tournament {
   Guild               Guild?   @relation(fields: [Guild_id], references: [guild_id])
   Guild_id            String?
   delete_warning      Boolean?
+  fm_mods             Int      @default(1) // How many mods are required for freemod picks
   double_pick         Int      @default(1) // 0: No double picking; 1: Only double picking NM; 2 Double Picking allowed
   double_ban          Int      @default(1) // 0: No double picking; 1: Only double picking NM; 2 Double Picking allowed
   Teams               Team[]
