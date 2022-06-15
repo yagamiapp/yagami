@@ -52,6 +52,13 @@ class MatchManager {
 		this.init = false;
 		this.rollVerification = {};
 		this.swaps = [];
+
+		this.partials = {
+			choosing: false,
+			banning: false,
+			picking: false,
+			readying: false,
+		};
 	}
 
 	/*
@@ -417,11 +424,17 @@ class MatchManager {
 	}
 
 	async readyHandler() {
+		if (this.partials.readying) return;
+
 		if (this.state == 4) {
+			this.partials.readying = true;
 			await this.channel.sendMessage("All players ready!");
 			await this.lobby.startMatch(5);
+			this.partials.readying = false;
+			return;
 		}
 		if (this.state == 1) {
+			this.partials.readying = true;
 			// Count Players
 			let lobbyCount = {};
 			for (const team of this.teams) {
@@ -538,6 +551,7 @@ class MatchManager {
 			await this.updateState(2);
 			await this.lobby.startMatch(5);
 			await this.channel.sendMessage("glhf!");
+			this.partials.readying = false;
 		}
 	}
 
@@ -929,6 +943,8 @@ class MatchManager {
 	 * @returns
 	 */
 	async chooseListener(msg) {
+		if (this.partials.choosing) return;
+
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 		user = team.getUser(user);
@@ -942,6 +958,7 @@ class MatchManager {
 			);
 		}
 		if (!command) return;
+		this.partials.choosing = true;
 		if (
 			this.round.bans == 0 &&
 			command.groups.type.toLowerCase() == "ban"
@@ -957,6 +974,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`The pick order has already been chosen`
 				);
+				this.partials.choosing = false;
 				return;
 			}
 			if (command.groups.order.toLowerCase() == "first") {
@@ -978,6 +996,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`The ban order has already been chosen`
 				);
+				this.partials.choosing = false;
 				return;
 			}
 			if (command.groups.order.toLowerCase() == "first") {
@@ -992,6 +1011,7 @@ class MatchManager {
 			}
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
+			this.partials.choosing = false;
 		}
 	}
 
@@ -1001,6 +1021,8 @@ class MatchManager {
 	 * @returns
 	 */
 	async banListener(msg) {
+		if (this.partials.banning) return;
+
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 
@@ -1008,6 +1030,7 @@ class MatchManager {
 		let command = msg.message.match(/!ban (?<map>\w+)/);
 
 		if (!command) return;
+		this.partials.banning = true;
 		let mapString = command.groups.map.toUpperCase();
 		let map = this.mappool.find((x) => x.identifier == mapString);
 
@@ -1015,6 +1038,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`Map ${command.groups.map} not found`
 			);
+			this.partials.banning = false;
 			return;
 		}
 
@@ -1023,6 +1047,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`${map.identifier} has already been chosen as a ban`
 			);
+			this.partials.banning = false;
 			return;
 		}
 
@@ -1037,6 +1062,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`You cannot ban from the same modpool more than once.`
 				);
+				this.partials.banning = false;
 				return;
 			}
 		}
@@ -1046,6 +1072,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`Silly goose! The tiebreaker is unbannable.`
 			);
+			this.partials.banning = false;
 			return;
 		}
 
@@ -1058,6 +1085,7 @@ class MatchManager {
 		await this.updateMessage();
 		await this.updateWaitingOn(1 - this.waiting_on);
 		await this.banPhase();
+		this.partials.banning = false;
 	}
 
 	/**
@@ -1065,6 +1093,8 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async pickListener(msg) {
+		if (this.partials.picking) return;
+
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 
@@ -1072,11 +1102,13 @@ class MatchManager {
 		let command = msg.message.match(/!pick (?<map>\w+)/);
 
 		if (!command) return;
+		this.partials.picking = true;
 		let mapString = command.groups.map.toUpperCase();
 		let map = this.mappool.find((x) => x.identifier == mapString);
 
 		if (!map) {
 			await this.channel.sendMessage("Invalid map name");
+			this.partials.picking = false;
 			return;
 		}
 
@@ -1085,6 +1117,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`${map.identifier} was one of the bans`
 			);
+			this.partials.picking = false;
 			return;
 		}
 
@@ -1093,6 +1126,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`${map.identifier} has already been picked`
 			);
+			this.partials.picking = false;
 			return;
 		}
 
@@ -1111,6 +1145,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`You cannot pick the same modpool twice.`
 				);
+				this.partials.picking = false;
 				return;
 			}
 		}
@@ -1120,11 +1155,13 @@ class MatchManager {
 			await this.channel.sendMessage(
 				"Silly goose! The tiebreaker is unpickable."
 			);
+			this.partials.picking = false;
 			return;
 		}
 
 		await this.abortTimer(false);
 		await this.addPick(map);
+		this.partials.picking = false;
 		await this.channel.sendMessage(
 			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${map.beatmapset_id} chimu.moe Mirror]`
 		);
