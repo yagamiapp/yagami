@@ -1940,7 +1940,7 @@ class MatchManager {
 		}
 
 		// Final Match Results
-		if (state >= 8) {
+		if (state == 9) {
 			if (this.teams[0].score > this.teams[1].score) {
 				embed.color = this.teams[0].color;
 				embed.setThumbnail(this.teams[0].icon_url);
