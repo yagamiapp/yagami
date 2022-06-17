@@ -404,16 +404,28 @@ class MatchManager {
 			inLobbyPlayers.length > this.tournament.x_v_x_mode &&
 			this.state != 4
 		) {
-			await this.lobby.kickPlayer(`#${event.player.user.id}`);
 			return;
 		}
 
 		let slot = inLobbyPlayers.length;
+		let teamIndex = this.teams.indexOf(team);
+
 		// Move the player to the lower slots if team 2
-		if (team == this.teams[1]) {
+		if (teamIndex == 1) {
 			slot += this.tournament.x_v_x_mode;
 		}
-		this.swaps.push({ player: event.player, slot });
+		let teamSlots = [];
+		for (
+			let i = 1 + this.tournament.x_v_x_mode * teamIndex;
+			i < this.tournament.x_v_x_mode;
+			i++
+		) {
+			teamSlots.push(i);
+		}
+
+		if (slot && !teamSlots.includes(slot))
+			this.swaps.push({ player: event.player, slot });
+
 		if (!this.swapping) {
 			await this.swap();
 		}
@@ -1377,6 +1389,7 @@ class MatchManager {
 		let player = swap.player;
 		/**
 		 * @type {number}
+		 * Decrease slot by 1 because the array is 0-indexed
 		 */
 		let slot = swap.slot - 1;
 
