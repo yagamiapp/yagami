@@ -54,6 +54,7 @@ module.exports = {
 		});
 
 		let attachment;
+		let currentPrio;
 		if (command.options.admin || round.show_mappool) {
 			for (const map of pool) {
 				let data = await prisma.map.findFirst({
@@ -66,6 +67,10 @@ module.exports = {
 						beatmap_id: map.mapId,
 					},
 				});
+				if (currentPrio != map.modPriority) {
+					poolString += `\n`;
+					currentPrio = map.modPriority;
+				}
 				poolString += `[${map.identifier}](https://osu.ppy.sh/b/${data.beatmap_id})  `;
 			}
 			if (poolString == "") poolString = "No maps";
