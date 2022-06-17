@@ -1000,6 +1000,7 @@ class MatchManager {
 				let otherTeam = this.teams[1 - this.waiting_on];
 				await otherTeam.setPickOrder(1);
 			}
+			this.partials.choosing = false;
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
 		}
