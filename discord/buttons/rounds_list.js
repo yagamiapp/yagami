@@ -8,15 +8,6 @@ const { stripIndents } = require("common-tags/lib");
 const { generateImage } = require("../poolToImg");
 const { fetchGuild, prisma } = require("../../prisma");
 
-let modIcon = {
-	NM: "<:NM:972256928757592144>",
-	HD: "<:HD:972256986357964801>",
-	HR: "<:HR:972256992380993616>",
-	DT: "<:DT:972256999305781298>",
-	FM: "<:FM:972257023297204325>",
-	TB: "<:TB:972257028502339595>",
-};
-
 module.exports = {
 	data: new MessageButton().setCustomId("round_list"),
 	async execute(interaction, command) {
