@@ -53,6 +53,7 @@ module.exports = {
 			orderBy: { modPriority: "asc" },
 		});
 
+		let attachment;
 		if (command.options.admin || round.show_mappool) {
 			for (const map of pool) {
 				let data = await prisma.map.findFirst({
@@ -68,6 +69,11 @@ module.exports = {
 				poolString += `[${map.identifier}](https://osu.ppy.sh/b/${data.beatmap_id})  `;
 			}
 			if (poolString == "") poolString = "No maps";
+			let image = await generateImage(round.mappoolId);
+			attachment = new MessageAttachment(
+				image.toBuffer("image/png"),
+				"mappool.png"
+			);
 		} else {
 			poolString = "**Mappool is hidden**";
 		}
@@ -106,8 +112,6 @@ module.exports = {
 			components.components[2].disabled = true;
 		}
 
-		let image = await generateImage(round.mappoolId);
-
 		let embed = new MessageEmbed()
 			.setColor(tournament.color)
 			.setTitle(`${round.acronym}: ${round.name}`)
@@ -119,26 +123,25 @@ module.exports = {
 			`
 			)
 			.setDescription("**Mappool** \n" + poolString)
-			.setThumbnail(tournament.icon_url)
-			.setImage("attachment://mappool.png");
-
-		let attachment = new MessageAttachment(
-			image.toBuffer("image/png"),
-			"mappool.png"
-		);
+			.setThumbnail(tournament.icon_url);
+		let files = [];
+		if (attachment) {
+			embed.setImage("attachment://mappool.png");
+			files = [attachment];
+		}
 
 		if (interaction.isCommand()) {
 			await interaction.editReply({
 				embeds: [embed],
 				components: [components],
-				files: [attachment],
+				files,
 			});
 			return;
 		}
 		await interaction.update({
 			embeds: [embed],
 			components: [components],
-			files: [attachment],
+			files,
 		});
 	},
 };
