@@ -26,6 +26,8 @@ let states = {
 
 let nodesuClient = new Client(process.env.banchoAPIKey);
 
+// Mods that count as a "User with a mod" in FM rules
+let allowedFMMods = ["ez", "hd", "hr", "fl"];
 let maxWarmupLength = 300;
 let maxAborts = 1;
 
@@ -49,6 +51,14 @@ class MatchManager {
 		this.mp = mp;
 		this.init = false;
 		this.rollVerification = {};
+		this.swaps = [];
+
+		this.partials = {
+			choosing: false,
+			banning: false,
+			picking: false,
+			readying: false,
+		};
 	}
 
 	/*
@@ -242,6 +252,8 @@ class MatchManager {
 			return;
 		}
 		await this.lobby.clearHost();
+		await this.lobby.abortTimer();
+		await this.lobby.lockSlots();
 
 		// Update db object
 		await prisma.match.update({
@@ -261,8 +273,10 @@ class MatchManager {
 				this.tournament.score_mode == 4
 					? 3
 					: this.tournament.score_mode,
-			slots: this.tournament.x_v_x_mode * 2 + 1,
+			slots: this.tournament.team_size * 2 + 1,
 		};
+		if (this.lobbySettings.slots > 16) this.lobbySettings.slots = 16;
+
 		this.beatmap = this.lobby.beatmap;
 
 		let { team_mode, score_mode, slots } = this.lobbySettings;
@@ -291,6 +305,7 @@ class MatchManager {
 			}
 		}
 
+		this.swapping = true;
 		// Setup event handlers
 		this.channel.on("message", async (msg) => await this.msgHandler(msg));
 		this.lobby.on(
@@ -325,6 +340,8 @@ class MatchManager {
 			await this.updateMessage();
 		});
 
+		this.swap();
+
 		// Start Warmups
 		if (this.state == 3) {
 			await this.updateState(4);
@@ -350,6 +367,9 @@ class MatchManager {
 	 */
 	async joinHandler(event) {
 		let user;
+		/**
+		 * @type {Team}
+		 */
 		let team;
 		for (let teamTest of this.teams) {
 			let userTest = teamTest.getUserPos(event.player.user._id);
@@ -360,15 +380,54 @@ class MatchManager {
 			}
 		}
 		if (user == null) {
-			await this.channel.lobby.kickPlayer(event.player.user.username);
 			return;
 		}
 
-		if (team == this.teams[0]) {
-			console.log("Team 0");
+		// Put the user on the right te
+		if ([2, 3].includes(this.tournament.team_mode)) {
+			if (team == this.teams[0]) {
+				await this.lobby.changeTeam(event.player, "Red");
+			}
+			if (team == this.teams[1]) {
+				await this.lobby.changeTeam(event.player, "Blue");
+			}
 		}
-		if (team == this.teams[1]) {
-			console.log("Team 1");
+
+		// Get users from the team that are already in the lobby
+		let userMap = team.users.map((x) => x.osu_id);
+		let inLobbyPlayers = this.lobby.slots
+			.filter((x) => x)
+			.filter((x) => userMap.includes(x.user.id));
+
+		// If the team has max players, kick the user
+		if (
+			inLobbyPlayers.length > this.tournament.x_v_x_mode &&
+			this.state != 4
+		) {
+			return;
+		}
+
+		let slot = inLobbyPlayers.length;
+		let teamIndex = this.teams.indexOf(team);
+
+		// Move the player to the lower slots if team 2
+		if (teamIndex == 1) {
+			slot += this.tournament.x_v_x_mode;
+		}
+		let teamSlots = [];
+		for (
+			let i = 1 + this.tournament.x_v_x_mode * teamIndex;
+			i < this.tournament.x_v_x_mode;
+			i++
+		) {
+			teamSlots.push(i);
+		}
+
+		if (slot && !teamSlots.includes(slot))
+			this.swaps.push({ player: event.player, slot });
+
+		if (!this.swapping) {
+			await this.swap();
 		}
 
 		if (this.state == 4 && this.init) {
@@ -378,11 +437,17 @@ class MatchManager {
 	}
 
 	async readyHandler() {
+		if (this.partials.readying) return;
+
 		if (this.state == 4) {
+			this.partials.readying = true;
 			await this.channel.sendMessage("All players ready!");
 			await this.lobby.startMatch(5);
+			this.partials.readying = false;
+			return;
 		}
 		if (this.state == 1) {
+			this.partials.readying = true;
 			// Count Players
 			let lobbyCount = {};
 			for (const team of this.teams) {
@@ -416,6 +481,82 @@ class MatchManager {
 				return;
 			}
 
+			let freemod = this.picks[this.picks.length - 1].mods
+				.toUpperCase()
+				.includes("FREEMOD");
+			if (freemod) {
+				await this.lobby.updateSettings();
+				if (this.tournament.force_nf) {
+					let noNF = [];
+					for (const player of this.lobby.slots) {
+						if (!player) continue;
+
+						let nf =
+							player.mods.filter((x) => x.shortMod == "nf")
+								.length == 0;
+						if (nf) {
+							noNF.push(player.user.username);
+						}
+					}
+
+					if (noNF.length > 0) {
+						let noNFString = "";
+						for (const user of noNF) {
+							noNFString +=
+								noNFString == "" ? `${user}` : `, ${user}`;
+						}
+						await this.channel.sendMessage(
+							`The following players do not have the NF mod: ${noNFString}`
+						);
+						return;
+					}
+				}
+
+				let freemodCount = {};
+				for (const team of this.teams) {
+					let teamIndex = this.teams.indexOf(team);
+					for (const slot of this.lobby.slots) {
+						if (!slot) continue;
+
+						let userMap = team.users.map((x) => x.osu_username);
+						if (userMap.includes(slot.user.username)) {
+							let modMap = slot.mods.map((x) => x.shortMod);
+							if (modMap.some((x) => allowedFMMods.includes(x))) {
+								freemodCount[teamIndex] =
+									freemodCount[teamIndex] == null
+										? 1
+										: freemodCount[teamIndex] + 1;
+							}
+						}
+					}
+					if (freemodCount[teamIndex] == null) {
+						freemodCount[teamIndex] = 0;
+					}
+				}
+
+				for (const key in freemodCount) {
+					let teamCount = freemodCount[key];
+					if (teamCount < this.tournament.fm_mods) {
+						badTeams.push(key);
+					}
+				}
+
+				if (badTeams.length >= 1) {
+					let teamString = "";
+					for (const team of badTeams) {
+						teamString += this.teams[team].name + " ";
+					}
+					await this.channel.sendMessage(
+						`The following teams do not meet FM requirements: ${teamString}`
+					);
+					let s = this.tournament.fm_mods == 1 ? "" : "s";
+					await this.channel.sendMessage(
+						`Teams must have at least ${this.tournament.fm_mods} player${s} with a mod`
+					);
+					return;
+				}
+			}
+
 			this.abortAllowed = true;
 			setTimeout(() => (this.abortAllowed = false), 35 * 1000);
 
@@ -423,6 +564,7 @@ class MatchManager {
 			await this.updateState(2);
 			await this.lobby.startMatch(5);
 			await this.channel.sendMessage("glhf!");
+			this.partials.readying = false;
 		}
 	}
 
@@ -717,6 +859,7 @@ class MatchManager {
 		}
 
 		if (this.state == 4) {
+			await this.lobby.setSize(16);
 			await this.warmup();
 			return;
 		}
@@ -813,6 +956,8 @@ class MatchManager {
 	 * @returns
 	 */
 	async chooseListener(msg) {
+		if (this.partials.choosing) return;
+
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 		user = team.getUser(user);
@@ -826,6 +971,7 @@ class MatchManager {
 			);
 		}
 		if (!command) return;
+		this.partials.choosing = true;
 		if (
 			this.round.bans == 0 &&
 			command.groups.type.toLowerCase() == "ban"
@@ -841,6 +987,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`The pick order has already been chosen`
 				);
+				this.partials.choosing = false;
 				return;
 			}
 			if (command.groups.order.toLowerCase() == "first") {
@@ -853,6 +1000,7 @@ class MatchManager {
 				let otherTeam = this.teams[1 - this.waiting_on];
 				await otherTeam.setPickOrder(1);
 			}
+			this.partials.choosing = false;
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
 		}
@@ -862,6 +1010,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`The ban order has already been chosen`
 				);
+				this.partials.choosing = false;
 				return;
 			}
 			if (command.groups.order.toLowerCase() == "first") {
@@ -876,6 +1025,7 @@ class MatchManager {
 			}
 			await this.updateWaitingOn(1 - this.waiting_on);
 			await this.chooseOrder();
+			this.partials.choosing = false;
 		}
 	}
 
@@ -885,6 +1035,8 @@ class MatchManager {
 	 * @returns
 	 */
 	async banListener(msg) {
+		if (this.partials.banning) return;
+
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 
@@ -892,6 +1044,7 @@ class MatchManager {
 		let command = msg.message.match(/!ban (?<map>\w+)/);
 
 		if (!command) return;
+		this.partials.banning = true;
 		let mapString = command.groups.map.toUpperCase();
 		let map = this.mappool.find((x) => x.identifier == mapString);
 
@@ -899,6 +1052,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`Map ${command.groups.map} not found`
 			);
+			this.partials.banning = false;
 			return;
 		}
 
@@ -907,6 +1061,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`${map.identifier} has already been chosen as a ban`
 			);
+			this.partials.banning = false;
 			return;
 		}
 
@@ -921,6 +1076,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`You cannot ban from the same modpool more than once.`
 				);
+				this.partials.banning = false;
 				return;
 			}
 		}
@@ -930,6 +1086,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`Silly goose! The tiebreaker is unbannable.`
 			);
+			this.partials.banning = false;
 			return;
 		}
 
@@ -942,6 +1099,7 @@ class MatchManager {
 		await this.updateMessage();
 		await this.updateWaitingOn(1 - this.waiting_on);
 		await this.banPhase();
+		this.partials.banning = false;
 	}
 
 	/**
@@ -949,6 +1107,8 @@ class MatchManager {
 	 * @param {import("bancho.js").BanchoMessage} msg
 	 */
 	async pickListener(msg) {
+		if (this.partials.picking) return;
+
 		let team = this.teams[this.waiting_on];
 		let user = team.getUserPos(msg.user.id);
 
@@ -956,11 +1116,13 @@ class MatchManager {
 		let command = msg.message.match(/!pick (?<map>\w+)/);
 
 		if (!command) return;
+		this.partials.picking = true;
 		let mapString = command.groups.map.toUpperCase();
 		let map = this.mappool.find((x) => x.identifier == mapString);
 
 		if (!map) {
 			await this.channel.sendMessage("Invalid map name");
+			this.partials.picking = false;
 			return;
 		}
 
@@ -969,6 +1131,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`${map.identifier} was one of the bans`
 			);
+			this.partials.picking = false;
 			return;
 		}
 
@@ -977,6 +1140,7 @@ class MatchManager {
 			await this.channel.sendMessage(
 				`${map.identifier} has already been picked`
 			);
+			this.partials.picking = false;
 			return;
 		}
 
@@ -995,6 +1159,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`You cannot pick the same modpool twice.`
 				);
+				this.partials.picking = false;
 				return;
 			}
 		}
@@ -1004,11 +1169,13 @@ class MatchManager {
 			await this.channel.sendMessage(
 				"Silly goose! The tiebreaker is unpickable."
 			);
+			this.partials.picking = false;
 			return;
 		}
 
 		await this.abortTimer(false);
 		await this.addPick(map);
+		this.partials.picking = false;
 		await this.channel.sendMessage(
 			`${team.name} chooses ${map.identifier} | [https://osu.ppy.sh/b/${map.beatmapId} ${map.artist} - ${map.title} [${map.version}]] - [https://beatconnect.io/b/${map.beatmapset_id} Beatconnect Mirror] - [https://api.chimu.moe/v1/download/${map.beatmapset_id} chimu.moe Mirror]`
 		);
@@ -1209,10 +1376,46 @@ class MatchManager {
 	/**
 	 * Moves a player to a different slot, or swaps their
 	 * position with the player in that slot
-	 * @param {import("bancho.js").BanchoLobbyPlayer} player
-	 * @param {number} slot
 	 */
-	async swapPlayer(player, slot) {}
+	async swap() {
+		if (this.swaps.length == 0 || this.state == 2) {
+			this.swapping = false;
+			return;
+		}
+		this.swapping = true;
+		let swap = this.swaps[0];
+		/**
+		 * @type {import("bancho.js").BanchoLobbyPlayer}
+		 */
+		let player = swap.player;
+		/**
+		 * @type {number}
+		 * Decrease slot by 1 because the array is 0-indexed
+		 */
+		let slot = swap.slot - 1;
+
+		let slotMap = this.lobby.slots.map((x) => x?.user?.id);
+		let playerSlot = slotMap.indexOf(player.user.id);
+
+		let slots = this.lobby.slots;
+
+		if (playerSlot != slot) {
+			if (slots[slot] == null) {
+				await this.lobby.movePlayer(player, slot);
+			}
+
+			if (slots[slot] != null) {
+				let player2 = slots[slot];
+				let swapSlot = this.tournament.x_v_x_mode * 2;
+				await this.lobby.movePlayer(player2, swapSlot);
+				await this.lobby.movePlayer(player, slot);
+				await this.lobby.movePlayer(player2, playerSlot);
+			}
+		}
+
+		this.swaps.splice(0, 1);
+		await this.swap();
+	}
 	/**
 	 *
 	 * @param {number} num The team that you're waiting on
@@ -1480,7 +1683,7 @@ class MatchManager {
 		// Individual Score Table
 		if (
 			([4, 5, 6, 7].includes(state) || this.wins.length >= 1) &&
-			[1, 9].includes(state) &&
+			![1, 9].includes(state) &&
 			this.lastGameData
 		) {
 			let leaderboard = "";
@@ -1789,7 +1992,7 @@ class MatchManager {
 		}
 
 		// Final Match Results
-		if (state >= 8) {
+		if (state == 9) {
 			if (this.teams[0].score > this.teams[1].score) {
 				embed.color = this.teams[0].color;
 				embed.setThumbnail(this.teams[0].icon_url);

@@ -1,15 +1,12 @@
-let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+let {
+	MessageEmbed,
+	MessageButton,
+	MessageActionRow,
+	MessageAttachment,
+} = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
+const { generateImage } = require("../poolToImg");
 const { fetchGuild, prisma } = require("../../prisma");
-
-let modIcon = {
-	NM: "<:NM:972256928757592144>",
-	HD: "<:HD:972256986357964801>",
-	HR: "<:HR:972256992380993616>",
-	DT: "<:DT:972256999305781298>",
-	FM: "<:FM:972257023297204325>",
-	TB: "<:TB:972257028502339595>",
-};
 
 module.exports = {
 	data: new MessageButton().setCustomId("round_list"),
@@ -47,8 +44,8 @@ module.exports = {
 			orderBy: { modPriority: "asc" },
 		});
 
-		// TODO: Order pool by identifier in this order: NM, HD, HR, DT, EZ, FL, FM, TB
-		// let alphabet = ["NM", "HD", "HR", "DT", "EZ", "FL", "FM", "TB"];
+		let attachment;
+		let currentPrio;
 		if (command.options.admin || round.show_mappool) {
 			for (const map of pool) {
 				let data = await prisma.map.findFirst({
@@ -61,16 +58,18 @@ module.exports = {
 						beatmap_id: map.mapId,
 					},
 				});
-
-				let mapString = `${data.artist} - ${data.title} \\[${data.version}\\]`;
-				let identifier = modIcon[map.identifier.substring(0, 2)];
-
-				if (map.identifier.substring(2)) {
-					identifier += ` **${map.identifier.substring(2)}**`;
+				if (currentPrio != map.modPriority) {
+					poolString += `\n`;
+					currentPrio = map.modPriority;
 				}
-				poolString += `${identifier} [${mapString}](https://osu.ppy.sh/b/${data.beatmap_id})\n`;
+				poolString += `[${map.identifier}](https://osu.ppy.sh/b/${data.beatmap_id})  `;
 			}
 			if (poolString == "") poolString = "No maps";
+			let image = await generateImage(round.mappoolId);
+			attachment = new MessageAttachment(
+				image.toBuffer("image/png"),
+				"mappool.png"
+			);
 		} else {
 			poolString = "**Mappool is hidden**";
 		}
@@ -121,17 +120,24 @@ module.exports = {
 			)
 			.setDescription("**Mappool** \n" + poolString)
 			.setThumbnail(tournament.icon_url);
+		let files = [];
+		if (attachment) {
+			embed.setImage("attachment://mappool.png");
+			files = [attachment];
+		}
 
 		if (interaction.isCommand()) {
 			await interaction.editReply({
 				embeds: [embed],
 				components: [components],
+				files,
 			});
 			return;
 		}
 		await interaction.update({
 			embeds: [embed],
 			components: [components],
+			files,
 		});
 	},
 };
