@@ -273,8 +273,10 @@ class MatchManager {
 				this.tournament.score_mode == 4
 					? 3
 					: this.tournament.score_mode,
-			slots: this.tournament.x_v_x_mode * 2 + 1,
+			slots: this.tournament.team_size * 2 + 1,
 		};
+		if (this.lobbySettings.slots > 16) this.lobbySettings.slots = 16;
+
 		this.beatmap = this.lobby.beatmap;
 
 		let { team_mode, score_mode, slots } = this.lobbySettings;
@@ -378,11 +380,10 @@ class MatchManager {
 			}
 		}
 		if (user == null) {
-			await this.channel.lobby.kickPlayer(event.player.user.id);
 			return;
 		}
 
-		// Put the user on the right team
+		// Put the user on the right te
 		if ([2, 3].includes(this.tournament.team_mode)) {
 			if (team == this.teams[0]) {
 				await this.lobby.changeTeam(event.player, "Red");
