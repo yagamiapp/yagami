@@ -120,7 +120,7 @@ module.exports.generateImage = async (id) => {
 		let csInt = parseInt(cs).toFixed(1);
 		let odInt = parseInt(od).toFixed(1);
 		let arInt = parseInt(ar).toFixed(1);
-		let srInt = parseInt(sr).toFixed(2);
+		let srInt = parseFloat(sr).toFixed(2);
 		// Length in seconds to time string
 		let lengthString = `${Math.floor(length / 60)}:${
 			Math.floor(length % 60) < 10 ? "0" : ""
