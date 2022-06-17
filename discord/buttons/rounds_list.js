@@ -1,5 +1,11 @@
-let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+let {
+	MessageEmbed,
+	MessageButton,
+	MessageActionRow,
+	MessageAttachment,
+} = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
+const { generateImage } = require("../poolToImg");
 const { fetchGuild, prisma } = require("../../prisma");
 
 let modIcon = {
@@ -47,8 +53,6 @@ module.exports = {
 			orderBy: { modPriority: "asc" },
 		});
 
-		// TODO: Order pool by identifier in this order: NM, HD, HR, DT, EZ, FL, FM, TB
-		// let alphabet = ["NM", "HD", "HR", "DT", "EZ", "FL", "FM", "TB"];
 		if (command.options.admin || round.show_mappool) {
 			for (const map of pool) {
 				let data = await prisma.map.findFirst({
@@ -61,14 +65,7 @@ module.exports = {
 						beatmap_id: map.mapId,
 					},
 				});
-
-				let mapString = `${data.artist} - ${data.title} \\[${data.version}\\]`;
-				let identifier = modIcon[map.identifier.substring(0, 2)];
-
-				if (map.identifier.substring(2)) {
-					identifier += ` **${map.identifier.substring(2)}**`;
-				}
-				poolString += `${identifier} [${mapString}](https://osu.ppy.sh/b/${data.beatmap_id})\n`;
+				poolString += `[${map.identifier}](https://osu.ppy.sh/b/${data.beatmap_id})  `;
 			}
 			if (poolString == "") poolString = "No maps";
 		} else {
@@ -109,6 +106,8 @@ module.exports = {
 			components.components[2].disabled = true;
 		}
 
+		let image = await generateImage(round.mappoolId);
+
 		let embed = new MessageEmbed()
 			.setColor(tournament.color)
 			.setTitle(`${round.acronym}: ${round.name}`)
@@ -120,18 +119,26 @@ module.exports = {
 			`
 			)
 			.setDescription("**Mappool** \n" + poolString)
-			.setThumbnail(tournament.icon_url);
+			.setThumbnail(tournament.icon_url)
+			.setImage("attachment://mappool.png");
+
+		let attachment = new MessageAttachment(
+			image.toBuffer("image/png"),
+			"mappool.png"
+		);
 
 		if (interaction.isCommand()) {
 			await interaction.editReply({
 				embeds: [embed],
 				components: [components],
+				files: [attachment],
 			});
 			return;
 		}
 		await interaction.update({
 			embeds: [embed],
 			components: [components],
+			files: [attachment],
 		});
 	},
 };
