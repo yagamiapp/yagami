@@ -4,3 +4,5 @@ node_modules
 *.sqlite
 *.sqlite-journal
 firebaseData.json
+rawpools.json
+pools.json
