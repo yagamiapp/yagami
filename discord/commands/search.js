@@ -22,6 +22,6 @@ module.exports = {
 			return;
 		}
 
-		execute(interaction, { options: { index: 0, admin: false } });
+		execute(interaction, { options: { i: 0 } });
 	},
 };
