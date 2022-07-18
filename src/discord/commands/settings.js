@@ -29,7 +29,9 @@ module.exports = {
 		.addChannelOption((option) =>
 			option
 				.setName("match_results_channel")
-				.setDescription("The channel in which match messages will be posted")
+				.setDescription(
+					"The channel in which match messages will be posted"
+				)
 		),
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });

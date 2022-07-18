@@ -1,7 +1,7 @@
-const web = require("./web");
-const discord = require("./discord");
-const bancho = require("./bancho");
-const { refreshTokens } = require("./prisma");
+const web = require("./src/web");
+const discord = require("./src/discord");
+const bancho = require("./src/bancho");
+const { refreshTokens } = require("./src/prisma");
 require("dotenv").config();
 
 if (!process.env.disableWeb) {
