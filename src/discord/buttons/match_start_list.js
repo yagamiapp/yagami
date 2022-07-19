@@ -118,11 +118,11 @@ module.exports = {
 				},
 			});
 
-			embed.addField(
-				`${round.acronym}: Match ${match.tournamentId}`,
-				`${teams[0].name} vs ${teams[1].name}`,
-				true
-			);
+			embed.addFields({
+				name: `${round.acronym}: Match ${match.tournamentId}`,
+				value: `${teams[0].name} vs ${teams[1].name}`,
+				inline: true,
+			});
 			let startButton = new MessageButton()
 				.setLabel("Start match " + match.tournamentId)
 				.setCustomId("start_match?id=" + match.id + "&index=" + index)

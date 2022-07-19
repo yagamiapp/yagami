@@ -1,5 +1,5 @@
 const { stripIndents } = require("common-tags/lib");
-const { EmbedBuilder, Colors } = require("discord.js");
+const { EmbedBuilder, Colors, InteractionType } = require("discord.js");
 
 /**
  * @type {import("discord.js").TextChannel}
@@ -17,7 +17,7 @@ module.exports = {
 	 */
 	async log(interaction) {
 		let embed = new EmbedBuilder();
-		if (interaction.isCommand()) {
+		if (interaction.type == InteractionType.ApplicationCommand) {
 			// Craft message to send to console
 			let options = interaction.options.data;
 			let commandType = options[0]?.type;
@@ -52,7 +52,7 @@ module.exports = {
 				.setColor(Colors.Blue);
 		}
 
-		if (interaction.isButton()) {
+		if (interaction.type == InteractionType.MessageComponent) {
 			// Restructure command id into command object
 			let command = {};
 			let stringParse = interaction.customId.split("?");
@@ -78,7 +78,7 @@ module.exports = {
 				.setColor(Colors.Purple);
 		}
 
-		if (interaction.isModalSubmit()) {
+		if (interaction.type == InteractionType.ModalSubmit) {
 			// Restructure command id into command object
 			let command = {};
 			let stringParse = interaction.customId.split("?");

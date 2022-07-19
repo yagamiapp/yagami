@@ -42,14 +42,19 @@ module.exports = {
 				**Let's get your server up and running:**
 				`
 			)
-			.addField("Set up your server settings:", `\`\`\`/settings\`\`\``)
-			.addField(
-				"Link your account to your osu! account:",
-				`\`\`\`/link\`\`\``
-			)
-			.addField(
-				"Set up your first tournament:",
-				`\`\`\`/tournaments create\`\`\``
+			.addFields(
+				{
+					name: "Set up your server settings:",
+					value: `\`\`\`/settings\`\`\``,
+				},
+				{
+					name: "Link your account to your osu! account:",
+					value: `\`\`\`/link\`\`\``,
+				},
+				{
+					name: "Set up your first tournament:",
+					value: `\`\`\`/tournaments create\`\`\``,
+				}
 			)
 			.setTimestamp()
 			.setFooter({
@@ -64,19 +69,21 @@ module.exports = {
 			.setDescription(
 				"A recent update to discord has changed the way slash command permissions work. Currently, I can't the permissions for you, and you wouldn't want players deleting your tournament, would you?"
 			)
-			.addField(
-				"To change slash command settings:",
-				"Go into your server settings, select integrations, and then click on Yagami to edit settings."
-			)
-			.addField(
-				"The following commands should be restricted to admins only:",
-				`
+			.addFields(
+				{
+					name: "To change slash command settings:",
+					value: "Go into your server settings, select integrations, and then click on Yagami to edit settings.",
+				},
+				{
+					name: "The following commands should be restricted to admins only:",
+					value: `
 				> \`/settings\`
 				> \`/tournaments\`
 				> \`/rounds\`
 				> \`/teams\`
 				> \`/matches\`
-			`
+			`,
+				}
 			);
 		let channel = guild.channels.cache.find(
 			(channel) =>

@@ -3,6 +3,7 @@ const {
 	GatewayIntentBits,
 	Collection,
 	EmbedBuilder,
+	InteractionType,
 } = require("discord.js");
 const fs = require("fs");
 const join = require("./join");
@@ -53,7 +54,7 @@ module.exports = {
 
 		// Command Handler
 		bot.on("interactionCreate", async (interaction) => {
-			if (!interaction.isCommand()) return;
+			if (interaction.type != InteractionType.ApplicationCommand) return;
 			await logger.log(interaction);
 
 			// Craft message to send to console
@@ -123,7 +124,7 @@ module.exports = {
 		});
 		// Button Handler
 		bot.on("interactionCreate", async (interaction) => {
-			if (!interaction.isButton()) return;
+			if (interaction.type != InteractionType.MessageComponent) return;
 			await logger.log(interaction);
 
 			// Restructure command id into command object
@@ -179,7 +180,7 @@ module.exports = {
 
 		// Modal Handler
 		bot.on("interactionCreate", async (interaction) => {
-			if (!interaction.isModalSubmit()) return;
+			if (interaction.type != InteractionType.ModalSubmit) return;
 			await logger.log(interaction);
 
 			// Restructure command id into command object

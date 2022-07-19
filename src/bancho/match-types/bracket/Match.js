@@ -1664,15 +1664,15 @@ class MatchManager {
 
 		// Score line
 		if (state <= 2 || (state >= 5 && state <= 7)) {
-			embed.addField(
-				"Score",
-				`
+			embed.addFields({
+				name: "Score",
+				value: `
 				${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
 					this.teams[0].score
 				} - ${this.teams[1].score} | ${this.teams[1].name} ${
 					emotes.teams[this.teams[1].id]
-				}`
-			);
+				}`,
+			});
 		}
 
 		// Remove img on setup phases
@@ -1904,16 +1904,16 @@ class MatchManager {
 			}
 			`;
 
-			embed.addField("Bans", banString);
+			embed.addFields({ name: "Bans", value: banString });
 		}
 		// Handle Picks
 		let picks = this.picks.sort((a, b) => a.pickNumber - b.pickNumber);
 
 		if (this.teams[0].pick_order) {
-			embed.addField(
-				"First Pick",
-				this.teams[this.teams[0].pick_order - 1].name
-			);
+			embed.addFields({
+				name: "First Pick",
+				value: this.teams[this.teams[0].pick_order - 1].name,
+			});
 			let pickString = ``;
 			for (const pick of picks) {
 				if (!pick.picked) return;
@@ -1923,7 +1923,10 @@ class MatchManager {
 
 				pickString += string;
 			}
-			embed.addField("Picks", pickString || "No picks yet");
+			embed.addFields({
+				name: "Picks",
+				value: pickString || "No picks yet",
+			});
 		}
 
 		if (state == 0) {
@@ -1936,7 +1939,7 @@ class MatchManager {
 		// If no match link
 		if (state == -1) {
 			if (this.mp) {
-				embed.addField("Previous MP Link: ", this.mp);
+				embed.addFields({ name: "Previous MP Link: ", value: this.mp });
 			}
 			embed
 				.setTitle(
