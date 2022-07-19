@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 let { execute } = require("../../buttons/rounds_list");
 const { fetchGuild, prisma } = require("../../../prisma");
 
@@ -17,11 +17,11 @@ module.exports = {
 
 		// In case there are no rounds
 		if (rounds == []) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: There are no rounds in this tournament."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}

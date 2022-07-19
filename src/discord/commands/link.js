@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { prisma } = require("../../prisma");
 const crypto = require("crypto");
 const { stripIndents } = require("common-tags/lib");
@@ -34,7 +34,7 @@ module.exports = {
 				await member.roles.add(role);
 			}
 
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setThumbnail(`https://s.ppy.sh/a/${duplicate.osu_id}`)
 				.setTitle("Authorization Success!")
 				.setDescription(
@@ -68,9 +68,9 @@ module.exports = {
 		let interval = setTimeout(async () => {
 			delete this[id];
 
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("Auth request timed out")
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 		}, 60000);
 
@@ -80,7 +80,7 @@ module.exports = {
 
 		let link = `https://osu.ppy.sh/oauth/authorize/?client_id=${process.env.osuClientId}&redirect_uri=${process.env.osuRedirectURI}&response_type=code&state=${id}`;
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor("#F88000")
 			.setDescription(`[Click here to login with osu!](${link})`);
 		await interaction.editReply({ embeds: [embed] });

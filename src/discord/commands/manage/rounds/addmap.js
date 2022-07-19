@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 const { fetchGuild, prisma } = require("../../../../prisma");
 const { fetchMap } = require("../../../../bancho/fetchMap.js");
 
@@ -62,11 +62,11 @@ module.exports = {
 
 		// In case the round doesn't exist
 		if (round == null) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: A round with the acronym ${acronym} does not exist.`
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can create a round using /rounds create",
 				});
@@ -87,11 +87,11 @@ module.exports = {
 			where: { identifier: identifier, mappoolId: mappool.id },
 		});
 		if (duplicate) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: The identifier ${identifier} has already been used.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -127,7 +127,7 @@ module.exports = {
 			},
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Map Added")
 			.setDescription(
 				`**[${identifier}]:** ${map.artist} - ${map.title} [${map.version}]`

@@ -1,4 +1,4 @@
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { fetchGuild, prisma } = require("../../../../prisma");
 let { stripIndents } = require("common-tags");
@@ -19,9 +19,9 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		if (!tournament) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(`**Err**: No active tournament found.`)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can set an active tournament with !tournament activate",
 				});
@@ -36,7 +36,7 @@ module.exports = {
 			data: { allow_registrations: toggle },
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Successfully changed settings!")
 			.setColor("GREEN")
 			.setDescription(

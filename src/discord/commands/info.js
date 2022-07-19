@@ -1,7 +1,7 @@
 //@ts-check
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { stripIndents } = require("common-tags/lib");
-const { MessageEmbed, version: djs } = require("discord.js");
+const { EmbedBuilder, version: djs } = require("discord.js");
 const { version } = require("../../../package.json");
 const { prisma } = require("../../prisma");
 
@@ -35,7 +35,7 @@ module.exports = {
 		// TODO: Right align text
 		let matches = await prisma.match.findMany();
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor("#F88000")
 			.setTitle("Yagami")
 			.setDescription("A bot for managing tournaments")

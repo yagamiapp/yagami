@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { prisma } = require("../../../prisma");
 
 module.exports = {
@@ -26,7 +26,7 @@ module.exports = {
 		});
 
 		if (!team) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: ${
 						interaction.options.getUser("user")
@@ -34,12 +34,12 @@ module.exports = {
 							: "You are"
 					} not in a team`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle(team.name)
 			.setColor(team.color || "#F88000")
 			.setThumbnail(team.icon_url);

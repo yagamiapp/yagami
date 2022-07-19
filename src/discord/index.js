@@ -1,10 +1,15 @@
-const { Client, Intents, Collection, MessageEmbed } = require("discord.js");
+const {
+	Client,
+	GatewayIntentBits,
+	Collection,
+	EmbedBuilder,
+} = require("discord.js");
 const fs = require("fs");
 const join = require("./join");
 const logger = require("./logger");
 
 const bot = new Client({
-	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES],
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
 });
 
 module.exports = {
@@ -97,7 +102,7 @@ module.exports = {
 				await command.execute(interaction);
 			} catch (error) {
 				console.log(error);
-				let embed = new MessageEmbed()
+				let embed = new EmbedBuilder()
 					.setColor("#ff0000")
 					.setDescription(
 						"**Err**: There was an error while executing this command!"
@@ -152,7 +157,7 @@ module.exports = {
 				await button.execute(interaction, command);
 			} catch (error) {
 				console.log(error);
-				let embed = new MessageEmbed()
+				let embed = new EmbedBuilder()
 					.setColor("#ff0000")
 					.setDescription(
 						"**Err**: There was an error while executing this button!"
@@ -208,7 +213,7 @@ module.exports = {
 				await modal.execute(interaction, command);
 			} catch (error) {
 				console.log(error);
-				let embed = new MessageEmbed()
+				let embed = new EmbedBuilder()
 					.setColor("#ff0000")
 					.setDescription(
 						"**Err**: There was an error while executing this modal!"

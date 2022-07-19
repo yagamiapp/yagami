@@ -1,5 +1,5 @@
 let { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 let { fetchGuild } = require("../../../../prisma");
 let { execute } = require("../../../buttons/match_start_list");
 
@@ -14,9 +14,9 @@ module.exports = {
 
 		// In case there is no active tournament
 		if (!tournament) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**: No active tournament.")
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can make a new tournament with /tournament create",
 				});

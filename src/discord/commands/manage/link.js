@@ -1,7 +1,12 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { stripIndents } = require("common-tags/lib");
 const { prisma } = require("../../../prisma");
-const { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+const {
+	EmbedBuilder,
+	MessageButton,
+	MessageActionRow,
+	Colors,
+} = require("discord.js");
 
 // Subcommand Handler
 let data = new SlashCommandSubcommandBuilder()
@@ -27,7 +32,7 @@ module.exports = {
 		let channel = interaction.options.getChannel("channel");
 		let role = interaction.options.getRole("role");
 
-		let finishEmbed = new MessageEmbed()
+		let finishEmbed = new EmbedBuilder()
 			.setTitle("Settings changed")
 			.setColor("#F88000");
 
@@ -42,7 +47,7 @@ module.exports = {
 				.setLabel("Link Account")
 				.setStyle("PRIMARY")
 				.setCustomId("link");
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					stripIndents`
             In order to use this bot, you must first link your account.
@@ -59,11 +64,11 @@ module.exports = {
 			try {
 				await channel.send({ embeds: [embed], components: [row] });
 			} catch (e) {
-				let embed = new MessageEmbed()
+				let embed = new EmbedBuilder()
 					.setDescription(
 						"**Err:** Cannot send message in given channel"
 					)
-					.setColor("RED");
+					.setColor(Colors.Red);
 				await interaction.editReply({ embeds: [embed] });
 				return;
 			}

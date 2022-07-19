@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { stripIndents } = require("common-tags/lib");
 const { prisma, fetchGuild } = require("../prisma");
@@ -116,7 +116,7 @@ module.exports.authUser = async (query, req, res) => {
 	}
 
 	// Update embed with Success message
-	let embed = new MessageEmbed()
+	let embed = new EmbedBuilder()
 		.setThumbnail(userData.avatar_url)
 		.setTitle("Authorization Success!")
 		.setDescription(

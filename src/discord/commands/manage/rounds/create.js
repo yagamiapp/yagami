@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { fetchGuild, prisma } = require("../../../../prisma");
 
@@ -37,11 +37,11 @@ module.exports = {
 		let acronym = interaction.options.getString("acronym").toUpperCase();
 
 		if (!tournament) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: There is no active tournament in this server."
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can create a tournament with /tournament create",
 				});
@@ -54,14 +54,14 @@ module.exports = {
 		});
 
 		if (test) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: A round with the acronym `" +
 						acronym +
 						"` already exists in tournament: " +
 						tournament.name
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -82,7 +82,7 @@ module.exports = {
 			},
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor(tournament.color)
 			.setTitle("New round created!")
 			.setDescription(

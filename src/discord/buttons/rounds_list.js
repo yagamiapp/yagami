@@ -1,15 +1,16 @@
 let {
-	MessageEmbed,
+	EmbedBuilder,
 	MessageButton,
 	MessageActionRow,
 	MessageAttachment,
+	Colors,
 } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { generateImage } = require("../poolToImg");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
-	data: new MessageButton().setCustomId("round_list"),
+	data: { customId: "round_list" },
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
@@ -19,11 +20,11 @@ module.exports = {
 
 		// In case there are no rounds
 		if (rounds.length == 0) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: There are no rounds in this tournament."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -108,7 +109,7 @@ module.exports = {
 			components.components[2].disabled = true;
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor(tournament.color)
 			.setTitle(`${round.acronym}: ${round.name}`)
 			.addField(

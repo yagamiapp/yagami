@@ -2,10 +2,7 @@ const { MessageButton } = require("discord.js");
 const { execute } = require("../commands/link");
 
 module.exports = {
-	data: new MessageButton()
-		.setCustomId("link")
-		.setLabel("Link Account")
-		.setStyle("PRIMARY"),
+	data: { customId: "link" },
 	async execute(interaction, command) {
 		await execute(interaction);
 	},

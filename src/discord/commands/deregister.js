@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
@@ -22,20 +22,20 @@ module.exports = {
 		});
 
 		if (!tournament.allow_registrations) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot deregister while registrations are disabled.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 		}
 
 		if (!team) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot deregister unless you are in a team.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -54,11 +54,11 @@ module.exports = {
 			},
 		});
 		if (matchCheck) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot deregister while your team is match.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -106,7 +106,7 @@ module.exports = {
 				} catch (e) {}
 			}, 30 * 1000);
 
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setTitle("⚠ Warning ⚠")
 				.setDescription(
 					`You are about to leave your team. You will need an invite to join back. Type \`/deregister\` again to confirm.`
@@ -138,7 +138,7 @@ module.exports = {
 			});
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("See you next time!")
 			.setDescription(`Successfully deregistered to the tournament!`)
 			.setColor(tournament.color)

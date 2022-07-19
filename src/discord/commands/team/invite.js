@@ -1,6 +1,11 @@
 const { stripIndents } = require("common-tags/lib");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
+const {
+	EmbedBuilder,
+	MessageActionRow,
+	MessageButton,
+	Colors,
+} = require("discord.js");
 const { fetchGuild, prisma } = require("../../../prisma");
 
 module.exports = {
@@ -55,11 +60,11 @@ module.exports = {
 
 		// In case the user is not in a team
 		if (!inviterTeam) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot invite a user if you are not in a team.`
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can create a team by using /team create",
 				});
@@ -79,21 +84,21 @@ module.exports = {
 
 		// In case registration is disabled
 		if (!tournament.allow_registrations) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot make changes to your team when registrations are closed.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 		// In case the team size is 1
 		if (tournament.team_size == 1) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot invite a user if the team size is 1.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -110,39 +115,39 @@ module.exports = {
 			},
 		});
 		if (duplicateCheck) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot invite a user that is already in your team.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 		// In case the user hasn't linked their account
 		if (!inviteeData) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: User \`${invitee.tag}\` has not linked their account.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 		// In case the team is full
 		if (inviterMembers.length >= tournament.team_size) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(`**Err**: Your team is full.`)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 		// In case the user is already in a team
 		if (inviteeTeam) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: User \`${inviteeData.osu_username}\` is already in a team.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -162,11 +167,11 @@ module.exports = {
 			},
 		});
 		if (matchCheck) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You cannot invite while your team is match.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -212,7 +217,7 @@ module.exports = {
 			}
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Pending Invite!")
 			.setDescription(
 				stripIndents`
@@ -239,7 +244,7 @@ module.exports = {
 			components: [inviteAccept],
 		});
 
-		embed = new MessageEmbed()
+		embed = new EmbedBuilder()
 			.setTitle(`Invite sent to ${inviteeData.osu_username}!`)
 			.setDescription("We'll send you a DM if they accept.")
 			.setColor(inviterTeam.color)

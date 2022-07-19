@@ -1,7 +1,7 @@
 const { prisma } = require("../../../prisma");
 const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
-const { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+const { EmbedBuilder, MessageButton, MessageActionRow } = require("discord.js");
 const { Team } = require("./Team");
 const { convertEnumToAcro } = require("../../modEnum");
 const { Map } = require("./Map");
@@ -1650,7 +1650,7 @@ class MatchManager {
 		let message = await channel.messages.fetch(this.message_id);
 		let oldembed = message.embeds[0];
 		let description = "";
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle(
 				`${this.round.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})`
 			)

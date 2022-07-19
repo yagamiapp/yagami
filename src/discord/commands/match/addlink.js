@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { prisma } = require("../../../prisma");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { MatchManager } = require("../../../bancho/match-types/bracket/Match");
 const { stripIndents } = require("common-tags/lib");
 
@@ -40,15 +40,15 @@ module.exports = {
 		matchId = matchId?.id;
 
 		if (!matchId) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: You are not in a match that requires an MP link."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			return interaction.editReply({ embeds: [embed] });
 		}
 
-		let embed = new MessageEmbed();
+		let embed = new EmbedBuilder();
 		embed
 			.setTitle("Loading match")
 			.setDescription(
@@ -65,11 +65,11 @@ module.exports = {
 			await match.createMatch();
 		} catch (e) {
 			console.log(e);
-			embed = new MessageEmbed()
+			embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: We encountered an error while joining the match"
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "Make sure the lobby exists, and that you added the bot as a ref",
 				});
@@ -91,7 +91,7 @@ module.exports = {
 		let message = await channel.messages.fetch(match.message_id);
 		let oldembed = message.embeds[0];
 
-		embed = new MessageEmbed()
+		embed = new EmbedBuilder()
 			.setTitle(oldembed.title)
 			.setColor("GREEN")
 			.setAuthor(oldembed.author)

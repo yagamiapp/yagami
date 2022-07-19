@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
@@ -52,7 +52,7 @@ module.exports = {
 			data: guild,
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Settings Updated")
 			.setDescription(description)
 			.setColor("#AAAAAA");

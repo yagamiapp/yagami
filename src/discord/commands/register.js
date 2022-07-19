@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
@@ -12,9 +12,9 @@ module.exports = {
 		let tournament = guild.active_tournament;
 
 		if (!tournament.allow_registrations) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**: Registrations are closed.")
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -31,11 +31,11 @@ module.exports = {
 		});
 
 		if (duplicateCheck) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You are already registered to the tournament!\n\nUse \`/deregister\` to deregister.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -48,12 +48,12 @@ module.exports = {
 
 		// In case the user hasn't linked their account
 		if (!user) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: You must link your account before you can register.`
 				)
 				.setFooter({ text: "You can link your account by using /link" })
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -79,7 +79,7 @@ module.exports = {
 		});
 
 		if (tournament.team_size == 1) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setTitle("Registered")
 				.setDescription(`You have been registered to the tournament!`)
 				.setColor(team.color || "#F88000")
@@ -89,7 +89,7 @@ module.exports = {
 			return;
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Registered")
 			.setDescription(
 				`You have been registered to the tournament!\n\nYou can change your team name and invite players with /team`

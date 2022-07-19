@@ -1,11 +1,8 @@
-const { MessageButton, MessageEmbed } = require("discord.js");
+const { MessageButton, EmbedBuilder } = require("discord.js");
 const { prisma, fetchGuild } = require("../../prisma");
 
 module.exports = {
-	data: new MessageButton()
-		.setCustomId("invite_accept")
-		.setLabel("Accept")
-		.setStyle("PRIMARY"),
+	data: { customId: "invite_accept" },
 	async execute(interaction, command) {
 		let guild = await fetchGuild(command.options.guild);
 		let tournament = guild.active_tournament;
@@ -36,7 +33,7 @@ module.exports = {
 			},
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("✅ Invite Accepted ✅")
 			.setColor("GREEN");
 
@@ -54,7 +51,7 @@ module.exports = {
 		);
 
 		let dm = await tourneyMember.createDM();
-		let dmEmbed = new MessageEmbed()
+		let dmEmbed = new EmbedBuilder()
 			.setTitle("🎉 Your invite was accepted! 🎉")
 			.setDescription(
 				` \`${userData.osu_username}\` accepted your invite to join your team!`

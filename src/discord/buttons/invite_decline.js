@@ -1,14 +1,11 @@
-const { MessageButton, MessageEmbed } = require("discord.js");
+const { MessageButton, EmbedBuilder, Colors } = require("discord.js");
 
 module.exports = {
-	data: new MessageButton()
-		.setCustomId("invite_decline")
-		.setLabel("Decline")
-		.setStyle("PRIMARY"),
+	data: { customId: "invite_decline" },
 	async execute(interaction, command) {
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("✅ Invite Declined")
-			.setColor("RED");
+			.setColor(Colors.Red);
 		interaction.update({ content: null, embeds: [embed], components: [] });
 	},
 };

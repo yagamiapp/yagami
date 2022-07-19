@@ -1,14 +1,16 @@
 const { stripIndents } = require("common-tags/lib");
-const { MessageButton, MessageEmbed, MessageActionRow } = require("discord.js");
+const {
+	MessageButton,
+	EmbedBuilder,
+	MessageActionRow,
+	Colors,
+} = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 const { execute } = require("./match_start_list");
 const { MatchManager } = require("../../bancho/match-types/bracket/Match");
 
 module.exports = {
-	data: new MessageButton()
-		.setCustomId("start_match")
-		.setLabel("Accept")
-		.setStyle("PRIMARY"),
+	data: { customId: "start_match" },
 	/**
 	 *
 	 * @param {import("discord.js").ButtonInteraction} interaction
@@ -22,11 +24,11 @@ module.exports = {
 			command.options.recover &&
 			!interaction.memberPermissions.has("ADMINISTRATOR")
 		) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err:** You lack the permissions to perform this action"
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "Please ping an admin to recover the match for you",
 				});
@@ -94,11 +96,11 @@ module.exports = {
 			},
 		});
 		if (duplicateCheck) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: One or more of the teams is in a match that is currently running"
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "Make sure both teams are not in an active match",
 				});
@@ -135,11 +137,11 @@ module.exports = {
 				.permissionsFor(interaction.guild.me)
 				.has("SEND_MESSAGES")
 		) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: Cannot post match results message in <#${messageChannel.id}>`
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: `Make sure the bot's match result channel is set up correctly`,
 				});
@@ -191,7 +193,7 @@ module.exports = {
 			},
 		});
 
-		let matchEmbed = new MessageEmbed()
+		let matchEmbed = new EmbedBuilder()
 			.setTitle(
 				`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
 			)

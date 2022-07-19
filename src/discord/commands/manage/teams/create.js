@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { fetchGuild, prisma } = require("../../../../prisma");
 
 module.exports = {
@@ -24,11 +24,11 @@ module.exports = {
 		let tournament = guild.active_tournament;
 
 		if (!tournament.allow_registrations) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: Cannot edit teams while registrations are closed."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -45,9 +45,9 @@ module.exports = {
 		});
 
 		if (duplicateCheck) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(`**Err**: That user is already in a team.`)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -60,11 +60,11 @@ module.exports = {
 
 		// In case the user hasn't linked their account
 		if (!dbUser) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: \`${user.tag}\` has not linked their account.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -89,7 +89,7 @@ module.exports = {
 			},
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Team created")
 			.setDescription(`**${team.name}** has been created.`)
 			.setColor(tournament.color)

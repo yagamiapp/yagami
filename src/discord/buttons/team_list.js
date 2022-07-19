@@ -1,8 +1,13 @@
-let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+let {
+	EmbedBuilder,
+	MessageButton,
+	MessageActionRow,
+	Colors,
+} = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
-	data: new MessageButton().setCustomId("team_list"),
+	data: { customId: "team_list" },
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
@@ -14,11 +19,11 @@ module.exports = {
 
 		// In case there are no teams
 		if (teams.length == 0) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: There are no teams in this tournament."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -95,7 +100,7 @@ module.exports = {
 			components.components[2].disabled = true;
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Teams")
 			.setColor(tournament.color || "#F88000")
 			.setThumbnail(tournament.icon_url);

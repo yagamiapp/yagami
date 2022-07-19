@@ -1,34 +1,36 @@
 const {
-	Modal,
-	TextInputComponent,
-	MessageActionRow,
-	MessageEmbed,
+	ModalBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+	ActionRowBuilder,
+	EmbedBuilder,
+	Colors,
 } = require("discord.js");
 
 module.exports = {
-	data: new Modal()
+	data: new ModalBuilder()
 		.setCustomId("report")
 		.setTitle("Report a bug")
 		.setComponents([
-			new MessageActionRow().addComponents([
-				new TextInputComponent()
+			new ActionRowBuilder().addComponents([
+				new TextInputBuilder()
 					.setLabel("Brief description of the bug")
 					.setCustomId("title")
 					.setRequired(true)
-					.setStyle("SHORT"),
+					.setStyle(TextInputStyle.Short),
 			]),
-			new MessageActionRow().addComponents([
-				new TextInputComponent()
+			new ActionRowBuilder().addComponents([
+				new TextInputBuilder()
 					.setLabel("Go into more detail")
 					.setCustomId("content")
 					.setRequired(true)
-					.setStyle("PARAGRAPH"),
+					.setStyle(TextInputStyle.Paragraph),
 			]),
-			new MessageActionRow().addComponents([
-				new TextInputComponent()
+			new ActionRowBuilder().addComponents([
+				new TextInputBuilder()
 					.setLabel("Any helpful links/content")
 					.setCustomId("links")
-					.setStyle("SHORT"),
+					.setStyle(TextInputStyle.Short),
 			]),
 		]),
 	/**
@@ -49,13 +51,13 @@ module.exports = {
 			format: "png",
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setAuthor({
 				iconURL: avatar,
 				name: interaction.user.tag,
 			})
 			.setTitle(title)
-			.setColor("RED")
+			.setColor(Colors.Red)
 			.setDescription(desc)
 			.setTimestamp()
 			.addField("Links", links || "No links provided");
@@ -66,11 +68,11 @@ module.exports = {
 		try {
 			await channel.send({ embeds: [embed] });
 		} catch (e) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err:** I can't send a message in the bug report channel, that's one mighty bug wouldn't you say?"
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({ text: "Go scream at the dev to fix it" });
 			await interaction.editReply({ embeds: [embed] });
 		}

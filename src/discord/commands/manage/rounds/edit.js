@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { fetchGuild, prisma } = require("../../../../prisma");
 
@@ -55,11 +55,11 @@ module.exports = {
 
 		// In case the round doesn't exist
 		if (round == null) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: A round with the acronym ${acronym} does not exist.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -74,7 +74,7 @@ module.exports = {
 			data: round,
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor(tournament.color)
 			.setTitle("Settings Updated")
 			.setDescription(

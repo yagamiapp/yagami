@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const { deployCommands } = require("../deploy-commands");
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
 		await interaction.deferReply();
 		await deployCommands(interaction.guild);
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor("#BBBBBB")
 			.setDescription("Updated guild commands and permissions");
 		await interaction.editReply({ embeds: [embed] });

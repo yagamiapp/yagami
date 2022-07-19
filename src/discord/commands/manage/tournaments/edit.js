@@ -1,4 +1,4 @@
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { fetchGuild, prisma } = require("../../../../prisma");
 let { stripIndents } = require("common-tags");
@@ -9,13 +9,14 @@ module.exports = {
 		.setDescription("Edits the currently selected tournament")
 		.addStringOption((option) =>
 			option
-				.setName("name")
-				.setDescription("The name for your tournament")
+				.setName("acronym")
+				.setDescription("Change the acronym of your tournament")
+				.setRequired(true)
 		)
 		.addStringOption((option) =>
 			option
-				.setName("acronym")
-				.setDescription("Change the acronym of your tournament")
+				.setName("name")
+				.setDescription("The name for your tournament")
 		)
 		.addIntegerOption((option) =>
 			option
@@ -23,20 +24,24 @@ module.exports = {
 				.setDescription(
 					"Changes the way scores are handled in the lobby"
 				)
-				.addChoice("Score", 0)
-				.addChoice("Combo", 1)
-				.addChoice("Accuracy", 2)
-				.addChoice("ScoreV2", 3)
-				.addChoice("ScoreV2 Accuracy", 4)
+				.setChoices(
+					{ name: "Score", value: 0 },
+					{ name: "Combo", value: 1 },
+					{ name: "Accuracy", value: 2 },
+					{ name: "ScoreV2", value: 3 },
+					{ name: "ScoreV2 Accuracy", value: 4 }
+				)
 		)
 		.addIntegerOption((option) =>
 			option
 				.setName("team_mode")
 				.setDescription("Changes the way users play in the lobby")
-				.addChoice("Head to Head", 0)
-				.addChoice("Tag Coop", 1)
-				.addChoice("Team Vs", 2)
-				.addChoice("Tag Team Vs", 3)
+				.setChoices(
+					{ name: "Head to Head", value: 0 },
+					{ name: "Tag Coop", value: 1 },
+					{ name: "Team Vs", value: 2 },
+					{ name: "Tag Team Vs", value: 3 }
+				)
 		)
 		.addBooleanOption((option) =>
 			option
@@ -75,17 +80,21 @@ module.exports = {
 			option
 				.setName("double_pick")
 				.setDescription("Whether double picks are allowed or not")
-				.addChoice("No double picking", 0)
-				.addChoice("No double picking NM excluded", 1)
-				.addChoice("Double picking", 2)
+				.setChoices(
+					{ name: "No double picking", value: 0 },
+					{ name: "No double picking NM excluded", value: 1 },
+					{ name: "Double picking", value: 2 }
+				)
 		)
 		.addIntegerOption((option) =>
 			option
 				.setName("double_ban")
 				.setDescription("Whether double bans are allowed or not")
-				.addChoice("No double banning", 0)
-				.addChoice("No double banning NM excluded", 1)
-				.addChoice("Double banning", 2)
+				.setChoices(
+					{ name: "No double banning", value: 0 },
+					{ name: "No double banning NM excluded", value: 1 },
+					{ name: "Double banning", value: 2 }
+				)
 		)
 		.addIntegerOption((option) =>
 			option
@@ -101,9 +110,9 @@ module.exports = {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 		if (!tournament) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**: No Active Tournament Found")
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can create a tournament with /tournament create",
 				});
@@ -114,11 +123,11 @@ module.exports = {
 
 		// In case registration is enabled
 		if (tournament.allow_registrations) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: You cannot edit tournament settings while registration is allowed."
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can disable registration with /tournament registration",
 				});
@@ -131,11 +140,11 @@ module.exports = {
 			interaction.options.getString("icon_url") &&
 			!urlRegex.test(interaction.options.getString("icon_url"))
 		) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: The icon url you provided is not a valid image."
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({ text: "The url must lead to an image" });
 			await interaction.editReply({ embeds: [embed] });
 			return;
@@ -147,11 +156,11 @@ module.exports = {
 				interaction.options.getString("color")
 			)
 		) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: The color you provided is not a valid hex color."
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "The color must be in the following format: #0eB8b9",
 				});
@@ -170,7 +179,7 @@ module.exports = {
 			data: tournament,
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Successfully changed settings!")
 			.setColor(tournament.color || "GREEN")
 			.setDescription(

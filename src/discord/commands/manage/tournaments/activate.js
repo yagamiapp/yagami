@@ -1,4 +1,4 @@
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { prisma } = require("../../../../prisma");
 module.exports = {
@@ -23,11 +23,11 @@ module.exports = {
 		});
 
 		if (!tournament) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: No tournament with the acronym \`${acro}\` found.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -37,7 +37,7 @@ module.exports = {
 			data: { active_tournament: tournament.id },
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Active Tournament Updated!")
 			.setDescription(
 				`Active tournament switched to \`${tournament.name}\``

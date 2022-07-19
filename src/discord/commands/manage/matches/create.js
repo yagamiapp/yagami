@@ -1,5 +1,5 @@
 let { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 let { fetchGuild, prisma } = require("../../../../prisma");
 
 module.exports = {
@@ -31,9 +31,9 @@ module.exports = {
 
 		// In case there is no active tournament
 		if (!tournament) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**: No active tournament.")
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can make a new tournament with /tournament create",
 				});
@@ -78,9 +78,9 @@ module.exports = {
 
 		// In case the given acronym is not valid
 		if (!round) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**: The round acronym is not valid")
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "Use /rounds list to see all the rounds",
 				});
@@ -90,11 +90,11 @@ module.exports = {
 
 		// In case the team1 user is not on a team
 		if (!teams[0]) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: The user from team 1 is not on a team"
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "Use /teams list to see all the teams",
 				});
@@ -104,11 +104,11 @@ module.exports = {
 
 		// In case the team 2 user is not on a team
 		if (!teams[1]) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: The user from team 2 is not on a team"
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "Use /teams list to see all the teams",
 				});
@@ -118,9 +118,9 @@ module.exports = {
 
 		// In case the teams are the same
 		if (teams[0].id == teams[1].id) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**: The teams are the same")
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "Use /teams list to see all the teams",
 				});
@@ -185,7 +185,7 @@ module.exports = {
 			});
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Matchup created")
 			.setDescription("The matchup has been created")
 			.setColor(tournament.color)

@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { fetchGuild, prisma } = require("../../../../prisma");
 
 module.exports = {
@@ -52,29 +52,29 @@ module.exports = {
 
 		// In case the user is not in a team
 		if (!team) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(`**Err**: That user is not in a team`)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}
 		// In case registration is disabled
 		if (!tournament.allow_registrations) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: You cannot edit teams while registration is closed."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
 		// In case the player name is longer than 25 characters
 		if (options?.name?.length > 25) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: The name of the team cannot be longer than 25 characters.`
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "If your team name is an emote, pick something else :)",
 				});
@@ -88,11 +88,11 @@ module.exports = {
 			interaction.options.getString("icon_url") &&
 			!urlRegex.test(interaction.options.getString("icon_url"))
 		) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: The icon url you provided is not a valid image."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -103,11 +103,11 @@ module.exports = {
 				interaction.options.getString("color")
 			)
 		) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: The color you provided is not a valid hex color."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -124,7 +124,7 @@ module.exports = {
 			data: team,
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Settings updated")
 			.setColor(team.color || "GREEN")
 			.setThumbnail(team.icon_url);

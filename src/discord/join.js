@@ -1,5 +1,5 @@
 let deploy = require("./deploy-commands");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const { prisma } = require("../prisma");
 const { stripIndents } = require("common-tags/lib");
 
@@ -28,7 +28,7 @@ module.exports = {
 				})
 				.catch((err) => console.log(err));
 		}
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Thanks for the invite!")
 			.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png")
 			.setColor("#F88000")
@@ -57,7 +57,7 @@ module.exports = {
 				iconURL: "https://clxxiii.dev/img/icon.png",
 			});
 
-		let permissionsEmbed = new MessageEmbed()
+		let permissionsEmbed = new EmbedBuilder()
 			.setTitle("⚠️ Permissions Warning ⚠️")
 			.setColor("DARK_ORANGE")
 			.setImage("https://i.imgur.com/nLd71Ai.png")

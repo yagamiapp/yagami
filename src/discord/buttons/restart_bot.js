@@ -2,10 +2,7 @@ const { MessageButton } = require("discord.js");
 const pm2 = require("pm2");
 
 module.exports = {
-	data: new MessageButton()
-		.setCustomId("restart_bot")
-		.setLabel("Decline")
-		.setStyle("PRIMARY"),
+	data: { customId: "restart_bot" },
 	async execute(interaction, command) {
 		if (interaction.user.id != "265144290240495617") return;
 

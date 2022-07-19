@@ -1,6 +1,6 @@
 const { fetchGuild } = require("../../../../prisma");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 
 let enums = {
 	score_mode: {
@@ -38,9 +38,9 @@ module.exports = {
 		let tournaments = guild.tournaments;
 
 		if (tournaments == null) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**:No Tournaments Found")
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can create a tournament with tournament create",
 				});
@@ -51,7 +51,7 @@ module.exports = {
 
 		let active_tournament = guild.active_tournament;
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor(active_tournament.color || "#F88000")
 			.setThumbnail(
 				active_tournament.icon_url ||

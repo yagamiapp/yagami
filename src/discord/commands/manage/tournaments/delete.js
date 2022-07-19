@@ -1,6 +1,6 @@
 const { stripIndents } = require("common-tags/lib");
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { prisma } = require("../../../../prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -24,11 +24,11 @@ module.exports = {
 		});
 
 		if (tournament == null) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					`**Err**: No tournament with the acronym \`${acro}\` found.`
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -54,7 +54,7 @@ module.exports = {
 				});
 			}
 
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setTitle("Successfully Deleted `" + acro + "`")
 				.setColor("GREEN");
 			await interaction.editReply({ embeds: [embed] });
@@ -77,7 +77,7 @@ module.exports = {
 			}
 		}, 60000);
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor("DARK_RED")
 			.setTitle("⚠ WARNING ⚠").setDescription(stripIndents`
                     Deleting a tournament is **IRREVERSIBLE** and **CANNOT** be undone.

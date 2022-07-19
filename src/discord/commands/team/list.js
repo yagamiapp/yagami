@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
 const { fetchGuild, prisma } = require("../../../prisma");
-let { MessageEmbed } = require("discord.js");
+let { EmbedBuilder, Colors } = require("discord.js");
 let { execute } = require("../../buttons/team_list");
 
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
 
 		// In case there is no tournament
 		if (!tournament) {
-			let embed = new MessageEmbed().setDescription(
+			let embed = new EmbedBuilder().setDescription(
 				"**Err**: There is no active tournament"
 			);
 			await interaction.editReply({ embeds: [embed] });
@@ -28,11 +28,11 @@ module.exports = {
 
 		// In case there are no teams
 		if (!teams) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: There are no teams in this tournament."
 				)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}

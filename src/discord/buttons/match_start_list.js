@@ -1,9 +1,14 @@
-let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+let {
+	EmbedBuilder,
+	MessageButton,
+	MessageActionRow,
+	Colors,
+} = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
-	data: new MessageButton().setCustomId("match_start_list"),
+	data: { customId: "match_start_list" },
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
@@ -33,9 +38,9 @@ module.exports = {
 
 		// In case there are no matches
 		if (groups.length == 0) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription("**Err**: There are no matches to start")
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "You can create a match with /matches create",
 				});
@@ -83,7 +88,7 @@ module.exports = {
 			pages.components[2].disabled = true;
 		}
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor(tournament.color)
 			.setTitle(`Matches to start`)
 			.setDescription(

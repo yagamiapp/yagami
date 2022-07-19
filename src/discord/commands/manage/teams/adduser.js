@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { fetchGuild, prisma } = require("../../../../prisma");
 
 module.exports = {
@@ -40,9 +40,9 @@ module.exports = {
 		});
 
 		if (!team) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(`**Err**: That user is not in a team.`)
-				.setColor("RED");
+				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -54,7 +54,7 @@ module.exports = {
 			},
 		});
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Roster Changed")
 			.setDescription(`**${team.name}**`)
 			.setColor(team.color || "#F88000")

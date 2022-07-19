@@ -1,5 +1,5 @@
 const { stripIndents } = require("common-tags/lib");
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 
 /**
  * @type {import("discord.js").TextChannel}
@@ -16,7 +16,7 @@ module.exports = {
 	 * @param {import("discord.js").Interaction} interaction
 	 */
 	async log(interaction) {
-		let embed = new MessageEmbed();
+		let embed = new EmbedBuilder();
 		if (interaction.isCommand()) {
 			// Craft message to send to console
 			let options = interaction.options.data;
@@ -49,7 +49,7 @@ module.exports = {
 			embed
 				.setTitle("Command")
 				.setDescription(`/${commandString} ${optionString}`)
-				.setColor("BLUE");
+				.setColor(Colors.Blue);
 		}
 
 		if (interaction.isButton()) {
@@ -75,7 +75,7 @@ module.exports = {
 			embed
 				.setTitle("Button")
 				.setDescription(`[${command.name}] ${optionString}`)
-				.setColor("PURPLE");
+				.setColor(Colors.Purple);
 		}
 
 		if (interaction.isModalSubmit()) {
@@ -100,7 +100,7 @@ module.exports = {
 			embed
 				.setTitle("Modal")
 				.setDescription(`[${command.name}] ${optionString}`)
-				.setColor("YELLOW");
+				.setColor(Colors.Yellow);
 		}
 
 		embed
@@ -121,7 +121,7 @@ module.exports = {
 		}
 	},
 	async error(msg, interaction) {
-		let embed = new MessageEmbed();
+		let embed = new EmbedBuilder();
 		if (interaction) {
 			embed
 				.setTimestamp()
@@ -136,7 +136,7 @@ module.exports = {
 		}
 		let { stack } = msg;
 
-		embed.setTitle("Error").setColor("RED");
+		embed.setTitle("Error").setColor(Colors.Red);
 		let errorMessage = stripIndents`
 			\`\`\`
 			${stack}
@@ -154,12 +154,15 @@ module.exports = {
 	 * @param {import("discord.js").Client} client
 	 */
 	async init(client) {
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle("Bot Online!")
 			.setThumbnail(client.user.displayAvatarURL())
 			.setDescription(`\`${client.user.tag}\` is now online!`)
-			.setColor("GREEN")
-			.addField("Restart Time", `<t:${(Date.now() / 1000).toFixed(0)}:R>`)
+			.setColor(Colors.Green)
+			.addFields({
+				name: "Restart Time",
+				value: `<t:${(Date.now() / 1000).toFixed(0)}:R>`,
+			})
 			.setTimestamp();
 		try {
 			await channel.send({ embeds: [embed] });

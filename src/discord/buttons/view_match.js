@@ -1,8 +1,8 @@
-let { MessageEmbed, MessageButton, MessageActionRow } = require("discord.js");
+let { EmbedBuilder, MessageButton, MessageActionRow } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
-	data: new MessageButton().setCustomId("view_match"),
+	data: { customId: "view_match" },
 	async execute(interaction, command) {
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
@@ -32,7 +32,7 @@ module.exports = {
 				.setStyle("DANGER"),
 		]);
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setTitle(`${round.acronym}: ${teams[0].name} vs ${teams[1].name}`)
 			.setColor(tournament.color)
 			.setThumbnail(tournament.icon_url);

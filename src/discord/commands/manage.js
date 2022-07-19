@@ -1,9 +1,10 @@
+const fs = require("fs");
 const {
+	EmbedBuilder,
 	SlashCommandBuilder,
 	SlashCommandSubcommandBuilder,
-} = require("@discordjs/builders");
-const fs = require("fs");
-const { MessageEmbed } = require("discord.js");
+	Colors,
+} = require("discord.js");
 
 // Subcommand Handler
 let data = new SlashCommandBuilder()
@@ -35,11 +36,11 @@ module.exports = {
 	 */
 	async execute(interaction) {
 		if (!interaction.memberPermissions.has("ADMINISTRATOR")) {
-			let embed = new MessageEmbed()
+			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: You need to be an admin to use this command!"
 				)
-				.setColor("RED")
+				.setColor(Colors.Red)
 				.setFooter({
 					text: "If you'd like to disable admin checking, use /settings",
 				});
