@@ -9,7 +9,6 @@ let data = new SlashCommandSubcommandBuilder()
 	.setDescription("Manage settings for linking accounts")
 	.addChannelOption((option) =>
 		option
-			.addChannelType(0)
 			.setName("channel")
 			.setDescription("The channel to send the link message to")
 	)

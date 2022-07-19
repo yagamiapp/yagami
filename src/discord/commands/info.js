@@ -2,7 +2,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { stripIndents } = require("common-tags/lib");
 const { MessageEmbed, version: djs } = require("discord.js");
-const { version } = require("../../package.json");
+const { version } = require("../../../package.json");
 const { prisma } = require("../../prisma");
 
 const start_time = Date.now();

@@ -14,7 +14,7 @@ module.exports = {
 		// Make Collection of commands
 		bot.commands = new Collection();
 		const commandFiles = fs
-			.readdirSync("./discord/commands")
+			.readdirSync("./src/discord/commands")
 			.filter((file) => file.endsWith(".js"));
 
 		for (const file of commandFiles) {
@@ -27,7 +27,7 @@ module.exports = {
 		// Make collection of buttons
 		bot.buttons = new Collection();
 		const buttonFiles = fs
-			.readdirSync("./discord/buttons")
+			.readdirSync("./src/discord/buttons")
 			.filter((file) => file.endsWith(".js"));
 
 		for (const file of buttonFiles) {
@@ -38,7 +38,7 @@ module.exports = {
 		// Make collectio nof modals
 		bot.modals = new Collection();
 		const modalFiles = fs
-			.readdirSync("./discord/modals")
+			.readdirSync("./src/discord/modals")
 			.filter((file) => file.endsWith(".js"));
 
 		for (const file of modalFiles) {

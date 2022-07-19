@@ -3,7 +3,7 @@ const fs = require("fs");
 
 let endpoints = {};
 let endpointFiles = fs
-	.readdirSync("./web/api/endpoints")
+	.readdirSync("./src/web/api/endpoints")
 	.filter((file) => file.endsWith(".js"));
 
 endpointFiles.forEach((element) => {

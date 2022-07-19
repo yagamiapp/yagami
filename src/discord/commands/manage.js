@@ -13,7 +13,7 @@ let groups = {};
 let subcommands = {};
 
 const commandFiles = fs
-	.readdirSync("./discord/commands/manage")
+	.readdirSync("./src/discord/commands/manage")
 	.filter((file) => file.endsWith(".js"));
 
 for (const file of commandFiles) {

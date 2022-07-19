@@ -9,7 +9,7 @@ const fs = require("fs");
 module.exports.deployCommands = async (guild) => {
 	let guildCommands = [];
 
-	fs.readdirSync("./discord/commands")
+	fs.readdirSync("./src/discord/commands")
 		.filter((file) => file.endsWith(".js"))
 		.forEach((file) => {
 			let fileModule = require("./commands/" + file);

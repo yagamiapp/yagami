@@ -9,7 +9,7 @@ let data = new SlashCommandBuilder()
 let subcommands = {};
 
 const subcommandFiles = fs
-	.readdirSync("./discord/commands/round")
+	.readdirSync("./src/discord/commands/round")
 	.filter((file) => file.endsWith(".js"));
 
 for (const file of subcommandFiles) {

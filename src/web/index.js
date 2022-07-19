@@ -1,13 +1,13 @@
 const express = require("express");
 const { rateLimit } = require("express-rate-limit");
 const app = express();
-const auth = require("./auth");
-const crypto = require("crypto");
-const path = require("path");
+const { authUser } = require("./auth");
+const { createHmac, timingSafeEqual } = require("crypto");
+const { join } = require("path");
 const redirects = require("./redirects.json");
-const api = require("./api");
+const { execute } = require("./api");
 const PORT = process.env.PORT | 3000;
-const pm2 = require("pm2");
+const { pullAndReload } = require("pm2");
 
 module.exports.init = () => {
 	const limiter = rateLimit({
@@ -22,8 +22,9 @@ module.exports.init = () => {
 
 	app.use(express.json());
 
-	app.get("/auth", (req, res) => { // lgtm [js/missing-rate-limiting]
-		auth.authUser(req.query, req, res);
+	app.get("/auth", (req, res) => {
+		// lgtm [js/missing-rate-limiting]
+		authUser(req.query, req, res);
 	});
 
 	app.post("/reload", (req, res) => {
@@ -31,7 +32,7 @@ module.exports.init = () => {
 		if (!ref) return;
 
 		// Check github secret hash
-		var hmac = crypto.createHmac("sha256", process.env.GITHUB_SECRET);
+		var hmac = createHmac("sha256", process.env.GITHUB_SECRET);
 		hmac.update(JSON.stringify(req.body), "utf-8");
 
 		var xub = "X-Hub-Signature-256";
@@ -41,7 +42,7 @@ module.exports.init = () => {
 		);
 		var expected = Buffer.from("sha256=" + hmac.digest("hex"), "utf8");
 
-		if (!crypto.timingSafeEqual(received, expected)) {
+		if (!timingSafeEqual(received, expected)) {
 			console.error(
 				"Wrong secret. Expected %s, received %s",
 				expected,
@@ -63,7 +64,7 @@ module.exports.init = () => {
 			return;
 		}
 
-		pm2.pullAndReload("yagami", (err, meta) => {
+		pullAndReload("yagami", (err, meta) => {
 			if (err) {
 				res.status(400).send({ error: err.msg });
 				console.log(`Failed to reload server: ${err.msg}`);
@@ -87,13 +88,14 @@ module.exports.init = () => {
 
 	app.get("/api/:endpoint", async (req, res) => {
 		let { endpoint } = req.params;
-		await api.execute(endpoint, req, res);
+		await execute(endpoint, req, res);
 	});
 
-	app.use("/", express.static(path.join(__dirname, "public")));
+	app.use("/", express.static(join(__dirname, "public")));
 
-	app.get("*", (req, res) => { // lgtm [js/missing-rate-limiting]
-		res.status(404).sendFile(path.join(__dirname, "404.html"));
+	app.get("*", (req, res) => {
+		// lgtm [js/missing-rate-limiting]
+		res.status(404).sendFile(join(__dirname, "404.html"));
 	});
 
 	app.listen(PORT, () =>

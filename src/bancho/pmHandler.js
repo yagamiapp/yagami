@@ -2,7 +2,7 @@ const fs = require("fs");
 
 // Create collection of commands
 let commandFiles = fs
-	.readdirSync("./bancho/dm-commands")
+	.readdirSync("./src/bancho/dm-commands")
 	.filter((file) => file.endsWith(".js"));
 let commands = {};
 commandFiles.forEach((file) => {

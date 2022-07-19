@@ -8,7 +8,7 @@ let data = new SlashCommandSubcommandGroupBuilder()
 let subcommands = {};
 
 const subcommandFiles = fs
-	.readdirSync("./discord/commands/manage/rounds")
+	.readdirSync("./src/discord/commands/manage/rounds")
 	.filter((file) => file.endsWith(".js"));
 
 for (const file of subcommandFiles) {

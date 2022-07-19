@@ -11,7 +11,7 @@ module.exports = {
 	 */
 	async exec(msg, options) {
 		let commandFiles = fs
-			.readdirSync("./bancho/commands")
+			.readdirSync("./src/bancho/commands")
 			.filter((file) => file.endsWith(".js"));
 		let commands = {};
 		commandFiles.forEach((file) => {
