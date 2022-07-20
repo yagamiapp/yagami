@@ -1,4 +1,4 @@
-const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
+const { SlashCommandSubcommandBuilder } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { prisma } = require("../../../prisma");
 const {

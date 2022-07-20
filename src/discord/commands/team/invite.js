@@ -1,5 +1,5 @@
 const { stripIndents } = require("common-tags/lib");
-const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
+const { SlashCommandSubcommandBuilder } = require("discord.js");
 const {
 	EmbedBuilder,
 	MessageActionRow,

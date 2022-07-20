@@ -1,4 +1,4 @@
-const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
+const { SlashCommandSubcommandBuilder } = require("discord.js");
 const { prisma } = require("../../../prisma");
 const { EmbedBuilder, Colors } = require("discord.js");
 const { MatchManager } = require("../../../bancho/match-types/bracket/Match");

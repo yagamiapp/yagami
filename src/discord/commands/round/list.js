@@ -1,4 +1,4 @@
-const { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
+const { SlashCommandSubcommandBuilder } = require("discord.js");
 let { EmbedBuilder, Colors } = require("discord.js");
 let { execute } = require("../../buttons/rounds_list");
 const { fetchGuild, prisma } = require("../../../prisma");

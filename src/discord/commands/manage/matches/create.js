@@ -1,4 +1,4 @@
-let { SlashCommandSubcommandBuilder } = require("@discordjs/builders");
+let { SlashCommandSubcommandBuilder } = require("discord.js");
 let { EmbedBuilder, Colors } = require("discord.js");
 let { fetchGuild, prisma } = require("../../../../prisma");
 

@@ -1,4 +1,4 @@
-const { SlashCommandSubcommandGroupBuilder } = require("@discordjs/builders");
+const { SlashCommandSubcommandGroupBuilder } = require("discord.js");
 const fs = require("fs");
 
 // Subcommand Handler

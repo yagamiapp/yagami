@@ -1,5 +1,5 @@
 //@ts-check
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { EmbedBuilder, version: djs } = require("discord.js");
 const { version } = require("../../../package.json");
