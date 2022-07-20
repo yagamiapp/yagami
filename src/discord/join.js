@@ -71,9 +71,7 @@ module.exports = {
 				channel
 					.permissionsFor(guild.members.me)
 					.has(PermissionFlagsBits.SendMessages) &&
-				channel
-					.permissionsFor(guild.members.me)
-					.has(PermissionFlagsBits.ViewChannel)
+				channel.viewable
 		);
 		console.log(channel.name);
 		await channel.send({ embeds: [embed] });
