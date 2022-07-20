@@ -72,10 +72,10 @@ module.exports = {
 				await interaction.editReply({ embeds: [embed] });
 				return;
 			}
-			finishEmbed.addField(
-				"Channel",
-				`Link channel set to <#${channel.id}>`
-			);
+			finishEmbed.addFields({
+				name: "Channel",
+				value: `Link channel set to <#${channel.id}>`,
+			});
 		}
 
 		if (role) {
@@ -88,7 +88,10 @@ module.exports = {
 				},
 			});
 
-			finishEmbed.addField("Role", `Link role set to <@&${role.id}>`);
+			finishEmbed.addFields({
+				name: "Role",
+				value: `Link role set to <@&${role.id}>`,
+			});
 		}
 
 		await interaction.editReply({ embeds: [finishEmbed] });

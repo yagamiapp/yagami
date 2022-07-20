@@ -208,32 +208,34 @@ module.exports = {
             Here's what you need to do to get started:
             `
 			)
-			.addField(
-				"Create the match",
-				stripIndents`
+			.addFields(
+				{
+					name: "Create the match",
+					value: stripIndents`
                 Select one member of your match to make the lobby, by sending a DM to \`BanchoBot\` on osu:
                 \`\`\`
                 !mp make ${tournament.acronym}: (${teams[0].name}) vs (${teams[1].name})
                 \`\`\`
-            `
-			)
-			.addField(
-				"Add yagami as a ref",
-				stripIndents`
-                Add the bot as a ref to your match:
-                \`\`\`
-                !mp addref ${process.env.banchoUsername}
-                \`\`\`
-            `
-			)
-			.addField(
-				"Point the bot to the match",
-				stripIndents`
-                Get the link to your match and paste it into the \`/match addlink\` command in this server
-                \`\`\`
-                /match addlink link:https://osu.ppy.sh/...
+            `,
+				},
+				{
+					name: "Add yagami as a ref",
+					value: stripIndents`
+				Add the bot as a ref to your match:
 				\`\`\`
-            `
+				!mp addref ${process.env.banchoUsername}
+				\`\`\`
+				`,
+				},
+				{
+					name: "Point the bot to the match",
+					value: stripIndents`
+				Get the link to your match and paste it into the \`/match addlink\` command in this server
+				\`\`\`
+				/match addlink link:https://osu.ppy.sh/...
+				\`\`\`
+			`,
+				}
 			);
 		let playerString = "";
 		for (let player of players) {

@@ -112,13 +112,13 @@ module.exports = {
 		let embed = new EmbedBuilder()
 			.setColor(tournament.color)
 			.setTitle(`${round.acronym}: ${round.name}`)
-			.addField(
-				"Statistics",
-				stripIndents`
+			.addFields({
+				name: "Statistics",
+				value: stripIndents`
 			    **Best of:** ${round.best_of}
 			    **Bans:** ${round.bans}
-			`
-			)
+			`,
+			})
 			.setDescription("**Mappool** \n" + poolString)
 			.setThumbnail(tournament.icon_url);
 		let files = [];

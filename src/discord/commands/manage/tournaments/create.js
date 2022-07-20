@@ -169,37 +169,39 @@ module.exports = {
 			.setTitle("Tournament Creation Success")
 			.setDescription(message)
 			.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png")
-			.addField(
-				"Change the settings of the tournament:",
-				stripIndent`
+			.addFields(
+				{
+					name: "Change the settings of the tournament:",
+					value: stripIndent`
 				\`\`\`
-				/tournament edit
+				/manage tournaments edit
 				\`\`\`
-				`
-			)
-			.addField(
-				"Begin making your first mappool",
-				stripIndent`
+				`,
+				},
+				{
+					name: "Begin making your first mappool",
+					value: stripIndent`
 				\`\`\`
-				/rounds create
+				/manage rounds create
 				\`\`\`
-				`
-			)
-			.addField(
-				"Add teams to your tournament",
-				stripIndent`
+				`,
+				},
+				{
+					name: "Add teams to your tournament",
+					value: stripIndent`
 				\`\`\`
-				/teams create
+				/manage teams create
 				\`\`\`
-				`
-			)
-			.addField(
-				"Make your first match",
-				stripIndent`
+				`,
+				},
+				{
+					name: "Make your first match",
+					value: stripIndent`
 				\`\`\`
-				/matches create
+				/manage matches create
 				\`\`\`
-				`
+				`,
+				}
 			);
 		await interaction.editReply({ embeds: [embed] });
 	},

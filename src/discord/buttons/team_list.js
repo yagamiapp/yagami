@@ -135,7 +135,10 @@ module.exports = {
 					teamString += " **(c)**";
 				}
 			}
-			embed.addField(team.name, teamString || "No members");
+			embed.addFields({
+				name: team.name,
+				value: teamString || "No members",
+			});
 		}
 
 		if (interaction.isCommand()) {

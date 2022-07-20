@@ -1,5 +1,9 @@
 let deploy = require("./deploy-commands");
-const { EmbedBuilder } = require("discord.js");
+const {
+	EmbedBuilder,
+	ChannelType,
+	PermissionFlagsBits,
+} = require("discord.js");
 const { prisma } = require("../prisma");
 const { stripIndents } = require("common-tags/lib");
 
@@ -61,37 +65,18 @@ module.exports = {
 				text: "Made with ❤️ by clxxiii#8958",
 				iconURL: "https://clxxiii.dev/img/icon.png",
 			});
-
-		let permissionsEmbed = new EmbedBuilder()
-			.setTitle("⚠️ Permissions Warning ⚠️")
-			.setColor("DARK_ORANGE")
-			.setImage("https://i.imgur.com/nLd71Ai.png")
-			.setDescription(
-				"A recent update to discord has changed the way slash command permissions work. Currently, I can't the permissions for you, and you wouldn't want players deleting your tournament, would you?"
-			)
-			.addFields(
-				{
-					name: "To change slash command settings:",
-					value: "Go into your server settings, select integrations, and then click on Yagami to edit settings.",
-				},
-				{
-					name: "The following commands should be restricted to admins only:",
-					value: `
-				> \`/settings\`
-				> \`/tournaments\`
-				> \`/rounds\`
-				> \`/teams\`
-				> \`/matches\`
-			`,
-				}
-			);
 		let channel = guild.channels.cache.find(
 			(channel) =>
-				channel.type === "GUILD_TEXT" &&
-				channel.permissionsFor(guild.me).has("SEND_MESSAGES")
+				channel.type === ChannelType.GuildText &&
+				channel
+					.permissionsFor(guild.members.me)
+					.has(PermissionFlagsBits.SendMessages) &&
+				channel
+					.permissionsFor(guild.members.me)
+					.has(PermissionFlagsBits.ViewChannel)
 		);
-		channel = guild.systemChannel || channel;
-		await channel.send({ embeds: [embed, permissionsEmbed] });
+		console.log(channel.name);
+		await channel.send({ embeds: [embed] });
 	},
 	/**
 	 *

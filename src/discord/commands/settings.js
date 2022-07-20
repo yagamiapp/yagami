@@ -6,7 +6,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("settings")
 		.setDescription("Edit global settings for the bot")
-		.setDefaultPermission(true)
+		.setDefaultMemberPermissions(0)
 		.addBooleanOption((option) =>
 			option
 				.setName("change_nickname")

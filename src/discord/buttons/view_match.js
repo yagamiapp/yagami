@@ -66,7 +66,11 @@ module.exports = {
 					teamString += " **(c)**";
 				}
 			}
-			embed.addField(team.name, teamString, true);
+			embed.addFields({
+				name: team.name,
+				value: teamString,
+				inline: true,
+			});
 		}
 
 		if (interaction.isCommand()) {

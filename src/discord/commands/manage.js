@@ -9,7 +9,8 @@ const {
 // Subcommand Handler
 let data = new SlashCommandBuilder()
 	.setName("manage")
-	.setDescription("Manage all settings related to your tournament");
+	.setDescription("Manage all settings related to your tournament")
+	.setDefaultMemberPermissions(0);
 let groups = {};
 let subcommands = {};
 

@@ -95,7 +95,10 @@ module.exports = {
 				tourneyString += `[${tournament.acronym}]: ${tournament.name}`;
 		}
 		if (tourneyString != "") {
-			embed.addField("Other Tournaments", tourneyString);
+			embed.addFields({
+				name: "Other Tournaments",
+				value: tourneyString,
+			});
 		}
 
 		await interaction.editReply({ embeds: [embed] });

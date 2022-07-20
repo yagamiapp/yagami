@@ -60,7 +60,7 @@ module.exports = {
 			.setColor(Colors.Red)
 			.setDescription(desc)
 			.setTimestamp()
-			.addField("Links", links || "No links provided");
+			.addFields({ name: "Links", value: links || "No links provided" });
 
 		let channel = interaction.client.channels.cache.get(
 			process.env.BUG_CHANNEL_ID

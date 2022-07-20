@@ -13,7 +13,7 @@ convertCommands(guildCommands);
 
 /**
  *
- * @param {import("@discordjs/builders").SlashCommandBuilder[]} commands
+ * @param {import("discord.js").SlashCommandBuilder[]} commands
  */
 function convertCommands(commands) {
 	let data = [];
@@ -23,7 +23,7 @@ function convertCommands(commands) {
 	data.push("| ------- | ----------- | ------------------------ |");
 
 	/**
-	 * @type {import("@discordjs/builders").SlashCommandBuilder[]}
+	 * @type {import("discord.js").SlashCommandBuilder[]}
 	 */
 	let subCommands = {};
 	for (const command of commands) {

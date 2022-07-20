@@ -237,7 +237,7 @@ module.exports = {
 				iconURL: "https://a.ppy.sh/" + inviterData.osu_id,
 				url: "https://osu.ppy.sh/users/" + inviterData.osu_id,
 			})
-			.addField(`**${inviterTeam.name}:**`, teamString);
+			.addFields({ name: `**${inviterTeam.name}:**`, value: teamString });
 
 		dm.send({
 			embeds: [embed],

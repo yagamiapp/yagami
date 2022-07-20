@@ -40,36 +40,37 @@ module.exports = {
 			.setTitle("Yagami")
 			.setDescription("A bot for managing tournaments")
 			.setThumbnail("https://yagami.clxxiii.dev/static/yagami%20var.png")
-			.addField(
-				"Version",
-				stripIndents`
-					> ➣ Bot Version: **${version}**
-					> ➣ Node Version: **${process.versions.node}**
-					> ➣ DJS Version: **${djs}**
-				`
-			)
-			.addField(
-				"Latency",
-				stripIndents`
+			.addFields(
+				{
+					name: "Version",
+					value: stripIndents`
+						> ➣ Bot Version: **${version}**
+						> ➣ Node Version: **${process.versions.node}**
+						> ➣ DJS Version: **${djs}**
+					`,
+				},
+				{
+					name: "Latency",
+					value: stripIndents`
 					> ➣ Uptime: **${uptimeString}**
 					> ➣ Response Time: **${Date.now() - interaction.createdTimestamp} ms**
 					> ➣ API Latency: **${Math.round(interaction.client.ws.ping)} ms**
-					`
-			)
-			.addField(
-				"Statistics",
-				stripIndents`
+					`,
+				},
+				{
+					name: "Statistics",
+					value: stripIndents`
 					> ➣ Servers:  **${interaction.client.guilds.cache.size}**
 					> ➣ Total Matches Tracked: **${matches.length}**
-				`
-			);
-		embed
-			.addField(
-				"Developer",
-				stripIndents`
-				<@265144290240495617>
-				[Discord](https://yagami.clxxiii.dev/discord) | [Twitter](https://twitter.com/clxxiii1) | [GitHub](https://github.com/clxxiii) | [osu!](https://osu.ppy.sh/users/10962678)
-				`
+				`,
+				},
+				{
+					name: "Developer",
+					value: stripIndents`
+					<@265144290240495617>
+					[Discord](https://yagami.clxxiii.dev/discord) | [Twitter](https://twitter.com/clxxiii1) | [GitHub](https://github.com/clxxiii) | [osu!](https://osu.ppy.sh/users/10962678)
+					`,
+				}
 			)
 			.setTimestamp()
 			.setFooter({

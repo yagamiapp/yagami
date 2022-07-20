@@ -71,7 +71,7 @@ module.exports = {
 				teamString += " **(c)**";
 			}
 		}
-		embed.addField("Roster", teamString);
+		embed.addFields({ name: "Roster", value: teamString });
 
 		await interaction.editReply({ embeds: [embed] });
 	},
