@@ -110,7 +110,7 @@ module.exports = {
 				.setDescription(
 					`You are about to leave your team. You will need an invite to join back. Type \`/deregister\` again to confirm.`
 				)
-				.setColor("DARK_RED");
+				.setColor(Colors.DarkRed);
 			interaction.editReply({ embeds: [embed] });
 			return;
 		}

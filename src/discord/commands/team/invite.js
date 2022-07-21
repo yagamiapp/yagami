@@ -2,8 +2,9 @@ const { stripIndents } = require("common-tags/lib");
 const { SlashCommandSubcommandBuilder } = require("discord.js");
 const {
 	EmbedBuilder,
-	MessageActionRow,
-	MessageButton,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
 	Colors,
 } = require("discord.js");
 const { fetchGuild, prisma } = require("../../../prisma");
@@ -177,8 +178,8 @@ module.exports = {
 		}
 
 		let dm = await invitee.createDM();
-		let inviteAccept = new MessageActionRow().addComponents(
-			new MessageButton()
+		let inviteAccept = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
 				.setCustomId(
 					"invite_accept?user=" +
 						interaction.user.id +
@@ -186,8 +187,8 @@ module.exports = {
 						interaction.guildId
 				)
 				.setLabel("Accept")
-				.setStyle("PRIMARY"),
-			new MessageButton()
+				.setStyle(ButtonStyle.Primary),
+			new ButtonBuilder()
 				.setCustomId(
 					"invite_decline?user=" +
 						interaction.user.id +
@@ -195,7 +196,7 @@ module.exports = {
 						interaction.guildId
 				)
 				.setLabel("Decline")
-				.setStyle("DANGER")
+				.setStyle(ButtonStyle.Danger)
 		);
 		// Make an embed inviting the user to the team
 		let teamString = "";

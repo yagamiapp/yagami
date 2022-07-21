@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { stripIndents } = require("common-tags/lib");
 const { prisma, fetchGuild } = require("../prisma");
@@ -130,7 +130,7 @@ module.exports.authUser = async (query, req, res) => {
 			**Total Score**: \`${userData.statistics.total_score.toLocaleString()}\`
 			`
 		)
-		.setColor("LUMINOUS_VIVID_PINK");
+		.setColor(Colors.LuminousVividPink);
 	if (userData.cover_url) {
 		embed.setImage(userData.cover_url);
 	}

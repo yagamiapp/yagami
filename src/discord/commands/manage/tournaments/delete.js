@@ -56,7 +56,7 @@ module.exports = {
 
 			let embed = new EmbedBuilder()
 				.setTitle("Successfully Deleted `" + acro + "`")
-				.setColor("GREEN");
+				.setColor(Colors.Green);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -78,7 +78,7 @@ module.exports = {
 		}, 60000);
 
 		let embed = new EmbedBuilder()
-			.setColor("DARK_RED")
+			.setColor(Colors.Green)
 			.setTitle("⚠ WARNING ⚠").setDescription(stripIndents`
                     Deleting a tournament is **IRREVERSIBLE** and **CANNOT** be undone.
 

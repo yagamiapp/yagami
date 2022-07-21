@@ -1,8 +1,10 @@
 let {
 	EmbedBuilder,
-	MessageButton,
-	MessageActionRow,
+	ButtonBuilder,
+	ActionRowBuilder,
+	ButtonStyle,
 	Colors,
+	InteractionType,
 } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { fetchGuild, prisma } = require("../../prisma");
@@ -54,40 +56,35 @@ module.exports = {
 		if (!group) group = groups[0];
 
 		// Build buttons to scroll to other rounds
-		let pages = new MessageActionRow().addComponents(
-			new MessageButton()
-				.setCustomId(
-					"match_start_list?index=" +
-						(index - 1) +
-						"&round=" +
-						command.options.round
-				)
-				.setLabel("◀")
-				.setStyle("PRIMARY"),
-			new MessageButton()
-				.setCustomId("placeholder")
-				.setLabel(`${index + 1}/${groups.length}`)
-				.setStyle("SECONDARY")
-				.setDisabled(true),
-			new MessageButton()
-				.setCustomId(
-					"match_start_list?index=" +
-						(index + 1) +
-						"&round=" +
-						command.options.round
-				)
-				.setLabel("▶")
-				.setStyle("PRIMARY")
-		);
+		let leftButton = new ButtonBuilder()
+			.setCustomId("match_start_list?index=" + (index - 1))
+			.setLabel("◀")
+			.setStyle(ButtonStyle.Primary);
+
+		let pageButton = new ButtonBuilder()
+			.setCustomId("placeholder")
+			.setLabel(`${index + 1}/${groups.length}`)
+			.setStyle(ButtonStyle.Secondary)
+			.setDisabled(true);
+
+		let rightButton = new ButtonBuilder()
+			.setCustomId("match_start_list?index=" + (index + 1))
+			.setLabel("▶")
+			.setStyle(ButtonStyle.Primary);
 
 		if (index == 0) {
-			pages.components[0].disabled = true;
+			leftButton.setDisabled(true);
 		}
 
 		if (index == groups.length - 1) {
-			pages.components[2].disabled = true;
+			rightButton.setDisabled(true);
 		}
 
+		let pages = new ActionRowBuilder().addComponents(
+			leftButton,
+			pageButton,
+			rightButton
+		);
 		let embed = new EmbedBuilder()
 			.setColor(tournament.color)
 			.setTitle(`Matches to start`)
@@ -99,8 +96,8 @@ module.exports = {
 			)
 			.setThumbnail(tournament.icon_url);
 
-		let startButtons = new MessageActionRow();
-		let viewButtons = new MessageActionRow();
+		let startButtons = new ActionRowBuilder();
+		let viewButtons = new ActionRowBuilder();
 		for (let match of group) {
 			let teams = await prisma.team.findMany({
 				where: {
@@ -123,10 +120,10 @@ module.exports = {
 				value: `${teams[0].name} vs ${teams[1].name}`,
 				inline: true,
 			});
-			let startButton = new MessageButton()
+			let startButton = new ButtonBuilder()
 				.setLabel("Start match " + match.tournamentId)
 				.setCustomId("start_match?id=" + match.id + "&index=" + index)
-				.setStyle("SUCCESS");
+				.setStyle(ButtonStyle.Success);
 			if (match.state != 10) {
 				startButton
 					.setLabel("Started match " + match.tournamentId)
@@ -134,16 +131,16 @@ module.exports = {
 			}
 			startButtons.addComponents([startButton]);
 			viewButtons.addComponents([
-				new MessageButton()
+				new ButtonBuilder()
 					.setLabel("View match " + match.tournamentId)
 					.setCustomId(
 						"view_match?id=" + match.id + "&index=" + index
 					)
-					.setStyle("SECONDARY"),
+					.setStyle(ButtonStyle.Secondary),
 			]);
 		}
 
-		if (interaction.isCommand()) {
+		if (interaction.type === InteractionType.ApplicationCommand) {
 			await interaction.editReply({
 				embeds: [embed],
 				components: [viewButtons, startButtons, pages],

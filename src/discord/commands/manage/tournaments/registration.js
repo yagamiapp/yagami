@@ -38,7 +38,7 @@ module.exports = {
 
 		let embed = new EmbedBuilder()
 			.setTitle("Successfully changed settings!")
-			.setColor("GREEN")
+			.setColor(Colors.Green)
 			.setDescription(
 				stripIndents`
                 Set registration status to ${toggle}

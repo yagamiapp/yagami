@@ -1,4 +1,10 @@
-let { EmbedBuilder, MessageButton, MessageActionRow } = require("discord.js");
+let {
+	EmbedBuilder,
+	ButtonBuilder,
+	ActionRowBuilder,
+	ButtonStyle,
+	InteractionType,
+} = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
@@ -20,16 +26,11 @@ module.exports = {
 			where: { InBracketMatches: { some: { matchId: match.id } } },
 		});
 
-		let back = new MessageActionRow().addComponents([
-			new MessageButton()
-				.setCustomId(
-					"match_start_list?index=" +
-						command.options.index +
-						"&round=" +
-						command.options.round
-				)
+		let back = new ActionRowBuilder().addComponents([
+			new ButtonBuilder()
+				.setCustomId("match_start_list?index=" + command.options.index)
 				.setLabel("◀ Back to Matches")
-				.setStyle("DANGER"),
+				.setStyle(ButtonStyle.Danger),
 		]);
 
 		let embed = new EmbedBuilder()
@@ -73,7 +74,7 @@ module.exports = {
 			});
 		}
 
-		if (interaction.isCommand()) {
+		if (interaction.type === InteractionType.ApplicationCommand) {
 			await interaction.editReply({
 				embeds: [embed],
 			});

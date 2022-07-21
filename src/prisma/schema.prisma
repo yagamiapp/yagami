@@ -137,7 +137,7 @@ model User {
   discord_avatar           String
   discord_avatarURL        String
   discord_bot              Boolean
-  discord_createdTimestamp Int
+  discord_createdTimestamp BigInt
   discord_defaultAvatarURL String
   discord_discriminator    String
   discord_displayAvatarURL String
@@ -150,9 +150,9 @@ model User {
   osu_country_code         String
   osu_country_name         String
   osu_cover_url            String
-  osu_ranked_score         Int
+  osu_ranked_score         BigInt
   osu_play_count           Int
-  osu_total_score          Int
+  osu_total_score          BigInt
   osu_pp_rank              Int
   osu_level                Int
   osu_level_progress       Int
@@ -280,6 +280,7 @@ model MapInMatch {
   WonBy           TeamInMatch? @relation(fields: [wonByMatchId, wonByTeamId], references: [matchId, teamId], name: "won")
   wonByTeamId     Int?
   wonByMatchId    Int?
+
   @@id([mapIdentifier, matchId])
 }
 

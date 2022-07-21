@@ -48,7 +48,7 @@ module.exports = {
 			**Total Score**: \`${duplicate.osu_total_score.toLocaleString()}\`
 			`
 				)
-				.setColor("LUMINOUS_VIVID_PINK");
+				.setColor(Colors.LuminousVividPink);
 			if (duplicate.osu_cover_url) {
 				embed.setImage(duplicate.osu_cover_url);
 			}

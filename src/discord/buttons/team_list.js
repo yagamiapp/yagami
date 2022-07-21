@@ -1,7 +1,9 @@
 let {
 	EmbedBuilder,
-	MessageButton,
-	MessageActionRow,
+	ButtonBuilder,
+	ActionRowBuilder,
+	ButtonStyle,
+	InteractionType,
 	Colors,
 } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
@@ -76,29 +78,35 @@ module.exports = {
 		let group = groups[index];
 
 		// Build buttons to scroll to other rounds
-		let components = new MessageActionRow().addComponents(
-			new MessageButton()
-				.setCustomId("team_list?index=" + (index - 1))
-				.setLabel("◀")
-				.setStyle("PRIMARY"),
-			new MessageButton()
-				.setCustomId("placeholder")
-				.setLabel(`${index + 1}/${groups.length}`)
-				.setStyle("SECONDARY")
-				.setDisabled(true),
-			new MessageButton()
-				.setCustomId("team_list?index=" + (index + 1))
-				.setLabel("▶")
-				.setStyle("PRIMARY")
-		);
+		let leftButton = new ButtonBuilder()
+			.setCustomId("team_list?index=" + (index - 1))
+			.setLabel("◀")
+			.setStyle(ButtonStyle.Primary);
+
+		let pageButton = new ButtonBuilder()
+			.setCustomId("placeholder")
+			.setLabel(`${index + 1}/${groups.length}`)
+			.setStyle(ButtonStyle.Secondary)
+			.setDisabled(true);
+
+		let rightButton = new ButtonBuilder()
+			.setCustomId("team_list?index=" + (index + 1))
+			.setLabel("▶")
+			.setStyle(ButtonStyle.Primary);
 
 		if (index == 0) {
-			components.components[0].disabled = true;
+			leftButton.setDisabled(true);
 		}
 
 		if (index == groups.length - 1) {
-			components.components[2].disabled = true;
+			rightButton.setDisabled(true);
 		}
+
+		let components = new ActionRowBuilder().addComponents(
+			leftButton,
+			pageButton,
+			rightButton
+		);
 
 		let embed = new EmbedBuilder()
 			.setTitle("Teams")
@@ -141,7 +149,7 @@ module.exports = {
 			});
 		}
 
-		if (interaction.isCommand()) {
+		if (interaction.type == InteractionType.ApplicationCommand) {
 			await interaction.editReply({
 				embeds: [embed],
 				components: [components],

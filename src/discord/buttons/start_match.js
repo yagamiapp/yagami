@@ -1,9 +1,11 @@
 const { stripIndents } = require("common-tags/lib");
 const {
-	MessageButton,
+	ButtonBuilder,
 	EmbedBuilder,
-	MessageActionRow,
+	ActionRowBuilder,
+	PermissionFlagsBits,
 	Colors,
+	ButtonStyle,
 } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 const { execute } = require("./match_start_list");
@@ -22,7 +24,9 @@ module.exports = {
 
 		if (
 			command.options.recover &&
-			!interaction.memberPermissions.has("ADMINISTRATOR")
+			!interaction.memberPermissions.has(
+				PermissionFlagsBits.Administrator
+			)
 		) {
 			let embed = new EmbedBuilder()
 				.setDescription(
@@ -105,12 +109,10 @@ module.exports = {
 					text: "Make sure both teams are not in an active match",
 				});
 
-			let button = new MessageActionRow().addComponents([
-				new MessageButton()
+			let button = new ActionRowBuilder().addComponents([
+				new ButtonBuilder()
 					.setCustomId(
-						`match_start_list?round=${round.acronym}&index=${
-							command.options.index || 0
-						}`
+						`match_start_list?index=${command.options.index || 0}`
 					)
 					.setLabel("Back")
 					.setStyle("DANGER"),
@@ -134,8 +136,9 @@ module.exports = {
 
 		if (
 			!messageChannel
-				.permissionsFor(interaction.guild.me)
-				.has("SEND_MESSAGES")
+				.permissionsFor(interaction.guild.members.me)
+				.has(PermissionFlagsBits.SendMessages) ||
+			!messageChannel.viewable
 		) {
 			let embed = new EmbedBuilder()
 				.setDescription(
@@ -146,13 +149,13 @@ module.exports = {
 					text: `Make sure the bot's match result channel is set up correctly`,
 				});
 
-			let button = new MessageActionRow().addComponents([
-				new MessageButton()
+			let button = new ActionRowBuilder().addComponents([
+				new ButtonBuilder()
 					.setCustomId(
-						`match_start_list?round=${round.acronym}&index=${command.options.index}`
+						`match_start_list?index=${command.options.index}`
 					)
 					.setLabel("Back")
-					.setStyle("DANGER"),
+					.setStyle(ButtonStyle.Danger),
 			]);
 
 			if (command.options.recover) {

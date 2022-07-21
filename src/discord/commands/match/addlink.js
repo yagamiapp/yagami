@@ -82,7 +82,7 @@ module.exports = {
 		clearTimeout(archiveTimeout);
 		embed
 			.setTitle("Match loaded!")
-			.setColor("GREEN")
+			.setColor(Colors.Green)
 			.setDescription(
 				"<a:verified:970410957710954636> Check your invite message for more info"
 			);
@@ -93,7 +93,7 @@ module.exports = {
 
 		embed = new EmbedBuilder()
 			.setTitle(oldembed.title)
-			.setColor("GREEN")
+			.setColor(Colors.Green)
 			.setAuthor(oldembed.author)
 			.setThumbnail(oldembed.thumbnail?.url)
 			.setURL(match.mp)

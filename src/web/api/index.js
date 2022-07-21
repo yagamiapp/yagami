@@ -23,7 +23,10 @@ module.exports = {
 			}
 			await command.execute(req, res);
 		} catch (e) {
-			res.writeHead(500);
+			if (!res.headersSent) {
+				res.writeHead(500);
+			}
+
 			res.write("We encountered an error:" + e);
 			res.end();
 			return;

@@ -42,7 +42,7 @@ module.exports = {
 			.setDescription(
 				`Active tournament switched to \`${tournament.name}\``
 			)
-			.setColor("GREEN");
+			.setColor(Colors.Green);
 
 		await interaction.editReply({ embeds: [embed] });
 	},

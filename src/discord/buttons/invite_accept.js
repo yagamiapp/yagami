@@ -1,4 +1,4 @@
-const { MessageButton, EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { prisma, fetchGuild } = require("../../prisma");
 
 module.exports = {
@@ -35,7 +35,7 @@ module.exports = {
 
 		let embed = new EmbedBuilder()
 			.setTitle("✅ Invite Accepted ✅")
-			.setColor("GREEN");
+			.setColor(Colors.Green);
 
 		interaction.update({
 			content: null,
