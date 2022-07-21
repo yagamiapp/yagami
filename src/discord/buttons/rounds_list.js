@@ -1,8 +1,10 @@
 let {
 	EmbedBuilder,
-	MessageButton,
-	MessageActionRow,
-	MessageAttachment,
+	ButtonBuilder,
+	ActionRowBuilder,
+	AttachmentBuilder,
+	ButtonStyle,
+	InteractionType,
 	Colors,
 } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
@@ -67,47 +69,52 @@ module.exports = {
 			}
 			if (poolString == "") poolString = "No maps";
 			let image = await generateImage(round.mappoolId);
-			attachment = new MessageAttachment(
-				image.toBuffer("image/png"),
-				"mappool.png"
-			);
+			attachment = new AttachmentBuilder(image.toBuffer("image/png"), {
+				name: "mappool.png",
+			});
 		} else {
 			poolString = "**Mappool is hidden**";
 		}
 		// Build buttons to scroll to other rounds
-		let components = new MessageActionRow().addComponents(
-			new MessageButton()
-				.setCustomId(
-					"round_list?index=" +
-						(index - 1) +
-						"&admin=" +
-						command.options.admin
-				)
-				.setLabel("◀")
-				.setStyle("PRIMARY"),
-			new MessageButton()
-				.setCustomId("placeholder")
-				.setLabel(`${index + 1}/${rounds.length}`)
-				.setStyle("SECONDARY")
-				.setDisabled(true),
-			new MessageButton()
-				.setCustomId(
-					"round_list?index=" +
-						(index + 1) +
-						"&admin=" +
-						command.options.admin
-				)
-				.setLabel("▶")
-				.setStyle("PRIMARY")
-		);
+		let leftButton = new ButtonBuilder()
+			.setCustomId(
+				"round_list?index=" +
+					(index - 1) +
+					"&admin=" +
+					command.options.admin
+			)
+			.setLabel("◀")
+			.setStyle(ButtonStyle.Primary);
+
+		let pageButton = new ButtonBuilder()
+			.setCustomId("placeholder")
+			.setLabel(`${index + 1}/${rounds.length}`)
+			.setStyle(ButtonStyle.Secondary)
+			.setDisabled(true);
+
+		let rightButton = new ButtonBuilder()
+			.setCustomId(
+				"round_list?index=" +
+					(index + 1) +
+					"&admin=" +
+					command.options.admin
+			)
+			.setLabel("▶")
+			.setStyle(ButtonStyle.Primary);
 
 		if (index == 0) {
-			components.components[0].disabled = true;
+			leftButton.setDisabled(true);
 		}
 
 		if (index == rounds.length - 1) {
-			components.components[2].disabled = true;
+			rightButton.setDisabled(true);
 		}
+
+		let components = new ActionRowBuilder().addComponents(
+			leftButton,
+			pageButton,
+			rightButton
+		);
 
 		let embed = new EmbedBuilder()
 			.setColor(tournament.color)
@@ -127,7 +134,7 @@ module.exports = {
 			files = [attachment];
 		}
 
-		if (interaction.isCommand()) {
+		if (interaction.type === InteractionType.ApplicationCommand) {
 			await interaction.editReply({
 				embeds: [embed],
 				components: [components],
