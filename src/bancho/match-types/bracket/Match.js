@@ -1,7 +1,7 @@
 const { prisma } = require("../../../prisma");
 const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
-const { EmbedBuilder, MessageButton, MessageActionRow } = require("discord.js");
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const { Team } = require("./Team");
 const { convertEnumToAcro } = require("../../modEnum");
 const { Map } = require("./Map");
@@ -254,6 +254,9 @@ class MatchManager {
 		await this.lobby.clearHost();
 		await this.lobby.abortTimer();
 		await this.lobby.lockSlots();
+
+		let lobbyTitle = `${this.tournament.acronym}: (${this.teams[0].name}) vs (${this.teams[1].name})`;
+		await this.channel.sendMessage(`!mp name ${lobbyTitle}`);
 
 		// Update db object
 		await prisma.match.update({
@@ -1956,15 +1959,15 @@ class MatchManager {
 				**Delete Match:** The match will be deleted, this message will be kept for reference`
 				);
 			embed.image = null;
-			let recoverButton = new MessageButton()
+			let recoverButton = new ButtonBuilder()
 				.setCustomId("start_match?id=" + this.id + "&recover=true")
 				.setLabel("Recover Match")
 				.setStyle("SUCCESS");
-			let deleteButton = new MessageButton()
+			let deleteButton = new ButtonBuilder()
 				.setCustomId("delete_match?id=" + this.id)
 				.setLabel("Delete Match")
 				.setStyle("DANGER");
-			let components = new MessageActionRow().addComponents(
+			let components = new ActionRowBuilder().addComponents(
 				recoverButton,
 				deleteButton
 			);

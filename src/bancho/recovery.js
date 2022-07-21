@@ -1,6 +1,7 @@
 const { prisma } = require("../prisma");
 const { MatchManager } = require("./match-types/bracket/Match");
 const { bot } = require("../discord");
+const { EmbedBuilder } = require("discord.js");
 module.exports.recover = async () => {
 	let matches = await prisma.match.findMany({});
 
@@ -28,13 +29,12 @@ module.exports.recover = async () => {
 				},
 			});
 
-			let finalEmbed = message.embeds[0];
+			let finalEmbed = EmbedBuilder.from(message.embeds[0]);
 			finalEmbed
 				.setTitle(
 					`DELETED: ${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
 				)
 				.setColor("#555555")
-				.setDescription("")
 				.setFooter({ text: "Match Deleted" })
 				.setTimestamp();
 
