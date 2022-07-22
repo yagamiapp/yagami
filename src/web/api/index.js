@@ -14,6 +14,7 @@ endpointFiles.forEach((element) => {
 module.exports = {
 	async execute(endpoint, req, res) {
 		// Get file based on endpoint and call execute function
+
 		try {
 			let command = endpoints[endpoint];
 			if (!command) {

@@ -101,6 +101,5 @@
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */,
 		"outDir": "./built"
 	},
-	"include": ["./**/*.ts", "index.js"],
-	"exclude": ["node_modules"]
+	"include": ["./src/**/*", "index.js"]
 }

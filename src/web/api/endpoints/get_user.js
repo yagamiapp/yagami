@@ -8,11 +8,17 @@ module.exports = {
 			res.end();
 			return;
 		}
+
 		let user = await prisma.user.findFirst({
 			where: {
 				discord_id: req.query.u,
 			},
 		});
+
+		// This is required becasue JSON.stringify sucks
+		BigInt.prototype.toJSON = function () {
+			return this.toString();
+		};
 
 		if (user == null) {
 			res.writeHeader(400);
