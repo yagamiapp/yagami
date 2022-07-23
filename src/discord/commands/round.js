@@ -4,8 +4,7 @@ const fs = require("fs");
 // Subcommand Handler
 let data = new SlashCommandBuilder()
 	.setName("round")
-	.setDescription("Let's users view round information")
-	.setDefaultPermission(false);
+	.setDescription("Let's users view round information");
 let subcommands = {};
 
 const subcommandFiles = fs

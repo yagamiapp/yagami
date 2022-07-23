@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { fetchGuild, prisma } = require("../../prisma");
 
 module.exports = {
@@ -33,12 +33,42 @@ module.exports = {
 					"The channel in which match messages will be posted"
 				)
 		),
-	async execute(interaction) {
+	/**
+	 *
+	 * @param {import("discord.js").CommandInteraction} interaction
+	 */ async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 		let guild = await fetchGuild(interaction.guildId);
 		let options = interaction.options.data;
 		let description = "";
 
+		let linkedRole = interaction.options.getRole("linked_role");
+		if (!linkedRole.editable) {
+			let embed = new EmbedBuilder()
+				.setDescription(
+					`**Err**: The bot cannot manage <@&${linkedRole.id}> role.`
+				)
+				.setColor(Colors.Red)
+				.setFooter({
+					text: "Make sure the bot role is higher than the linked role in role settings",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
+		let playerRole = interaction.options.getRole("linked_role");
+		if (!linkedRole.editable) {
+			let embed = new EmbedBuilder()
+				.setDescription(
+					`**Err**: The bot cannot manage <@&${playerRole.id}> role.`
+				)
+				.setColor(Colors.Red)
+				.setFooter({
+					text: "Make sure the bot role is higher than the player role in role settings",
+				});
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
 		for (let option of options) {
 			guild[option.name] = option.value;
 			description += `**${option.name}**: ${option.value}\n`;
@@ -51,6 +81,10 @@ module.exports = {
 			},
 			data: guild,
 		});
+
+		if (description == "") {
+			description = "No settings updated";
+		}
 
 		let embed = new EmbedBuilder()
 			.setTitle("Settings Updated")

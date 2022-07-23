@@ -22,6 +22,11 @@ module.exports = {
 		});
 
 		if (duplicate) {
+			try {
+				await member.setNickname(duplicate.osu_username);
+			} catch (e) {
+				console.log("Cannot change nickname of " + member.user.tag);
+			}
 			let roleId = (
 				await prisma.guild.findUnique({
 					where: {
@@ -30,8 +35,14 @@ module.exports = {
 				})
 			).linked_role;
 			let role = interaction.guild.roles.cache.get(roleId);
-			if (role && role.editable && member.manageable) {
-				await member.roles.add(role);
+			if (role) {
+				try {
+					await member.roles.add(role);
+				} catch (e) {
+					console.log(
+						"Could not add linked role to " + member.user.tag
+					);
+				}
 			}
 
 			let embed = new EmbedBuilder()
