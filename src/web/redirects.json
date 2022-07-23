@@ -1,7 +1,7 @@
 [
 	{
 		"path": "/invite",
-		"dest": "https://discord.com/api/oauth2/authorize?client_id=956030276050493441&permissions=10670574704&scope=bot%20applications.commands"
+		"dest": "https://discord.com/api/oauth2/authorize?client_id=956030276050493441&permissions=10603482224&scope=bot%20applications.commands"
 	},
 	{
 		"path": "/discord",
