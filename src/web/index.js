@@ -22,8 +22,7 @@ module.exports.init = () => {
 
 	app.use(express.json());
 
-	app.get("/auth", (req, res) => {
-		// lgtm [js/missing-rate-limiting]
+	app.get("/auth", (req, res) => { // lgtm [js/missing-rate-limiting]
 		authUser(req.query, req, res);
 	});
 
@@ -93,8 +92,7 @@ module.exports.init = () => {
 
 	app.use("/", express.static(join(__dirname, "public")));
 
-	app.get("*", (req, res) => {
-		// lgtm [js/missing-rate-limiting]
+	app.get("*", (req, res) => { // lgtm [js/missing-rate-limiting]
 		res.status(404).sendFile(join(__dirname, "404.html"));
 	});
 
