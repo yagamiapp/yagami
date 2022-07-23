@@ -1,4 +1,4 @@
-const { MessageButton, EmbedBuilder, Colors } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const { prisma, fetchGuild } = require("../../prisma");
 
 module.exports = {

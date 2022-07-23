@@ -1,4 +1,3 @@
-const { MessageButton } = require("discord.js");
 const { execute } = require("../commands/link");
 
 module.exports = {
