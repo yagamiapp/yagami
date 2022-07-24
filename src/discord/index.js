@@ -4,6 +4,8 @@ const {
 	Collection,
 	EmbedBuilder,
 	InteractionType,
+	ApplicationCommandType,
+	ApplicationCommandOptionType,
 } = require("discord.js");
 const fs = require("fs");
 const join = require("./join");
@@ -62,7 +64,7 @@ module.exports = {
 			let commandType = options[0]?.type;
 			let commandString;
 
-			if (commandType == "SUB_COMMAND_GROUP") {
+			if (commandType == ApplicationCommandOptionType.SubcommandGroup) {
 				options = options[0];
 				let commandGroup = options.name;
 				options = options.options[0];
@@ -70,7 +72,7 @@ module.exports = {
 				options = options.options;
 
 				commandString = `${interaction.commandName} ${commandGroup} ${subcommand}`;
-			} else if (commandType == "SUB_COMMAND") {
+			} else if (commandType == ApplicationCommandOptionType.Subcommand) {
 				options = options[0];
 				let subcommand = options.name;
 				options = options.options;

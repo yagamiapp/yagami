@@ -3,8 +3,9 @@ const { stripIndents } = require("common-tags/lib");
 const { prisma } = require("../../../prisma");
 const {
 	EmbedBuilder,
-	MessageButton,
-	MessageActionRow,
+	ButtonBuilder,
+	ActionRowBuilder,
+	ButtonStyle,
 	Colors,
 } = require("discord.js");
 
@@ -43,9 +44,9 @@ module.exports = {
 				size: 128,
 			});
 
-			let button = new MessageButton()
+			let button = new ButtonBuilder()
 				.setLabel("Link Account")
-				.setStyle("PRIMARY")
+				.setStyle(ButtonStyle.Primary)
 				.setCustomId("link");
 			let embed = new EmbedBuilder()
 				.setDescription(
@@ -60,7 +61,7 @@ module.exports = {
 					name: interaction.guild.name,
 					iconURL: icon,
 				});
-			let row = new MessageActionRow().addComponents([button]);
+			let row = new ActionRowBuilder().addComponents([button]);
 			try {
 				await channel.send({ embeds: [embed], components: [row] });
 			} catch (e) {

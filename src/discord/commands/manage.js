@@ -3,6 +3,7 @@ const {
 	EmbedBuilder,
 	SlashCommandBuilder,
 	SlashCommandSubcommandBuilder,
+	ApplicationCommandOptionType,
 	Colors,
 } = require("discord.js");
 
@@ -49,7 +50,7 @@ module.exports = {
 			return;
 		}
 		let type = interaction.options.data[0].type;
-		if (type == "SUB_COMMAND") {
+		if (type == ApplicationCommandOptionType.Subcommand) {
 			let group = interaction.options.getSubcommand();
 			let file = subcommands[group];
 			if (!file) return;
