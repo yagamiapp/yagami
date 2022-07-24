@@ -34,6 +34,8 @@ module.exports = {
 		let time = refreshTime - Date.now();
 		if (time <= 0 || force) {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
+			console.log(`Refreshing osu token...`);
+
 			let response = await axios({
 				method: "POST",
 				url: "https://osu.ppy.sh/oauth/token",
@@ -105,7 +107,9 @@ module.exports = {
 		if (userData.authentication == "basic") {
 			return;
 		}
-
+		console.log(
+			`Refreshing user data for ${userData.username} (https://osu.ppy.sh/u/${userData.id})`
+		);
 		let userPayload = {
 			osu_id: userData.id,
 			osu_username: userData.username,

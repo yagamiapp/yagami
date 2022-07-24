@@ -73,8 +73,13 @@ module.exports = {
 					.has(PermissionFlagsBits.SendMessages) &&
 				channel.viewable
 		);
-		console.log(channel.name);
-		await channel.send({ embeds: [embed] });
+		try {
+			await channel.send({ embeds: [embed] });
+		} catch (e) {
+			console.log(
+				`Cannot send welcome message to selected channel, ${channel.name}`
+			);
+		}
 	},
 	/**
 	 *
