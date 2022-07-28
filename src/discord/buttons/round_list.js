@@ -81,32 +81,37 @@ module.exports = {
 				"round_list?index=" +
 					(index - 1) +
 					"&admin=" +
-					command.options.admin
+					command.options.admin || false
 			)
 			.setLabel("◀")
 			.setStyle(ButtonStyle.Primary);
 
 		let pageButton = new ButtonBuilder()
-			.setCustomId("placeholder")
+			.setCustomId(
+				`pager?list=round_list&min=1&max=${rounds.length}&admin=${command.options.admin}`
+			)
 			.setLabel(`${index + 1}/${rounds.length}`)
-			.setStyle(ButtonStyle.Secondary)
-			.setDisabled(true);
+			.setStyle(ButtonStyle.Secondary);
 
 		let rightButton = new ButtonBuilder()
 			.setCustomId(
 				"round_list?index=" +
 					(index + 1) +
 					"&admin=" +
-					command.options.admin
+					command.options.admin || false
 			)
 			.setLabel("▶")
 			.setStyle(ButtonStyle.Primary);
 
-		if (index == 0) {
+		if (index === 0) {
 			leftButton.setDisabled(true);
 		}
 
-		if (index == rounds.length - 1) {
+		if (rounds.length === 1) {
+			pageButton.setDisabled(true);
+		}
+
+		if (index === rounds.length - 1) {
 			rightButton.setDisabled(true);
 		}
 

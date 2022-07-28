@@ -84,21 +84,24 @@ module.exports = {
 			.setStyle(ButtonStyle.Primary);
 
 		let pageButton = new ButtonBuilder()
-			.setCustomId("placeholder")
+			.setCustomId(`pager?list=team_list&min=1&max=${groups.length}`)
 			.setLabel(`${index + 1}/${groups.length}`)
-			.setStyle(ButtonStyle.Secondary)
-			.setDisabled(true);
+			.setStyle(ButtonStyle.Secondary);
 
 		let rightButton = new ButtonBuilder()
 			.setCustomId("team_list?index=" + (index + 1))
 			.setLabel("▶")
 			.setStyle(ButtonStyle.Primary);
 
-		if (index == 0) {
+		if (index === 0) {
 			leftButton.setDisabled(true);
 		}
 
-		if (index == groups.length - 1) {
+		if (groups.length === 1) {
+			pageButton.setDisabled(true);
+		}
+
+		if (index === groups.length - 1) {
 			rightButton.setDisabled(true);
 		}
 

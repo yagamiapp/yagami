@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("discord.js");
 let { EmbedBuilder, Colors } = require("discord.js");
-let { execute } = require("../../buttons/rounds_list");
+let { execute } = require("../../buttons/round_list");
 const { fetchGuild, prisma } = require("../../../prisma");
 
 module.exports = {

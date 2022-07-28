@@ -62,10 +62,11 @@ module.exports = {
 			.setStyle(ButtonStyle.Primary);
 
 		let pageButton = new ButtonBuilder()
-			.setCustomId("placeholder")
+			.setCustomId(
+				`pager?list=match_start_list&min=1&max=${groups.length}`
+			)
 			.setLabel(`${index + 1}/${groups.length}`)
-			.setStyle(ButtonStyle.Secondary)
-			.setDisabled(true);
+			.setStyle(ButtonStyle.Secondary);
 
 		let rightButton = new ButtonBuilder()
 			.setCustomId("match_start_list?index=" + (index + 1))
@@ -74,6 +75,10 @@ module.exports = {
 
 		if (index == 0) {
 			leftButton.setDisabled(true);
+		}
+
+		if (groups.length === 1) {
+			pageButton.setDisabled(true);
 		}
 
 		if (index == groups.length - 1) {

@@ -210,7 +210,6 @@ module.exports = {
 			);
 
 			const modal = bot.modals.get(command.name);
-			console.log(bot.modals);
 			if (!modal) return;
 
 			try {
