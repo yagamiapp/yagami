@@ -2002,11 +2002,17 @@ class MatchManager {
 
 		// Final Match Results
 		if (state == 9) {
+			// Bold name on scorepost
 			if (this.teams[0].score > this.teams[1].score) {
+				description = `
+					${emotes.teams[this.teams[0].id]} **${this.teams[0].name}** | ${
+					this.teams[0].score
+				} - ${this.teams[1].score} | ${this.teams[1].name} ${
+					emotes.teams[this.teams[1].id]
+				}`;
 				embed.color = this.teams[0].color;
 				embed.setThumbnail(this.teams[0].icon_url);
-			}
-			if (this.teams[0].score < this.teams[1].score) {
+			} else if (this.teams[0].score < this.teams[1].score) {
 				description = `
 					${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
 					this.teams[0].score
@@ -2015,6 +2021,13 @@ class MatchManager {
 				}`;
 				embed.color = this.teams[1].color;
 				embed.setThumbnail(this.teams[1].icon_url);
+			} else {
+				description = `
+					${emotes.teams[this.teams[0].id]} ${this.teams[0].name} | ${
+					this.teams[0].score
+				} - ${this.teams[1].score} | ${this.teams[1].name} ${
+					emotes.teams[this.teams[1].id]
+				}`;
 			}
 			embed.setFooter(null);
 			embed.setImage(null);
