@@ -481,6 +481,7 @@ class MatchManager {
 				await this.channel.sendMessage(
 					`The following teams do not have the correct amount of players: ${teamString}`
 				);
+				this.partials.readying = false;
 				return;
 			}
 
@@ -511,6 +512,7 @@ class MatchManager {
 						await this.channel.sendMessage(
 							`The following players do not have the NF mod: ${noNFString}`
 						);
+						this.partials.readying = false;
 						return;
 					}
 				}
@@ -556,6 +558,7 @@ class MatchManager {
 					await this.channel.sendMessage(
 						`Teams must have at least ${this.tournament.fm_mods} player${s} with a mod`
 					);
+					this.partials.readying = false;
 					return;
 				}
 			}
