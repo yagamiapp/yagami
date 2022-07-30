@@ -11,6 +11,11 @@ module.exports = {
 				.setName("user")
 				.setDescription("Select a user to view the team of")
 		),
+	/**
+	 *
+	 * @param {import("discord.js").CommandInteraction} interaction
+	 * @returns
+	 */
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 		let user = interaction.options.getUser("user") || interaction.user;
@@ -21,6 +26,9 @@ module.exports = {
 					some: {
 						discordId: user.id,
 					},
+				},
+				Tournament: {
+					Guild_id: interaction.guildId,
 				},
 			},
 		});
