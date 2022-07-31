@@ -115,7 +115,7 @@ module.exports = {
 						`match_start_list?index=${command.options.index || 0}`
 					)
 					.setLabel("Back")
-					.setStyle("DANGER"),
+					.setStyle(ButtonStyle.Danger),
 			]);
 			if (command.options.recover) {
 				await interaction.reply({
