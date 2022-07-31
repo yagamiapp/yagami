@@ -1,7 +1,12 @@
 const { prisma } = require("../../../prisma");
 const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
+const {
+	EmbedBuilder,
+	ButtonBuilder,
+	ActionRowBuilder,
+	ButtonStyle,
+} = require("discord.js");
 const { Team } = require("./Team");
 const { convertEnumToAcro } = require("../../modEnum");
 const { Map } = require("./Map");
@@ -1965,11 +1970,11 @@ class MatchManager {
 			let recoverButton = new ButtonBuilder()
 				.setCustomId("start_match?id=" + this.id + "&recover=true")
 				.setLabel("Recover Match")
-				.setStyle("SUCCESS");
+				.setStyle(ButtonStyle.Primary);
 			let deleteButton = new ButtonBuilder()
 				.setCustomId("delete_match?id=" + this.id)
 				.setLabel("Delete Match")
-				.setStyle("DANGER");
+				.setStyle(ButtonStyle.Danger);
 			let components = new ActionRowBuilder().addComponents(
 				recoverButton,
 				deleteButton

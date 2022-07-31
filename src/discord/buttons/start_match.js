@@ -100,6 +100,7 @@ module.exports = {
 			},
 		});
 		if (duplicateCheck) {
+			console.log(duplicateCheck);
 			let embed = new EmbedBuilder()
 				.setDescription(
 					"**Err**: One or more of the teams is in a match that is currently running"
