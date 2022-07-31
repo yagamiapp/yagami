@@ -5,7 +5,7 @@ let credentials = {
 	username: process.env.banchoUsername,
 	password: process.env.banchoPassword,
 	apiKey: process.env.banchoAPIKey,
-	limiterTimespan: 4000,
+	limiterTimespan: 12000,
 };
 const client = new BanchoClient(credentials);
 

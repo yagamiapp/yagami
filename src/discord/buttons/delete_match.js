@@ -55,7 +55,7 @@ module.exports = {
 			},
 		});
 
-		let finalEmbed = interaction.message.embeds[0];
+		let finalEmbed = EmbedBuilder.from(interaction.message.embeds[0]);
 		finalEmbed
 			.setTitle(
 				`DELETED: ${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
