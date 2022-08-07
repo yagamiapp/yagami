@@ -10,6 +10,7 @@ const {
 const fs = require("fs");
 const join = require("./join");
 const logger = require("./logger");
+const { startPresenceUpdatetimer } = require("./presence");
 
 const bot = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
@@ -18,6 +19,8 @@ const bot = new Client({
 module.exports = {
 	async init() {
 		await bot.login(process.env.discordToken);
+
+		await startPresenceUpdatetimer(bot);
 
 		// Make Collection of commands
 		bot.commands = new Collection();
