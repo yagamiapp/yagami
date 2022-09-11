@@ -63,6 +63,31 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
+
+		// In case the team is in a match
+		let matchCheck = await prisma.match.findFirst({
+			where: {
+				Teams: {
+					some: {
+						teamId: team.id,
+					},
+				},
+				state: {
+					gte: 0,
+					lte: 7,
+				},
+			},
+		});
+		if (matchCheck) {
+			let embed = new EmbedBuilder()
+				.setDescription(
+					`**Err**: You cannot make changes to your team while you are in a match`
+				)
+				.setColor(Colors.Red);
+			interaction.reply({ embeds: [embed] });
+			return;
+		}
+
 		// In case the team size is 1
 		if (tournament.team_size == 1) {
 			let embed = new EmbedBuilder()
