@@ -2,9 +2,9 @@ const { BanchoClient } = require("bancho.js");
 const { pmHandler } = require("./pmHandler");
 
 let credentials = {
-	username: process.env.banchoUsername,
-	password: process.env.banchoPassword,
-	apiKey: process.env.banchoAPIKey,
+	username: process.env.BANCHO_USERNAME,
+	password: process.env.BANCHO_PASSWORD,
+	apiKey: process.env.BANCHO_API_KEY,
 	limiterTimespan: 12000,
 };
 const client = new BanchoClient(credentials);

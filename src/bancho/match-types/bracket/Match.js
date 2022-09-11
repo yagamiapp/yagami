@@ -29,7 +29,7 @@ let states = {
 	10: "Not Started",
 };
 
-let nodesuClient = new Client(process.env.banchoAPIKey);
+let nodesuClient = new Client(process.env.BANCHO_API_KEY);
 
 // Mods that count as a "User with a mod" in FM rules
 let allowedFMMods = ["ez", "hd", "hr", "fl"];

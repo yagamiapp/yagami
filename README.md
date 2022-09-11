@@ -61,23 +61,23 @@ You will need to add a .ENV file and add the following variables:
 
 ```env
 # Your osu username
-banchoUsername=
+BANCHO_USERNAME=
 # Your osu IRC password (https://old.ppy.sh/p/irc)
-banchoPassword=
+BANCHO_PASSWORD=
 # Your API key (https://old.ppy.sh/p/api)
-banchoAPIKey=
+BANCHO_API_KEY=
 # An osu application Client ID
-osuClientId=
+OSU_CLIENT_ID=
 # An osu application Client Secret
-osuClientSecret=
+OSU_CLIENT_SECRET=
 # An osu application Redirect URI
-osuRedirectURI=
+OSU_REDIRECT_URI=
 # A discord bot token
-discordToken=
+DISCORD_TOKEN=
 # The ID of the guild you are developing in
-testGuildId=
+TEST_GUILD_ID=
 # The client ID of your discord application
-clientId=
+DISCORD_CLIENT_ID=
 # The channel in which global bug reports should be sent to
 BUG_CHANNEL_ID=
 # This can be changed to a different location if you wish

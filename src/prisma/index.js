@@ -44,8 +44,8 @@ module.exports = {
 					Accept: "application/json",
 				},
 				data: {
-					client_id: process.env.osuClientId,
-					client_secret: process.env.osuClientSecret,
+					client_id: process.env.OSU_CLIENT_ID,
+					client_secret: process.env.OSU_CLIENT_SECRET,
 					grant_type: "refresh_token",
 					refresh_token: token.refresh_token,
 				},

@@ -227,7 +227,7 @@ module.exports = {
 					value: stripIndents`
 				Add the bot as a ref to your match:
 				\`\`\`
-				!mp addref ${process.env.banchoUsername}
+				!mp addref ${process.env.BANCHO_USERNAME}
 				\`\`\`
 				`,
 				},

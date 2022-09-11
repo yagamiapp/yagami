@@ -89,7 +89,7 @@ module.exports = {
 		let payload = { interaction, user: userJson, interval };
 		module.exports[id] = payload;
 
-		let link = `https://osu.ppy.sh/oauth/authorize/?client_id=${process.env.osuClientId}&redirect_uri=${process.env.osuRedirectURI}&response_type=code&state=${id}`;
+		let link = `https://osu.ppy.sh/oauth/authorize/?client_id=${process.env.OSU_CLIENT_ID}&redirect_uri=${process.env.OSU_REDIRECT_URI}&response_type=code&state=${id}`;
 
 		let embed = new EmbedBuilder()
 			.setColor("#F88000")

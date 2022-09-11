@@ -18,7 +18,7 @@ const bot = new Client({
 
 module.exports = {
 	async init() {
-		await bot.login(process.env.discordToken);
+		await bot.login(process.env.DISCORD_TOKEN);
 
 		await startPresenceUpdatetimer(bot);
 

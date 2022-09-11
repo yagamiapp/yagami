@@ -1,7 +1,7 @@
 let nodesu = require("nodesu");
 let { prisma } = require("../prisma");
 
-let client = new nodesu.Client(process.env.banchoAPIKey);
+let client = new nodesu.Client(process.env.BANCHO_API_KEY);
 
 /**
  *

@@ -12,11 +12,11 @@ const { prisma, fetchGuild } = require("../prisma");
  */
 module.exports.authUser = async (query, req, res) => {
 	let osuReqBody = {
-		client_id: process.env.osuClientId,
-		client_secret: process.env.osuClientSecret,
+		client_id: process.env.OSU_CLIENT_ID,
+		client_secret: process.env.OSU_CLIENT_SECRET,
 		code: query.code,
 		grant_type: "authorization_code",
-		redirect_uri: process.env.osuRedirectURI,
+		redirect_uri: process.env.OSU_REDIRECT_URI,
 	};
 
 	let authResponse = await axios({

@@ -17,11 +17,17 @@ module.exports.deployCommands = async (guild) => {
 				guildCommands.push(fileModule.data);
 		});
 
-	const rest = new REST({ version: "9" }).setToken(process.env.discordToken);
+	const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
 
-	rest.put(Routes.applicationGuildCommands(process.env.clientId, guild.id), {
-		body: guildCommands,
-	})
+	rest.put(
+		Routes.applicationGuildCommands(
+			process.env.DISCORD_CLIENT_ID,
+			guild.id
+		),
+		{
+			body: guildCommands,
+		}
+	)
 		.then(() =>
 			console.log(
 				"Registered command(s) to " +
@@ -42,7 +48,7 @@ module.exports.deployCommands = async (guild) => {
 
 	// // Get roles with admin perms & owner
 	// let commandIDs = await rest.get(
-	// 	Routes.applicationGuildCommands(process.env.clientId, guild.id)
+	// 	Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild.id)
 	// );
 
 	// let adminRoles = [];
