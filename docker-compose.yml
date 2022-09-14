@@ -5,7 +5,7 @@ services:
         build: .
         image: "clxxiii/yagami-bot:latest"
         volumes:
-            - "./src/prisma/dev.db/:/app/src/prisma/dev.db:rw"
+            - "./src/prisma/:/app/src/prisma/:rw"
         env_file:
             - .env
         ports:
@@ -17,7 +17,7 @@ services:
         ports:
             - "3000:3000"
         volumes:
-            - "./src/prisma/dev.db/:/app/src/prisma/dev.db:rw"
+            - "./src/prisma/:/app/src/prisma/:rw"
 volumes:
     db:
         external: true
