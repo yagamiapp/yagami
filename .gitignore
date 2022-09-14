@@ -6,3 +6,4 @@ node_modules
 firebaseData.json
 rawpools.json
 pools.json
+*.db
