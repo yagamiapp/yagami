@@ -3,7 +3,7 @@ services:
     bot:
         image: "clxxiii/yagami-bot:latest"
         volumes:
-            - "db:/db"
+            - "db:/app/db"
         env_file:
             - .env
         ports:
@@ -13,7 +13,7 @@ services:
         ports:
             - "3000:3000"
         volumes:
-            - "db:/db"
+            - "db:/app/db"
 volumes:
     db:
         external: true

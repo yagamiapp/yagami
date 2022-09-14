@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-ENV DATABASE_URL="file:/db/db.sqlite"
+ENV DATABASE_URL="file:/app/db/db.sqlite"
 
 RUN npx prisma generate
 
