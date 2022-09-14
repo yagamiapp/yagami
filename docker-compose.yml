@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+    bot:
+        image: "clxxiii/yagami-bot:latest"
+        volumes:
+            - "db:/db"
+        env_file:
+            - .env
+        ports:
+            - "5555:5555"
+    web:
+        image: "clxxiii/yagami-web:latest"
+        ports:
+            - "3000:3000"
+        volumes:
+            - "db:/db"
+volumes:
+    db:
+        external: true
