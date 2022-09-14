@@ -1,19 +1,23 @@
 version: "3.9"
 services:
     bot:
+        restart: always
+        build: .
         image: "clxxiii/yagami-bot:latest"
         volumes:
-            - "db:/app/db"
+            - "./src/prisma/dev.db/:/app/src/prisma/dev.db:rw"
         env_file:
             - .env
         ports:
             - "5555:5555"
     web:
+        restart: always
+        build: .
         image: "clxxiii/yagami-web:latest"
         ports:
             - "3000:3000"
         volumes:
-            - "db:/app/db"
+            - "./src/prisma/dev.db/:/app/src/prisma/dev.db:rw"
 volumes:
     db:
         external: true

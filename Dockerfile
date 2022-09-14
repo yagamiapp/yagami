@@ -2,16 +2,16 @@ FROM node:16
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json /app
 
 RUN npm install
 
-COPY . .
+COPY . /app
 
-ENV DATABASE_URL="file:/app/db/db.sqlite"
+ENV DATABASE_URL="file:/app/src/prisma/dev.db"
 
 RUN npx prisma generate
 
-RUN npx prisma migrate dev
+RUN npx prisma migrate deploy
 
 CMD [ "npm", "start" ]
