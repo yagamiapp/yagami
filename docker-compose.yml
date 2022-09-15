@@ -4,7 +4,7 @@ services:
         restart: always
         image: "clxxiii/yagami-bot:latest"
         volumes:
-            - "yagami_db:/app/src/prisma/db:rw"
+            - "./src/lib/prisma/db:/app/src/lib/prisma/db:rw"
         env_file:
             - .env
         ports:
@@ -15,7 +15,4 @@ services:
         ports:
             - "3000:3000"
         volumes:
-            - "yagami_db:/app/src/lib/prisma/db:rw"
-volumes:
-    yagami_db:
-        external: true
+            - "./src/lib/prisma/db:/app/src/lib/prisma/db:rw"
