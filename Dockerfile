@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . /app
 
-ENV DATABASE_URL="file:/app/src/prisma/dev.db"
+ENV DATABASE_URL="file:/app/src/prisma/db/dev.db"
 
 RUN npx prisma generate
 
