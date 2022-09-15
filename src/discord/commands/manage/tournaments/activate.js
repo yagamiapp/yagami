@@ -1,6 +1,6 @@
 let { EmbedBuilder, Colors } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("discord.js");
-const { prisma } = require("../../../../prisma");
+const { prisma } = require("../../../../lib/prisma");
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
 		.setName("activate")

@@ -1,4 +1,4 @@
-const { fetchGuild } = require("../../../../prisma");
+const { fetchGuild } = require("../../../../lib/prisma");
 const { SlashCommandSubcommandBuilder } = require("discord.js");
 let { EmbedBuilder, Colors } = require("discord.js");
 

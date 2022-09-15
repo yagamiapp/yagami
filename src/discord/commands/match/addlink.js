@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder } = require("discord.js");
-const { prisma } = require("../../../prisma");
+const { prisma } = require("../../../lib/prisma");
 const { EmbedBuilder, Colors } = require("discord.js");
 const { MatchManager } = require("../../../bancho/match-types/bracket/Match");
 const { stripIndents } = require("common-tags/lib");

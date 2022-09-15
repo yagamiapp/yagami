@@ -8,7 +8,7 @@
 		"dev": "nodemon index.js"
 	},
 	"prisma": {
-		"schema": "./src/prisma/schema.prisma"
+		"schema": "./src/lib/prisma/schema.prisma"
 	},
 	"author": "",
 	"license": "ISC",

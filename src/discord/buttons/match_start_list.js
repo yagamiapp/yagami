@@ -7,7 +7,7 @@ let {
 	InteractionType,
 } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
-const { fetchGuild, prisma } = require("../../prisma");
+const { fetchGuild, prisma } = require("../../lib/prisma");
 
 module.exports = {
 	data: { customId: "match_start_list" },

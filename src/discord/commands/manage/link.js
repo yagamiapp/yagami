@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
-const { prisma } = require("../../../prisma");
+const { prisma } = require("../../../lib/prisma");
 const {
 	EmbedBuilder,
 	ButtonBuilder,

@@ -5,7 +5,7 @@ let {
 	ButtonStyle,
 	InteractionType,
 } = require("discord.js");
-const { fetchGuild, prisma } = require("../../prisma");
+const { fetchGuild, prisma } = require("../../lib/prisma");
 
 module.exports = {
 	data: { customId: "view_match" },

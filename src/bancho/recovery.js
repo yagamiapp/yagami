@@ -1,4 +1,4 @@
-const { prisma } = require("../prisma");
+const { prisma } = require("../lib/prisma");
 const { MatchManager } = require("./match-types/bracket/Match");
 const { bot } = require("../discord");
 const { EmbedBuilder } = require("discord.js");

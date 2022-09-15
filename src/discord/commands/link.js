@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { EmbedBuilder, Colors } = require("discord.js");
-const { prisma } = require("../../prisma");
+const { prisma } = require("../../lib/prisma");
 const crypto = require("crypto");
 const { stripIndents } = require("common-tags/lib");
 

@@ -1,7 +1,7 @@
 const { SlashCommandSubcommandBuilder } = require("discord.js");
 let { EmbedBuilder, Colors } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
-const { fetchGuild, prisma } = require("../../../../prisma");
+const { fetchGuild, prisma } = require("../../../../lib/prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()

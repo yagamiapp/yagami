@@ -1,4 +1,4 @@
-let { prisma } = require("../prisma");
+let { prisma } = require("../lib/prisma");
 
 /**
  * @prop {string} beatmap_id

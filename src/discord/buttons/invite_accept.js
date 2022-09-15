@@ -1,5 +1,5 @@
 const { EmbedBuilder, Colors } = require("discord.js");
-const { prisma, fetchGuild } = require("../../prisma");
+const { prisma, fetchGuild } = require("../../lib/prisma");
 
 module.exports = {
 	data: { customId: "invite_accept" },

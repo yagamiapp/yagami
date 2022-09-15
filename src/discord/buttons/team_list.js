@@ -6,7 +6,7 @@ let {
 	InteractionType,
 	Colors,
 } = require("discord.js");
-const { fetchGuild, prisma } = require("../../prisma");
+const { fetchGuild, prisma } = require("../../lib/prisma");
 
 module.exports = {
 	data: { customId: "team_list" },

@@ -1,4 +1,4 @@
-const { prisma } = require("../../../prisma");
+const { prisma } = require("../../../lib/prisma");
 const { bot: discord } = require("../../../discord");
 const { Client } = require("nodesu");
 const {

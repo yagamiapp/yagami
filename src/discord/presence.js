@@ -1,5 +1,5 @@
 const { ActivityType } = require("discord.js");
-const { prisma } = require("../prisma");
+const { prisma } = require("../lib/prisma");
 
 let presences = [
 	{ name: "%m matches", type: ActivityType.Watching },

@@ -2,7 +2,7 @@ const axios = require("axios");
 const { EmbedBuilder, Colors } = require("discord.js");
 const linkCommand = require("../discord/commands/link");
 const { stripIndents } = require("common-tags/lib");
-const { prisma, fetchGuild } = require("../prisma");
+const { prisma, fetchGuild } = require("../lib/prisma");
 
 /**
  *

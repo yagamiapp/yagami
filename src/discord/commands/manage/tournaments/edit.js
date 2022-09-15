@@ -1,6 +1,6 @@
 let { EmbedBuilder, Colors } = require("discord.js");
 const { SlashCommandSubcommandBuilder } = require("discord.js");
-const { fetchGuild, prisma } = require("../../../../prisma");
+const { fetchGuild, prisma } = require("../../../../lib/prisma");
 let { stripIndents } = require("common-tags");
 
 module.exports = {

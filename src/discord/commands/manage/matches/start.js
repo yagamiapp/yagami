@@ -1,6 +1,6 @@
 let { SlashCommandSubcommandBuilder } = require("discord.js");
 let { EmbedBuilder, Colors } = require("discord.js");
-let { fetchGuild } = require("../../../../prisma");
+let { fetchGuild } = require("../../../../lib/prisma");
 let { execute } = require("../../../buttons/match_start_list");
 
 module.exports = {

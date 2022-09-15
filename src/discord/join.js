@@ -4,7 +4,7 @@ const {
 	ChannelType,
 	PermissionFlagsBits,
 } = require("discord.js");
-const { prisma } = require("../prisma");
+const { prisma } = require("../lib/prisma");
 const { stripIndents } = require("common-tags/lib");
 
 module.exports = {

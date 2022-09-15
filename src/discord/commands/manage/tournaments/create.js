@@ -1,5 +1,5 @@
 const { SlashCommandSubcommandBuilder, Colors } = require("discord.js");
-const { prisma } = require("../../../../prisma");
+const { prisma } = require("../../../../lib/prisma");
 let { stripIndent } = require("common-tags");
 let { EmbedBuilder } = require("discord.js");
 

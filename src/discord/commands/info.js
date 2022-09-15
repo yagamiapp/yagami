@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { EmbedBuilder, version: djs } = require("discord.js");
 const { version } = require("../../../package.json");
-const { prisma } = require("../../prisma");
+const { prisma } = require("../../lib/prisma");
 
 const start_time = Date.now();
 

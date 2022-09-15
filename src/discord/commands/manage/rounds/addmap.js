@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("discord.js");
 let { EmbedBuilder, Colors } = require("discord.js");
-const { fetchGuild, prisma } = require("../../../../prisma");
+const { fetchGuild, prisma } = require("../../../../lib/prisma");
 const { fetchMap } = require("../../../../bancho/fetchMap.js");
 
 let modPrioEnum = {

@@ -7,7 +7,7 @@ const {
 	Colors,
 	ButtonStyle,
 } = require("discord.js");
-const { fetchGuild, prisma } = require("../../prisma");
+const { fetchGuild, prisma } = require("../../lib/prisma");
 const { execute } = require("./match_start_list");
 const { MatchManager } = require("../../bancho/match-types/bracket/Match");
 

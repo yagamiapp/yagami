@@ -1,4 +1,4 @@
-let { prisma } = require("../prisma");
+let { prisma } = require("../lib/prisma");
 
 (async function main() {
 	let maps = await prisma.mapInPool.findMany();

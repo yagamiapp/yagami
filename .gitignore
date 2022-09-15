@@ -7,3 +7,4 @@ firebaseData.json
 rawpools.json
 pools.json
 *.db
+*.db-journal

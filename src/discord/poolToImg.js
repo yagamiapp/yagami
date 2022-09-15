@@ -1,5 +1,5 @@
 const { createCanvas, registerFont } = require("canvas");
-const { prisma } = require("../prisma");
+const { prisma } = require("../lib/prisma");
 
 let colors = {
 	NM: "#3d85c6",

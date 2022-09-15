@@ -9,7 +9,7 @@ let {
 } = require("discord.js");
 const { stripIndents } = require("common-tags/lib");
 const { generateImage } = require("../poolToImg");
-const { fetchGuild, prisma } = require("../../prisma");
+const { fetchGuild, prisma } = require("../../lib/prisma");
 
 module.exports = {
 	data: { customId: "round_list" },
