@@ -81,7 +81,7 @@ DISCORD_CLIENT_ID=
 # The channel in which global bug reports should be sent to
 BUG_CHANNEL_ID=
 # This can be changed to a different location if you wish
-DATABASE_URL="file:./dev.sqlite"
+DATABASE_URL="file:./db/dev.db"
 # A github secret to be used in webhooks
 GITHUB_SECRET=
 # The branch that will be updated when a commit is made to it
