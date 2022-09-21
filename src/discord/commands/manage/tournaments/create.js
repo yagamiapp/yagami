@@ -123,28 +123,30 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
-		// Construct tourney object
-		let tourney = {
-			acronym,
-			name: interaction.options.getString("name") ?? "My Tournament",
-			score_mode: interaction.options.getInteger("score_mode") ?? 3,
-			team_mode: interaction.options.getInteger("team_mode") ?? 0,
-			force_nf: interaction.options.getBoolean("force_nf") ?? true,
-			color: interaction.options.getString("color") ?? "#F88000",
-			team_size: interaction.options.getInteger("team_size") ?? 1,
-			icon_url:
-				interaction.options.getString("icon_url") ??
-				"https://yagami.clxxiii.dev/static/yagami%20var.png",
-			allow_registrations: false,
-			x_v_x_mode: interaction.options.getInteger("x_v_x_mode") || 1,
-			double_pick: interaction.options.getInteger("double_pick") || 1,
-			double_ban: interaction.options.getInteger("double_ban") || 1,
-			fm_mods: interaction.options.getInteger("fm_mods") || 1,
-			Guild_id: interaction.guildId,
-		};
 
+		// Construct tourney object
 		let tournament = await prisma.tournament.create({
-			data: tourney,
+			data: {
+				acronym,
+				name: interaction.options.getString("name") ?? "My Tournament",
+				score_mode: interaction.options.getInteger("score_mode") ?? 3,
+				banner_url:
+					"https://yagami.clxxiii.dev/icons/white-gradient.png",
+				description: "A new tournament",
+				team_mode: interaction.options.getInteger("team_mode") ?? 0,
+				force_nf: interaction.options.getBoolean("force_nf") ?? true,
+				color: interaction.options.getString("color") ?? "#F88000",
+				team_size: interaction.options.getInteger("team_size") ?? 1,
+				icon_url:
+					interaction.options.getString("icon_url") ??
+					"https://yagami.clxxiii.dev/icons/logo.png",
+				allow_registrations: false,
+				x_v_x_mode: interaction.options.getInteger("x_v_x_mode") || 1,
+				double_pick: interaction.options.getInteger("double_pick") || 1,
+				double_ban: interaction.options.getInteger("double_ban") || 1,
+				fm_mods: interaction.options.getInteger("fm_mods") || 1,
+				Guild_id: interaction.guildId,
+			},
 		});
 
 		prisma.guild
@@ -160,7 +162,7 @@ module.exports = {
 
 		let message = stripIndent`
 				Woohoo! 🥳 Your new tournament, \`${acronym}\` has been created!
-				Currently, your tournament's name is \`${tourney.name}\`, but you can change that!
+				Currently, your tournament's name is \`${tournament.name}\`, but you can change that!
 
 				Here are the next steps to get things running:
 			`;

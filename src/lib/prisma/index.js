@@ -27,10 +27,10 @@ module.exports = {
 	},
 	/**
 	 *
-	 * @param {import("@prisma/client").OsuOauth} token
+	 * @param {import("@prisma/client").User} user
 	 */
-	async refreshOsuToken(token, force) {
-		let refreshTime = token.last_update.getTime() + token.expires_in * 1000;
+	async refreshOsuToken(user, force) {
+		let refreshTime = user.last_update.getTime() + user.expires_in * 1000;
 		let time = refreshTime - Date.now();
 		if (time <= 0 || force) {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -47,7 +47,7 @@ module.exports = {
 					client_id: process.env.OSU_CLIENT_ID,
 					client_secret: process.env.OSU_CLIENT_SECRET,
 					grant_type: "refresh_token",
-					refresh_token: token.refresh_token,
+					refresh_token: user.refresh_token,
 				},
 				validateStatus: () => true,
 			});
@@ -60,9 +60,9 @@ module.exports = {
 			let { access_token, expires_in, refresh_token, token_type } =
 				response.data;
 
-			token = await prisma.osuOauth.update({
+			user = await prisma.user.update({
 				where: {
-					discord_id: token.discord_id,
+					id: user.id,
 				},
 				data: {
 					access_token,
@@ -72,13 +72,9 @@ module.exports = {
 					last_update: new Date(),
 				},
 			});
-			setTimeout(
-				module.exports.refreshOsuToken,
-				expires_in * 1000,
-				token
-			);
+			setTimeout(module.exports.refreshOsuToken, expires_in * 1000, user);
 		} else {
-			setTimeout(module.exports.refreshOsuToken, time, token);
+			setTimeout(module.exports.refreshOsuToken, time, user);
 		}
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 		let userData = await axios({
@@ -87,7 +83,7 @@ module.exports = {
 			headers: {
 				Accept: "application/json",
 				"Content-Type": "application/json",
-				Authorization: "Bearer " + token.access_token,
+				Authorization: "Bearer " + user.access_token,
 			},
 			validateStatus: () => true,
 		});
@@ -111,35 +107,35 @@ module.exports = {
 			`Refreshing user data for ${userData.username} (https://osu.ppy.sh/u/${userData.id})`
 		);
 		let userPayload = {
-			osu_id: userData.id,
-			osu_username: userData.username,
-			osu_country_code: userData.country.code,
-			osu_country_name: userData.country.name,
-			osu_cover_url: userData.cover_url,
-			osu_ranked_score: userData.statistics.ranked_score,
-			osu_play_count: userData.statistics.play_count,
-			osu_total_score: userData.statistics.total_score,
-			osu_pp_rank: userData.statistics.global_rank ?? -1,
-			osu_level: userData.statistics.level.current,
-			osu_level_progress: userData.statistics.level.progress,
-			osu_hit_accuracy: userData.statistics.hit_accuracy,
-			osu_pp: userData.statistics.pp,
+			id: userData.id,
+			username: userData.username,
+			country_code: userData.country.code,
+			country_name: userData.country.name,
+			cover_url: userData.cover_url,
+			ranked_score: userData.statistics.ranked_score,
+			play_count: userData.statistics.play_count,
+			total_score: userData.statistics.total_score,
+			pp_rank: userData.statistics.global_rank ?? -1,
+			level: userData.statistics.level.current,
+			level_progress: userData.statistics.level.progress,
+			hit_accuracy: userData.statistics.hit_accuracy,
+			pp: userData.statistics.pp,
 		};
 
 		await prisma.user.update({
 			where: {
-				discord_id: token.discord_id,
+				discord_id: user.discord_id,
 			},
 			data: userPayload,
 		});
 	},
 	async refreshTokens() {
-		let osuTokens = await prisma.osuOauth.findMany();
+		let users = await prisma.user.findMany();
 		let ratelimit = false;
-		for (const token of osuTokens) {
+		for (const user of users) {
 			if (ratelimit) continue;
 			await new Promise((resolve) => setTimeout(resolve, 2000));
-			let ratelimitUpdate = await module.exports.refreshOsuToken(token);
+			let ratelimitUpdate = await module.exports.refreshOsuToken(user);
 			ratelimit = ratelimit || ratelimitUpdate;
 		}
 	},

@@ -89,6 +89,7 @@ model User {
   OsuBadges       UserWithOsuBadge[]
   Badges          UserWithCustomBadge[]
   HostOf          UsersHostingTournament[]
+  Sessions        UserSession[]
 }
 
 model DiscordAccount {
@@ -106,6 +107,13 @@ model DiscordAccount {
   refresh_token String
   type          String
   scope         String
+}
+
+model UserSession {
+  id        String   @id
+  User      User     @relation(fields: [osuId], references: [id])
+  osuId     Int
+  createdAt DateTime @default(now())
 }
 
 model Guild {
