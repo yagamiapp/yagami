@@ -124,7 +124,7 @@ module.exports = {
 
 		await prisma.user.update({
 			where: {
-				discord_id: user.discord_id,
+				id: user.id,
 			},
 			data: userPayload,
 		});
