@@ -53,7 +53,7 @@ Clone the repository, and install the dependencies
 
 ```
 git clone https://github.com/clxxiii/yagami.git
-npm install
+pnpm install
 ```
 
 You will need to add a .ENV file and add the following variables:
@@ -105,5 +105,5 @@ npx prisma studio
 Lastly, run the dev command to get started!
 
 ```
-npm run dev
+pnpm run dev
 ```
