@@ -59,7 +59,13 @@ module.exports = {
 					tournamentId: tournament.id,
 					Members: {
 						some: {
-							discordId: users[0].id,
+							User: {
+								DiscordAccounts: {
+									some: {
+										id: users[0].id,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -69,7 +75,13 @@ module.exports = {
 					tournamentId: tournament.id,
 					Members: {
 						some: {
-							discordId: users[1].id,
+							User: {
+								DiscordAccounts: {
+									some: {
+										id: users[1].id,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -205,7 +217,7 @@ module.exports = {
 			});
 			for (let i = 0; i < members.length; i++) {
 				let member = members[i];
-				let rank = member.osu_pp_rank;
+				let rank = member.pp_rank;
 				if (rank == null) {
 					rank = "Unranked";
 				} else {
@@ -213,8 +225,8 @@ module.exports = {
 				}
 
 				teamString += `
-                    :flag_${member.osu_country_code.toLowerCase()}: ${
-					member.osu_username
+                    :flag_${member.country_code.toLowerCase()}: ${
+					member.username
 				} (#${rank})`;
 				if (i == 0) {
 					teamString += " **(c)**";

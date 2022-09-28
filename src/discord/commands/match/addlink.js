@@ -28,7 +28,13 @@ module.exports = {
 						Team: {
 							Members: {
 								some: {
-									discordId: interaction.user.id,
+									User: {
+										DiscordAccounts: {
+											some: {
+												id: interaction.user.id,
+											},
+										},
+									},
 								},
 							},
 						},

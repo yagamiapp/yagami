@@ -57,9 +57,8 @@ module.exports = {
 				active_tournament.icon_url ||
 					"https://yagami.clxxiii.dev/static/yagami%20var.png"
 			)
-			.setTitle(
-				`${active_tournament.acronym}: ${active_tournament.name}`
-			);
+			.setTitle(`${active_tournament.acronym}: ${active_tournament.name}`)
+			.setImage(active_tournament.banner_url);
 
 		let description = "";
 		for (const key in active_tournament) {
@@ -72,6 +71,7 @@ module.exports = {
 				"id",
 				"Guild_id",
 				"acronym",
+				"banner_url",
 			];
 			if (ignoredProps.includes(key) || key.includes("multiplier"))
 				continue;
