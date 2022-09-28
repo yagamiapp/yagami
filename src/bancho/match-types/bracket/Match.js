@@ -307,8 +307,8 @@ class MatchManager {
 			let users = team.users;
 
 			for (const user of users) {
-				if (!invitesToIgnore.includes(user.osu_username)) {
-					await this.invitePlayer(`#${user.osu_id}`);
+				if (!invitesToIgnore.includes(user.username)) {
+					await this.invitePlayer(`#${user.id}`);
 				}
 			}
 		}
@@ -402,7 +402,7 @@ class MatchManager {
 		}
 
 		// Get users from the team that are already in the lobby
-		let userMap = team.users.map((x) => x.osu_id);
+		let userMap = team.users.map((x) => x.id);
 		let inLobbyPlayers = this.lobby.slots
 			.filter((x) => x)
 			.filter((x) => userMap.includes(x.user.id));
@@ -528,7 +528,7 @@ class MatchManager {
 					for (const slot of this.lobby.slots) {
 						if (!slot) continue;
 
-						let userMap = team.users.map((x) => x.osu_username);
+						let userMap = team.users.map((x) => x.username);
 						if (userMap.includes(slot.user.username)) {
 							let modMap = slot.mods.map((x) => x.shortMod);
 							if (modMap.some((x) => allowedFMMods.includes(x))) {
@@ -942,7 +942,7 @@ class MatchManager {
 		if (this.rollVerification[username]) {
 			let team;
 			for (const teamTest of this.teams) {
-				let userList = teamTest.users.map((user) => user.osu_username);
+				let userList = teamTest.users.map((user) => user.username);
 				if (userList.includes(roll.groups.user)) {
 					team = teamTest;
 				}
@@ -1321,7 +1321,7 @@ class MatchManager {
 
 		let team;
 		for (const teamTest of this.teams) {
-			let userList = teamTest.users.map((user) => user.osu_username);
+			let userList = teamTest.users.map((user) => user.username);
 			if (userList.includes(msg.user.username)) {
 				team = teamTest;
 			}
@@ -1516,7 +1516,7 @@ class MatchManager {
 		if (msg.message.match(/^!mp timer|^!mp aborttimer/g)) {
 			let team;
 			for (const teamTest of this.teams) {
-				if (teamTest.users.find((u) => u.osu_id == msg.user.id)) {
+				if (teamTest.users.find((u) => u.id == msg.user.id)) {
 					team = teamTest;
 				}
 			}
@@ -1720,11 +1720,11 @@ class MatchManager {
 				let playerId = score.user_id;
 				let team;
 				for (const teamTest of this.teams) {
-					if (teamTest.users.find((u) => u.osu_id == playerId)) {
+					if (teamTest.users.find((u) => u.id == playerId)) {
 						team = teamTest;
 					}
 				}
-				let user = team.users.find((u) => u.osu_id == playerId);
+				let user = team.users.find((u) => u.id == playerId);
 
 				let mods = convertEnumToAcro(score.enabled_mods);
 
@@ -1794,7 +1794,7 @@ class MatchManager {
 
 				let userScore = [
 					emotes.grades[grade],
-					user.osu_username,
+					user.username,
 					parseInt(score.score).toLocaleString(),
 					parseInt(score.maxcombo).toLocaleString() + "x",
 					(accuracy * 100).toFixed(2) + "%",
@@ -1851,12 +1851,12 @@ class MatchManager {
 				.map((x) => x.user.username);
 			for (const team of this.teams) {
 				let inLobbyPlayers = team.users.filter((x) =>
-					players.includes(x.osu_username)
+					players.includes(x.username)
 				);
 
 				leaderboard += `${emotes.teams[team.id]} **${team.name}**\n`;
 				for (const user of inLobbyPlayers) {
-					leaderboard += `\`${user.osu_username}\`\n`;
+					leaderboard += `\`${user.username}\`\n`;
 				}
 				leaderboard += "\n";
 			}
