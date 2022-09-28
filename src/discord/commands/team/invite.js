@@ -28,14 +28,18 @@ module.exports = {
 		let invitee = interaction.options.getUser("user");
 		let inviteeData = await prisma.user.findFirst({
 			where: {
-				discord_id: invitee.id,
+				DiscordAccounts: {
+					some: {
+						id: invitee.id,
+					},
+				},
 			},
 		});
 		let inviteeTeam = await prisma.team.findFirst({
 			where: {
 				Members: {
 					some: {
-						discordId: invitee.id,
+						id: invitee.id,
 					},
 				},
 				tournamentId: tournament.id,
@@ -45,7 +49,11 @@ module.exports = {
 		// Get data of inviter
 		let inviterData = await prisma.user.findFirst({
 			where: {
-				discord_id: interaction.user.id,
+				DiscordAccounts: {
+					some: {
+						id: interaction.user.id,
+					},
+				},
 			},
 		});
 		let inviterTeam = await prisma.team.findFirst({
@@ -109,7 +117,7 @@ module.exports = {
 				discord_id: invitee.id,
 				InTeams: {
 					some: {
-						discordId: invitee.id,
+						osuId: invitee.id,
 						teamId: inviterTeam.id,
 					},
 				},
@@ -146,7 +154,7 @@ module.exports = {
 		if (inviteeTeam) {
 			let embed = new EmbedBuilder()
 				.setDescription(
-					`**Err**: User \`${inviteeData.osu_username}\` is already in a team.`
+					`**Err**: User \`${inviteeData.username}\` is already in a team.`
 				)
 				.setColor(Colors.Red);
 			await interaction.editReply({ embeds: [embed] });
@@ -202,7 +210,7 @@ module.exports = {
 		let teamString = "";
 		for (let i = 0; i < inviterMembers.length; i++) {
 			let member = inviterMembers[i];
-			let rank = member.osu_pp_rank;
+			let rank = member.pp_rank;
 			if (rank == null) {
 				rank = "Unranked";
 			} else {
@@ -210,9 +218,7 @@ module.exports = {
 			}
 
 			teamString += `
-			:flag_${member.osu_country_code.toLowerCase()}: ${
-				member.osu_username
-			} (#${rank})`;
+			:flag_${member.country_code.toLowerCase()}: ${member.username} (#${rank})`;
 			if (i == 0) {
 				teamString += " **(c)**";
 			}
@@ -222,9 +228,9 @@ module.exports = {
 			.setTitle("Pending Invite!")
 			.setDescription(
 				stripIndents`
-			You've received an invite to join a team from ${inviterData.osu_username}!
+			You've received an invite to join a team from ${inviterData.username}!
 
-			${inviterData.osu_username} has invited you to join the team, **${inviterTeam.name}** in **${tournament.name}**!
+			${inviterData.username} has invited you to join the team, **${inviterTeam.name}** in **${tournament.name}**!
 			`
 			)
 			.setColor(inviterTeam.color || tournament.color || "#F88000")
@@ -234,9 +240,9 @@ module.exports = {
 				text: tournament.name,
 			})
 			.setAuthor({
-				name: inviterData.osu_username,
-				iconURL: "https://a.ppy.sh/" + inviterData.osu_id,
-				url: "https://osu.ppy.sh/users/" + inviterData.osu_id,
+				name: inviterData.username,
+				iconURL: "https://a.ppy.sh/" + inviterData.id,
+				url: "https://osu.ppy.sh/users/" + inviterData.id,
 			})
 			.addFields({ name: `**${inviterTeam.name}:**`, value: teamString });
 
@@ -246,7 +252,7 @@ module.exports = {
 		});
 
 		embed = new EmbedBuilder()
-			.setTitle(`Invite sent to ${inviteeData.osu_username}!`)
+			.setTitle(`Invite sent to ${inviteeData.username}!`)
 			.setDescription("We'll send you a DM if they accept.")
 			.setColor(inviterTeam.color)
 			.setThumbnail("https://s.ppy.sh/a/" + inviteeData.osu_id);

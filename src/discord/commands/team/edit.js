@@ -36,7 +36,13 @@ module.exports = {
 			where: {
 				Members: {
 					some: {
-						discordId: interaction.user.id,
+						User: {
+							DiscordAccounts: {
+								some: {
+									id: interaction.user.id,
+								},
+							},
+						},
 					},
 				},
 				tournamentId: tournament.id,
@@ -171,7 +177,7 @@ module.exports = {
 		let teamString = "";
 		for (let i = 0; i < members.length; i++) {
 			let member = members[i];
-			let rank = member.osu_pp_rank;
+			let rank = member.pp_rank;
 			if (rank == null) {
 				rank = "Unranked";
 			} else {
@@ -179,9 +185,7 @@ module.exports = {
 			}
 
 			teamString += `
-			:flag_${member.osu_country_code.toLowerCase()}: ${
-				member.osu_username
-			} (#${rank})`;
+			:flag_${member.country_code.toLowerCase()}: ${member.username} (#${rank})`;
 			if (i == 0) {
 				teamString += " **(c)**";
 			}

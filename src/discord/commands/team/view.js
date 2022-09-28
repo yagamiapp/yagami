@@ -1,6 +1,6 @@
 const { SlashCommandSubcommandBuilder } = require("discord.js");
 const { EmbedBuilder, Colors } = require("discord.js");
-const { prisma } = require("../../../lib/prisma");
+const { prisma, fetchGuild } = require("../../../lib/prisma");
 
 module.exports = {
 	data: new SlashCommandSubcommandBuilder()
@@ -18,18 +18,24 @@ module.exports = {
 	 */
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
+		let guild = await fetchGuild(interaction.guildId);
+		let tournament = guild.active_tournament;
 		let user = interaction.options.getUser("user") || interaction.user;
 
 		let team = await prisma.team.findFirst({
 			where: {
 				Members: {
 					some: {
-						discordId: user.id,
+						User: {
+							DiscordAccounts: {
+								some: {
+									id: user.id,
+								},
+							},
+						},
 					},
 				},
-				Tournament: {
-					Guild_id: interaction.guildId,
-				},
+				tournamentId: tournament.id,
 			},
 		});
 
