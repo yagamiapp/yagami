@@ -9,14 +9,24 @@ module.exports = {
 
 		let userData = await prisma.user.findFirst({
 			where: {
-				discord_id: interaction.user.id,
+				DiscordAccounts: {
+					some: {
+						id: interaction.user.id,
+					},
+				},
 			},
 		});
 		let team = await prisma.team.findFirst({
 			where: {
 				Members: {
 					some: {
-						discordId: command.options.user,
+						User: {
+							DiscordAccounts: {
+								some: {
+									id: command.options.user,
+								},
+							},
+						},
 					},
 				},
 				tournamentId: tournament.id,
@@ -29,7 +39,7 @@ module.exports = {
 		await prisma.userInTeam.create({
 			data: {
 				teamId: team.id,
-				discordId: interaction.user.id,
+				osuId: userData.id,
 			},
 		});
 
@@ -54,7 +64,7 @@ module.exports = {
 		let dmEmbed = new EmbedBuilder()
 			.setTitle("🎉 Your invite was accepted! 🎉")
 			.setDescription(
-				` \`${userData.osu_username}\` accepted your invite to join your team!`
+				` \`${userData.username}\` accepted your invite to join your team!`
 			)
 			.setColor(tournament.color)
 			.setThumbnail(tournament.icon_url);

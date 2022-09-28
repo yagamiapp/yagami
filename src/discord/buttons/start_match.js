@@ -195,6 +195,13 @@ module.exports = {
 					},
 				},
 			},
+			include: {
+				DiscordAccounts: {
+					select: {
+						id: true,
+					},
+				},
+			},
 		});
 
 		let matchEmbed = new EmbedBuilder()
@@ -243,12 +250,11 @@ module.exports = {
 			);
 		let playerString = "";
 		for (let player of players) {
-			playerString += `<@${player.discord_id}> `;
+			playerString += `<@${player.DiscordAccounts[0].id}> `; // I can't think of a way to ping the right user in less than 100 lines of code
 		}
 
 		let archiveTimer = setTimeout(async () => {
 			// Creating a match with state 3 will start archive mode
-			console.log("Archiving...");
 			let archive = new MatchManager(match.id, null);
 			await archive.createMatch();
 		}, 15 * 60 * 1000);

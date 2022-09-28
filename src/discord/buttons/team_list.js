@@ -51,14 +51,14 @@ module.exports = {
 			for (let i = 0; i < a.members.length; i++) {
 				let user = a.members[i];
 				if (user.osu_pp_rank) {
-					aAvg += user.osu_pp_rank;
+					aAvg += user.pp_rank;
 				}
 			}
 
 			for (let i = 0; i < b.members.length; i++) {
 				let user = b.members[i];
 				if (user.osu_pp_rank) {
-					bAvg += user.osu_pp_rank;
+					bAvg += user.pp_rank;
 				}
 			}
 
@@ -131,7 +131,7 @@ module.exports = {
 
 			for (let i = 0; i < members.length; i++) {
 				let member = members[i];
-				let rank = member.osu_pp_rank;
+				let rank = member.pp_rank;
 				if (rank == null) {
 					rank = "Unranked";
 				} else {
@@ -139,9 +139,7 @@ module.exports = {
 				}
 
 				teamString += `
-				:flag_${member.osu_country_code.toLowerCase()}: ${
-					member.osu_username
-				} (#${rank})`;
+				:flag_${member.country_code.toLowerCase()}: ${member.username} (#${rank})`;
 				if (i == 0) {
 					teamString += " **(c)**";
 				}
