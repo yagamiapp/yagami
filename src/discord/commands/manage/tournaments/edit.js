@@ -11,7 +11,6 @@ module.exports = {
 			option
 				.setName("acronym")
 				.setDescription("Change the acronym of your tournament")
-				.setRequired(true)
 		)
 		.addStringOption((option) =>
 			option
