@@ -48,7 +48,11 @@ module.exports = {
 
 		let user = await prisma.user.findFirst({
 			where: {
-				discord_id: interaction.user.id,
+				DiscordAccounts: {
+					some: {
+						id: interaction.user.id,
+					},
+				},
 			},
 		});
 
@@ -65,13 +69,13 @@ module.exports = {
 		}
 
 		let team = {
-			name: user.osu_username + "'s team",
-			icon_url: "https://s.ppy.sh/a/" + user.osu_id,
+			name: user.username + "'s team",
+			icon_url: "https://s.ppy.sh/a/" + user.id,
 			color: tournament.color || "#F88000",
 			tournamentId: tournament.id,
 		};
 
-		if (tournament.team_size == 1) team.name = user.osu_username;
+		if (tournament.team_size == 1) team.name = user.username;
 
 		let teamObject = await prisma.team.create({
 			data: team,
@@ -79,7 +83,7 @@ module.exports = {
 
 		await prisma.userInTeam.create({
 			data: {
-				discordId: interaction.user.id,
+				osuId: user.id,
 				teamId: teamObject.id,
 			},
 		});
