@@ -24,7 +24,13 @@ module.exports = {
 				tournamentId: tournament.id,
 				Members: {
 					some: {
-						discordId: interaction.user.id,
+						User: {
+							DiscordAccounts: {
+								some: {
+									id: interaction.user.id,
+								},
+							},
+						},
 					},
 				},
 			},

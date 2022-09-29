@@ -14,7 +14,13 @@ module.exports = {
 			where: {
 				Members: {
 					some: {
-						discordId: interaction.user.id,
+						User: {
+							DiscordAccounts: {
+								some: {
+									id: interaction.user.id,
+								},
+							},
+						},
 					},
 				},
 			},
