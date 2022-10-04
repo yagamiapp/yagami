@@ -61,7 +61,7 @@ class Team {
 	 * @returns
 	 */
 	calculateScore(team) {
-		let users = team.users.map((user) => user.osu_id);
+		let users = team.users.map((user) => user.id);
 		let scoreSum = 0;
 		for (const score of this.match.lastGameData.scores) {
 			if (users.includes(parseInt(score.user_id))) {
@@ -114,7 +114,7 @@ class Team {
 	getUserPos(id) {
 		for (let i = 0; i < this.users.length; i++) {
 			let user = this.users[i];
-			if (user.osu_id == id) {
+			if (user.id == id) {
 				return i;
 			}
 		}

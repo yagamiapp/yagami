@@ -255,7 +255,7 @@ module.exports = {
 			.setTitle(`Invite sent to ${inviteeData.username}!`)
 			.setDescription("We'll send you a DM if they accept.")
 			.setColor(inviterTeam.color)
-			.setThumbnail("https://s.ppy.sh/a/" + inviteeData.osu_id);
+			.setThumbnail("https://s.ppy.sh/a/" + inviteeData.id);
 		await interaction.editReply({ embeds: [embed] });
 	},
 };

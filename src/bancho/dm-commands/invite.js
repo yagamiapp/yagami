@@ -26,7 +26,7 @@ module.exports = {
 							Members: {
 								some: {
 									User: {
-										osu_id: id,
+										id: id,
 									},
 								},
 							},
