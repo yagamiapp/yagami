@@ -58,7 +58,7 @@ module.exports = {
 			where: {
 				DiscordAccounts: {
 					some: {
-						id: interaction.options.getUser("user"),
+						id: interaction.options.getUser("user").id,
 					},
 				},
 			},
