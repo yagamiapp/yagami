@@ -54,10 +54,20 @@ module.exports = {
 			return;
 		}
 
+		let user = await prisma.user.findFirst({
+			where: {
+				DiscordAccounts: {
+					some: {
+						id: interaction.options.getUser("user"),
+					},
+				},
+			},
+		});
+
 		await prisma.userInTeam.create({
 			data: {
 				teamId: team.id,
-				discordId: interaction.options.getUser("user").id,
+				osuId: user.id,
 			},
 		});
 
