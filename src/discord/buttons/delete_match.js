@@ -1,4 +1,4 @@
-const { EmbedBuilder, Colors } = require("discord.js");
+const { EmbedBuilder, Colors, Embed } = require("discord.js");
 const { prisma, fetchGuild } = require("../../lib/prisma");
 
 module.exports = {
@@ -25,6 +25,27 @@ module.exports = {
 			});
 			return;
 		}
+
+		let match = await prisma.match.findUnique({
+			where: {
+				id: parseInt(command.options.id),
+			},
+		});
+
+		if (!match) {
+			let embed = interaction.message.embeds[0];
+			let embedBuilder = new EmbedBuilder();
+			embedBuilder.data = embed.data;
+
+			let newTitle = embed.data.title.replace("ARCHIVED", "DELETED");
+			embedBuilder.setDescription(null);
+			embedBuilder.setTitle(newTitle);
+			embedBuilder.setColor(Colors.NotQuiteBlack);
+
+			interaction.update({ embeds: [embedBuilder], components: [] });
+			return;
+		}
+
 		let guild = await fetchGuild(interaction.guildId);
 		let tournament = guild.active_tournament;
 
@@ -32,7 +53,7 @@ module.exports = {
 			where: {
 				Match: {
 					some: {
-						id: parseInt(command.options.id),
+						id: match.id,
 					},
 				},
 				tournamentId: tournament.id,
@@ -60,8 +81,8 @@ module.exports = {
 			.setTitle(
 				`DELETED: ${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
 			)
-			.setColor("#555555")
-			.setDescription("")
+			.setColor(Colors.NotQuiteBlack)
+			.setDescription(null)
 			.setFooter({ text: "Match Deleted" })
 			.setTimestamp();
 		await interaction.update({
