@@ -103,6 +103,7 @@ module.exports = {
 				.setMinValue(0)
 				.setMaxValue(8)
 		),
+	/** @param {import("discord.js").CommandInteraction} interaction */
 	async execute(interaction) {
 		await interaction.deferReply({ ephemeral: true });
 		let acronym = interaction.options.getString("acronym");
@@ -120,6 +121,24 @@ module.exports = {
 					`**Err**: A tournament with the acronym \`${acronym}\` already exists.`
 				)
 				.setColor(Colors.Red);
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
+
+		let user = await prisma.user.findFirst({
+			where: {
+				DiscordAccounts: {
+					some: {
+						id: interaction.user.id,
+					},
+				},
+			},
+		});
+
+		if (!user) {
+			let embed = new EmbedBuilder().setDescription(
+				`**Err**: You must login to make a tournament.`
+			);
 			await interaction.editReply({ embeds: [embed] });
 			return;
 		}
@@ -149,16 +168,21 @@ module.exports = {
 			},
 		});
 
-		prisma.guild
-			.update({
-				where: {
-					guild_id: interaction.guildId,
-				},
-				data: {
-					active_tournament: tournament.id,
-				},
-			})
-			.then(console.log);
+		await prisma.usersHostingTournament.create({
+			data: {
+				userId: user.id,
+				tourney: tournament.id,
+			},
+		});
+
+		await prisma.guild.update({
+			where: {
+				guild_id: interaction.guildId,
+			},
+			data: {
+				active_tournament: tournament.id,
+			},
+		});
 
 		let message = stripIndent`
 				Woohoo! 🥳 Your new tournament, \`${acronym}\` has been created!
