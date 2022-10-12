@@ -56,8 +56,8 @@ model UserWithCustomBadge {
 model UsersHostingTournament {
   userId  Int
   tourney Int
-  User    User       @relation(fields: [userId], references: [id])
-  Tourney Tournament @relation(fields: [tourney], references: [id])
+  User    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Tourney Tournament @relation(fields: [tourney], references: [id], onDelete: Cascade)
 
   @@id([userId, tourney])
 }
@@ -115,6 +115,7 @@ model UserSession {
   User      User     @relation(fields: [osuId], references: [id])
   osuId     Int
   createdAt DateTime @default(now())
+  lastUsed  DateTime @default(now())
 }
 
 model Guild {
@@ -198,7 +199,7 @@ model TeamInvite {
   inviteeUserId Int
   Invitee       User @relation(fields: [inviteeUserId], references: [id])
   teamId        Int
-  Team          Team @relation(fields: [teamId], references: [id])
+  Team          Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@id([inviteeUserId, teamId])
 }
@@ -209,7 +210,7 @@ model MapInPool {
   Map         Map          @relation(fields: [mapId], references: [beatmap_id])
   mapId       String
   modPriority Int          @default(0)
-  Mappool     Mappool      @relation(fields: [mappoolId], references: [id])
+  Mappool     Mappool      @relation(fields: [mappoolId], references: [id], onDelete: Cascade)
   mappoolId   Int
   InMatches   MapInMatch[]
 
@@ -269,7 +270,7 @@ model Team {
   icon_url         String
   color            String
   Members          UserInTeam[]
-  Tournament       Tournament             @relation(fields: [tournamentId], references: [id])
+  Tournament       Tournament             @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   tournamentId     Int
   scrim            Boolean                @default(false)
   InBracketMatches TeamInMatch[]
@@ -280,7 +281,7 @@ model Team {
 model UserInTeam {
   osuId          Int
   User           User     @relation(fields: [osuId], references: [id])
-  Team           Team     @relation(fields: [teamId], references: [id])
+  Team           Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
   teamId         Int
   member_order   Int      @default(0)
   delete_warning Boolean?
