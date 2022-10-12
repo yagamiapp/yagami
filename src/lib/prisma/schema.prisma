@@ -90,6 +90,7 @@ model User {
   Badges          UserWithCustomBadge[]
   HostOf          UsersHostingTournament[]
   Sessions        UserSession[]
+  Invites         TeamInvite[]
 }
 
 model DiscordAccount {
@@ -193,6 +194,15 @@ model Mappool {
   round_acronym        String?
 }
 
+model TeamInvite {
+  inviteeUserId Int
+  Invitee       User @relation(fields: [inviteeUserId], references: [id])
+  teamId        Int
+  Team          Team @relation(fields: [teamId], references: [id])
+
+  @@id([inviteeUserId, teamId])
+}
+
 model MapInPool {
   identifier  String // NM1, NM2 etc.
   mods        String
@@ -264,6 +274,7 @@ model Team {
   scrim            Boolean                @default(false)
   InBracketMatches TeamInMatch[]
   InQualifiers     TeamInQualifierMatch[]
+  InvitedUsers     TeamInvite[]
 }
 
 model UserInTeam {
