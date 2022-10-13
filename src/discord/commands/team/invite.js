@@ -39,7 +39,13 @@ module.exports = {
 			where: {
 				Members: {
 					some: {
-						id: invitee.id,
+						User: {
+							DiscordAccounts: {
+								some: {
+									id: invitee.id,
+								},
+							},
+						},
 					},
 				},
 				tournamentId: tournament.id,
@@ -60,7 +66,13 @@ module.exports = {
 			where: {
 				Members: {
 					some: {
-						discordId: interaction.user.id,
+						User: {
+							DiscordAccounts: {
+								some: {
+									id: interaction.user.id,
+								},
+							},
+						},
 					},
 				},
 				tournamentId: tournament.id,
@@ -114,10 +126,14 @@ module.exports = {
 		//	In case the use is already in your team
 		let duplicateCheck = await prisma.user.findFirst({
 			where: {
-				discord_id: invitee.id,
+				DiscordAccounts: {
+					some: {
+						id: invitee.id,
+					},
+				},
 				InTeams: {
 					some: {
-						osuId: invitee.id,
+						osuId: inviteeData.id,
 						teamId: inviterTeam.id,
 					},
 				},
@@ -185,24 +201,22 @@ module.exports = {
 			return;
 		}
 
+		// Create invite object in database
+		await prisma.teamInvite.create({
+			data: {
+				inviteeUserId: inviteeData.id,
+				teamId: inviterTeam.id,
+			},
+		});
+
 		let dm = await invitee.createDM();
 		let inviteAccept = new ActionRowBuilder().addComponents(
 			new ButtonBuilder()
-				.setCustomId(
-					"invite_accept?user=" +
-						interaction.user.id +
-						"&guild=" +
-						interaction.guildId
-				)
+				.setCustomId("invite_accept?team=" + inviterTeam.id)
 				.setLabel("Accept")
 				.setStyle(ButtonStyle.Primary),
 			new ButtonBuilder()
-				.setCustomId(
-					"invite_decline?user=" +
-						interaction.user.id +
-						"&guild=" +
-						interaction.guildId
-				)
+				.setCustomId("invite_decline?team=" + inviterTeam.id)
 				.setLabel("Decline")
 				.setStyle(ButtonStyle.Danger)
 		);

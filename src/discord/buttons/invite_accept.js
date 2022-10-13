@@ -16,19 +16,26 @@ module.exports = {
 				},
 			},
 		});
+
+		let invite = await prisma.teamInvite.findFirst({
+			where: {
+				inviteeUserId: userData.id,
+				teamId: parseInt(command.options.team),
+			},
+		});
+
+		if (!invite) {
+			await interaction.message.edit({
+				components: [],
+				embeds: [],
+				content: "You handled this invite already",
+			});
+			return;
+		}
+
 		let team = await prisma.team.findFirst({
 			where: {
-				Members: {
-					some: {
-						User: {
-							DiscordAccounts: {
-								some: {
-									id: command.options.user,
-								},
-							},
-						},
-					},
-				},
+				id: invite.teamId,
 				tournamentId: tournament.id,
 			},
 		});
@@ -43,6 +50,15 @@ module.exports = {
 			},
 		});
 
+		await prisma.teamInvite.delete({
+			where: {
+				inviteeUserId_teamId: {
+					teamId: team.id,
+					inviteeUserId: userData.id,
+				},
+			},
+		});
+
 		let embed = new EmbedBuilder()
 			.setTitle("✅ Invite Accepted ✅")
 			.setColor(Colors.Green);
@@ -52,22 +68,5 @@ module.exports = {
 			embeds: [embed],
 			components: [],
 		});
-
-		let tourneyGuild = await interaction.client.guilds.fetch(
-			command.options.guild
-		);
-		let tourneyMember = await tourneyGuild.members.fetch(
-			command.options.user
-		);
-
-		let dm = await tourneyMember.createDM();
-		let dmEmbed = new EmbedBuilder()
-			.setTitle("🎉 Your invite was accepted! 🎉")
-			.setDescription(
-				` \`${userData.username}\` accepted your invite to join your team!`
-			)
-			.setColor(tournament.color)
-			.setThumbnail(tournament.icon_url);
-		await dm.send({ embeds: [dmEmbed] });
 	},
 };

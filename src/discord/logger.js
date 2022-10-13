@@ -130,7 +130,7 @@ module.exports = {
 					iconURL: interaction.user.displayAvatarURL(),
 				})
 				.setFooter({
-					iconURL: interaction.guild.iconURL(),
+					iconURL: interaction.guild?.iconURL() || null,
 					text: interaction.guild?.name || "DM Channel",
 				});
 		}

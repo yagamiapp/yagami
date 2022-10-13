@@ -116,6 +116,9 @@ model UserSession {
   osuId     Int
   createdAt DateTime @default(now())
   lastUsed  DateTime @default(now())
+  device    String?
+  browser   String?
+  os        String?
 }
 
 model Guild {
