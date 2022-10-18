@@ -14,5 +14,7 @@ services:
         image: "clxxiii/yagami-web:latest"
         ports:
             - "3000:3000"
+        env_file:
+            - .env
         volumes:
             - "./src/lib/prisma/db:/app/src/lib/prisma/db:rw"
