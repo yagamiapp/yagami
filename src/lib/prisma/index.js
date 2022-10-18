@@ -41,8 +41,19 @@ module.exports = {
  * @param {import("@prisma/client").User} user
  */
 async function refreshOsuToken(user, force) {
+	let token = await prisma.osuOauth.findUnique({
+		where: {
+			userId: user.id,
+		},
+	});
+
+	if (!token) {
+		console.log(`${user.username} has no token`);
+		return;
+	}
+
 	force = force || false;
-	let refreshTime = user.last_update.getTime() + user.expires_in * 1000;
+	let refreshTime = token.last_update.getTime() + token.expires_in * 1000;
 	let time = refreshTime - Date.now();
 	if (time <= 0 || force) {
 		await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -58,7 +69,7 @@ async function refreshOsuToken(user, force) {
 				client_id: process.env.OSU_CLIENT_ID,
 				client_secret: process.env.OSU_CLIENT_SECRET,
 				grant_type: "refresh_token",
-				refresh_token: user.refresh_token,
+				refresh_token: token.refresh_token,
 			},
 			validateStatus: () => true,
 		});
@@ -71,6 +82,11 @@ async function refreshOsuToken(user, force) {
 			await prisma.userSession.deleteMany({
 				where: {
 					osuId: user.id,
+				},
+			});
+			await prisma.osuOauth.delete({
+				where: {
+					userId: user.id,
 				},
 			});
 			return;

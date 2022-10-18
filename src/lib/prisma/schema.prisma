@@ -77,12 +77,7 @@ model User {
   hit_accuracy   Float
   pp             Float
 
-  last_update   DateTime @default(now())
-  access_token  String
-  expires_in    Int
-  refresh_token String
-  type          String
-
+  OsuToken        OsuOauth?
   DiscordAccounts DiscordAccount[]
   InTeams         UserInTeam[]
   OwnerOfLobby    AutoHostRotate?
@@ -102,12 +97,30 @@ model DiscordAccount {
   flags         Int
   username      String
 
+  DiscordToken DiscordOauth?
+}
+
+model OsuOauth {
+  userId        Int      @id
   last_update   DateTime @default(now())
   access_token  String
   expires_in    Int
   refresh_token String
-  type          String
+  token_type    String
+
+  User User @relation(fields: [userId], references: [id])
+}
+
+model DiscordOauth {
+  userId        String   @id
+  last_update   DateTime @default(now())
+  access_token  String
+  expires_in    Int
+  refresh_token String
+  token_type    String
   scope         String
+
+  User DiscordAccount @relation(fields: [userId], references: [id])
 }
 
 model UserSession {
