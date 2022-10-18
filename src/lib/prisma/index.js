@@ -25,57 +25,73 @@ module.exports = {
 		});
 		return guild;
 	},
-	/**
-	 *
-	 * @param {import("@prisma/client").User} user
-	 */
-	async refreshOsuToken(user, force) {
-		let refreshTime = user.last_update.getTime() + user.expires_in * 1000;
-		let time = refreshTime - Date.now();
-		if (time <= 0 || force) {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			console.log(`Refreshing osu token...`);
-
-			let response = await axios({
-				method: "POST",
-				url: "https://osu.ppy.sh/oauth/token",
-				headers: {
-					"Content-Type": "application/json",
-					Accept: "application/json",
-				},
-				data: {
-					client_id: process.env.OSU_CLIENT_ID,
-					client_secret: process.env.OSU_CLIENT_SECRET,
-					grant_type: "refresh_token",
-					refresh_token: user.refresh_token,
-				},
-				validateStatus: () => true,
-			});
-
-			if (response.error) {
-				console.log(response.error);
-				return;
-			}
-
-			let { access_token, expires_in, refresh_token, token_type } =
-				response.data;
-
-			user = await prisma.user.update({
-				where: {
-					id: user.id,
-				},
-				data: {
-					access_token,
-					expires_in,
-					refresh_token,
-					type: token_type,
-					last_update: new Date(),
-				},
-			});
-			setTimeout(module.exports.refreshOsuToken, expires_in * 1000, user);
-		} else {
-			setTimeout(module.exports.refreshOsuToken, time, user);
+	async refreshTokens() {
+		let users = await prisma.user.findMany();
+		let ratelimit = false;
+		for (const user of users) {
+			if (ratelimit) continue;
+			let ratelimitUpdate = await refreshOsuToken(user);
+			ratelimit = ratelimit || ratelimitUpdate;
 		}
+	},
+};
+
+/**
+ *
+ * @param {import("@prisma/client").User} user
+ */
+async function refreshOsuToken(user, force) {
+	force = force || false;
+	let refreshTime = user.last_update.getTime() + user.expires_in * 1000;
+	let time = refreshTime - Date.now();
+	if (time <= 0 || force) {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		let response = await axios({
+			method: "POST",
+			url: "https://osu.ppy.sh/oauth/token",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+			data: {
+				client_id: process.env.OSU_CLIENT_ID,
+				client_secret: process.env.OSU_CLIENT_SECRET,
+				grant_type: "refresh_token",
+				refresh_token: user.refresh_token,
+			},
+			validateStatus: () => true,
+		});
+
+		// If the refresh token did not work, it means the user revoked the client's access.
+		// In this case, we just sign the user out of all sessions, and wait for them to log in
+		// and give us an updated token.
+		if (response.status != 200) {
+			console.log(`${user.username}'s refresh token has expired!`);
+			await prisma.userSession.deleteMany({
+				where: {
+					osuId: user.id,
+				},
+			});
+			return;
+		}
+
+		let { access_token, expires_in, refresh_token, token_type } =
+			response.data;
+
+		user = await prisma.user.update({
+			where: {
+				id: user.id,
+			},
+			data: {
+				access_token,
+				expires_in,
+				refresh_token,
+				type: token_type,
+				last_update: new Date(),
+			},
+		});
+
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 		let userData = await axios({
 			method: "get",
@@ -128,15 +144,13 @@ module.exports = {
 			},
 			data: userPayload,
 		});
-	},
-	async refreshTokens() {
-		let users = await prisma.user.findMany();
-		let ratelimit = false;
-		for (const user of users) {
-			if (ratelimit) continue;
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-			let ratelimitUpdate = await module.exports.refreshOsuToken(user);
-			ratelimit = ratelimit || ratelimitUpdate;
-		}
-	},
-};
+
+		setTimeout(refreshOsuToken, expires_in * 1000, user);
+		await new Promise((resolve) => setTimeout(resolve, 2000));
+	} else {
+		console.log(
+			`Data for ${user.username} is up to date! (https://osu.ppy.sh/u/${user.id})`
+		);
+		setTimeout(refreshOsuToken, time, user);
+	}
+}
