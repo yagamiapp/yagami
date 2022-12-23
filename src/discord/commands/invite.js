@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("discord.js");
-const redirects = require("../../web/redirects.json");
 
+const inviteURL = "https://discord.com/oauth2/authorize?client_id=956030276050493441&permissions=10603482224&scope=bot%20applications.commands"
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("invite")
@@ -12,7 +12,7 @@ module.exports = {
 	async execute(interaction) {
 		await interaction.deferReply();
 
-		let link = redirects.find((x) => x.path === "/invite");
-		await interaction.editReply({ content: link.dest });
+		let link = inviteURL;
+		await interaction.editReply({ content: link });
 	},
 };

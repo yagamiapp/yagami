@@ -21,7 +21,7 @@ module.exports.deployCommands = async (guild) => {
 
 	rest.put(
 		Routes.applicationGuildCommands(
-			process.env.DISCORD_CLIENT_ID,
+			process.env.CLIENT_ID,
 			guild.id
 		),
 		{
