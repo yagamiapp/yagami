@@ -8,11 +8,11 @@ let data = new SlashCommandBuilder()
 let subcommands = {};
 
 const subcommandFiles = fs
-	.readdirSync("./src/discord/commands/round")
+	.readdirSync("./src/discord/commands/scrims")
 	.filter((file) => file.endsWith(".js"));
 
 for (const file of subcommandFiles) {
-	const subcommand = require(`./round/${file}`);
+	const subcommand = require(`./scrims/${file}`);
 	data.addSubcommand(subcommand.data);
 	subcommands[subcommand.data.name] = subcommand;
 }
