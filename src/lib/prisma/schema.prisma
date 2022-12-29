@@ -79,6 +79,7 @@ model User {
 
   OsuToken        OsuOauth?
   DiscordAccounts DiscordAccount[]
+  TwitchAccounts  TwitchAccount[]
   InTeams         UserInTeam[]
   OwnerOfLobby    AutoHostRotate?
   OsuBadges       UserWithOsuBadge[]
@@ -101,6 +102,8 @@ model DiscordAccount {
 }
 
 model TwitchAccount {
+  User                 User         @relation(fields: [osuId], references: [id])
+  osuId                Int
   id                   Int          @id
   username             String
   requests_enabled     Boolean      @default(false)
