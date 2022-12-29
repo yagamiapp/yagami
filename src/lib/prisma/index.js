@@ -41,7 +41,7 @@ module.exports = {
  * @param {import("@prisma/client").User} user
  */
 async function refreshOsuToken(user, force) {
-  force = true;
+  force = force || false;
   let token = await prisma.osuOauth.findUnique({
     where: {
       userId: user.id,
@@ -53,7 +53,6 @@ async function refreshOsuToken(user, force) {
     return;
   }
 
-  force = force || false;
   let refreshTime = token.last_update.getTime() + token.expires_in * 1000;
   let time = refreshTime - Date.now();
 
@@ -116,7 +115,7 @@ async function refreshOsuToken(user, force) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: "Bearer " + user.access_token,
+        Authorization: "Bearer " + access_token,
       },
       validateStatus: () => true,
     });
@@ -134,6 +133,9 @@ async function refreshOsuToken(user, force) {
     userData = userData.data;
 
     if (userData.authentication == "basic") {
+      console.log(
+        `An error occured while authenticating to fetch ${userData.username}'s data`
+      );
       return;
     }
     console.log(
