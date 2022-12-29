@@ -41,6 +41,7 @@ module.exports = {
  * @param {import("@prisma/client").User} user
  */
 async function refreshOsuToken(user, force) {
+  force = true;
   let token = await prisma.osuOauth.findUnique({
     where: {
       userId: user.id,
@@ -95,7 +96,7 @@ async function refreshOsuToken(user, force) {
 
     let { access_token, expires_in, refresh_token, token_type } = response.data;
 
-    user = await prisma.osuOauth.update({
+    await prisma.osuOauth.update({
       where: {
         userId: user.id,
       },
