@@ -29,6 +29,7 @@
 	},
 	"devDependencies": {
 		"nodemon": "^2.0.15",
-		"prisma": "^4.3.1"
+		"prisma": "^4.3.1",
+		"prisma-dbml-generator": "^0.10.0"
 	}
 }
