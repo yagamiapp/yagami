@@ -87,6 +87,10 @@ GITHUB_SECRET=
 GITHUB_PROD_BRANCH=
 # The channel to send log messages to
 LOG_CHANNEL
+# Your twitch bot username
+TWITCH_USERNAME=""
+# Your twitch bot token
+TWITCH_TOKEN=""
 ```
 
 Next, setup prisma and if you'd like, run prisma studio in a new terminal window
