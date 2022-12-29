@@ -1,13 +1,15 @@
 // const web = require("./src/web");
 const discord = require("./src/discord");
 const bancho = require("./src/bancho");
+const twitch = require("./src/twitch");
 const { refreshTokens } = require("./src/lib/prisma");
 require("dotenv").config();
 
 if (!process.env.disableDiscord) {
-	discord.init();
+  discord.init();
 }
 if (!process.env.disableBancho) {
-	bancho.init();
+  bancho.init();
 }
+twitch.init();
 refreshTokens();
