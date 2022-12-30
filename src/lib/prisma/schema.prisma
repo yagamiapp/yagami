@@ -6,6 +6,9 @@ generator client {
   binaryTargets = ["native", "linux-musl"]
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
@@ -79,6 +82,7 @@ model User {
 
   OsuToken        OsuOauth?
   DiscordAccounts DiscordAccount[]
+  TwitchAccounts  TwitchAccount[]
   InTeams         UserInTeam[]
   OwnerOfLobby    AutoHostRotate?
   OsuBadges       UserWithOsuBadge[]
@@ -98,6 +102,19 @@ model DiscordAccount {
   username      String
 
   DiscordToken DiscordOauth?
+}
+
+model TwitchAccount {
+  User                 User         @relation(fields: [osuId], references: [id])
+  osuId                Int
+  id                   Int          @id
+  username             String
+  requests_enabled     Boolean      @default(false)
+  req_require_live     Boolean      @default(false)
+  req_require_category Boolean      @default(false)
+  Tournaments          Tournament[]
+
+  TwitchToken TwitchOauth?
 }
 
 model OsuOauth {
@@ -121,6 +138,17 @@ model DiscordOauth {
   scope         String
 
   User DiscordAccount @relation(fields: [userId], references: [id])
+}
+
+model TwitchOauth {
+  userId        Int      @id
+  last_update   DateTime @default(now())
+  access_token  String
+  expires_at    BigInt
+  refresh_token String
+  token_type    String
+
+  User TwitchAccount @relation(fields: [userId], references: [id])
 }
 
 model UserSession {
@@ -169,8 +197,10 @@ model Tournament {
   private             Boolean  @default(false)
   Teams               Team[]
 
-  ModMultipliers ModMultiplier[]
-  Hosts          UsersHostingTournament[]
+  twitchAccountId Int?
+  TwitchChannel   TwitchAccount?           @relation(fields: [twitchAccountId], references: [id])
+  ModMultipliers  ModMultiplier[]
+  Hosts           UsersHostingTournament[]
 }
 
 model ModMultiplier {

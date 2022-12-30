@@ -1,0 +1,521 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Global {
+  id Int [pk, increment]
+  ties Int [not null, default: 0]
+}
+
+Table OsuBadge {
+  id Int [pk, increment]
+  awarded_at DateTime [not null]
+  description String [not null]
+  image_url String [not null]
+  url String [not null]
+  UsersWithBadge UserWithOsuBadge [not null]
+}
+
+Table UserWithOsuBadge {
+  userId Int [not null]
+  badgeId Int [not null]
+  User User [not null]
+  OsuBadge OsuBadge [not null]
+
+  indexes {
+    (userId, badgeId) [pk]
+  }
+}
+
+Table CustomBadge {
+  id Int [pk, increment]
+  awarded_at DateTime [not null]
+  name String [not null]
+  description String [not null]
+  image_url String [not null]
+  url String [not null]
+  UsersWithBadge UserWithCustomBadge [not null]
+}
+
+Table UserWithCustomBadge {
+  userId Int [not null]
+  badgeId Int [not null]
+  User User [not null]
+  Badge CustomBadge [not null]
+
+  indexes {
+    (userId, badgeId) [pk]
+  }
+}
+
+Table UsersHostingTournament {
+  userId Int [not null]
+  tourney Int [not null]
+  User User [not null]
+  Tourney Tournament [not null]
+
+  indexes {
+    (userId, tourney) [pk]
+  }
+}
+
+Table User {
+  id Int [pk]
+  username String [not null]
+  country_code String [not null]
+  country_name String [not null]
+  cover_url String [not null]
+  ranked_score BigInt [not null]
+  play_count Int [not null]
+  total_score BigInt [not null]
+  pp_rank Int [not null]
+  level Int [not null]
+  level_progress Int [not null]
+  hit_accuracy Float [not null]
+  pp Float [not null]
+  OsuToken OsuOauth
+  DiscordAccounts DiscordAccount [not null]
+  TwitchAccounts TwitchAccount [not null]
+  InTeams UserInTeam [not null]
+  OwnerOfLobby AutoHostRotate
+  OsuBadges UserWithOsuBadge [not null]
+  Badges UserWithCustomBadge [not null]
+  HostOf UsersHostingTournament [not null]
+  Sessions UserSession [not null]
+  Invites TeamInvite [not null]
+}
+
+Table DiscordAccount {
+  User User [not null]
+  osuId Int [not null]
+  id String [pk]
+  avatar String [not null]
+  discriminator String [not null]
+  flags Int [not null]
+  username String [not null]
+  DiscordToken DiscordOauth
+}
+
+Table TwitchAccount {
+  User User [not null]
+  osuId Int [not null]
+  id Int [pk]
+  username String [not null]
+  requests_enabled Boolean [not null, default: false]
+  req_require_live Boolean [not null, default: false]
+  req_require_category Boolean [not null, default: false]
+  Tournaments Tournament [not null]
+  TwitchToken TwitchOauth
+}
+
+Table OsuOauth {
+  userId Int [pk]
+  last_update DateTime [default: `now()`, not null]
+  access_token String [not null]
+  expires_in Int [not null]
+  refresh_token String [not null]
+  token_type String [not null]
+  User User [not null]
+}
+
+Table DiscordOauth {
+  userId String [pk]
+  last_update DateTime [default: `now()`, not null]
+  access_token String [not null]
+  expires_in Int [not null]
+  refresh_token String [not null]
+  token_type String [not null]
+  scope String [not null]
+  User DiscordAccount [not null]
+}
+
+Table TwitchOauth {
+  userId Int [pk]
+  last_update DateTime [default: `now()`, not null]
+  access_token String [not null]
+  expires_at BigInt [not null]
+  refresh_token String [not null]
+  token_type String [not null]
+  User TwitchAccount [not null]
+}
+
+Table UserSession {
+  id String [pk]
+  User User [not null]
+  osuId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  lastUsed DateTime [default: `now()`, not null]
+  device String
+  browser String
+  os String
+}
+
+Table Guild {
+  guild_id String [pk]
+  change_nickname Boolean [not null]
+  linked_role String
+  player_role String
+  match_results_channel String
+  manager_admin_disabled Boolean [not null, default: false]
+  Tournaments Tournament [not null]
+  active_tournament Int
+}
+
+Table Tournament {
+  id Int [pk, increment]
+  acronym String [not null]
+  name String [not null]
+  color String [not null]
+  banner_url String [not null]
+  description String [not null]
+  force_nf Boolean [not null]
+  icon_url String [not null]
+  score_mode Int [not null]
+  team_mode Int [not null]
+  team_size Int [not null]
+  x_v_x_mode Int [not null]
+  allow_registrations Boolean [not null]
+  rounds Round [not null]
+  Guild Guild
+  Guild_id String
+  delete_warning Boolean
+  fm_mods Int [not null, default: 1]
+  double_pick Int [not null, default: 1]
+  double_ban Int [not null, default: 1]
+  private Boolean [not null, default: false]
+  Teams Team [not null]
+  twitchAccountId Int
+  TwitchChannel TwitchAccount
+  ModMultipliers ModMultiplier [not null]
+  Hosts UsersHostingTournament [not null]
+}
+
+Table ModMultiplier {
+  id Int [pk, increment]
+  Tournament Tournament [not null]
+  tournament_id Int [not null]
+  modString String [not null]
+  matchExactly Boolean [not null, default: false]
+  multiplier Float [not null]
+}
+
+Table Round {
+  id Int [pk, increment]
+  acronym String [not null]
+  name String [not null]
+  bans Int [not null]
+  best_of Int [not null]
+  delete_warning String
+  show_mappool Boolean [not null]
+  Match Match [not null]
+  Tournament Tournament [not null]
+  tournamentId Int [not null]
+  mappool Mappool
+  mappoolId Int [unique]
+}
+
+Table Mappool {
+  id Int [pk, increment]
+  Maps MapInPool [not null]
+  global Boolean [not null, default: false]
+  Round Round
+  Qualifier QualifierRound
+  tournament_name String
+  tournament_acronym String
+  tournament_iteration String
+  round_name String
+  round_acronym String
+}
+
+Table TeamInvite {
+  inviteeUserId Int [not null]
+  Invitee User [not null]
+  teamId Int [not null]
+  Team Team [not null]
+
+  indexes {
+    (inviteeUserId, teamId) [pk]
+  }
+}
+
+Table MapInPool {
+  identifier String [not null]
+  mods String [not null]
+  Map Map [not null]
+  mapId String [not null]
+  modPriority Int [not null, default: 0]
+  Mappool Mappool [not null]
+  mappoolId Int [not null]
+  InMatches MapInMatch [not null]
+
+  indexes {
+    (identifier, mappoolId) [pk]
+  }
+}
+
+Table Map {
+  beatmap_id String [pk]
+  fetch_time DateTime [default: `now()`, not null]
+  approved String
+  approved_date DateTime
+  artist String
+  artist_unicode String
+  audio_unavailable String
+  beatmapset_id String
+  bpm String
+  count_normal String
+  count_slider String
+  count_spinner String
+  creator String
+  creator_id String
+  diff_aim String
+  diff_speed String
+  diff_approach String
+  diff_drain String
+  diff_overall String
+  diff_size String
+  difficultyrating String
+  download_unavailable String
+  favourite_count String
+  file_md5 String
+  genre_id String
+  hit_length String
+  language_id String
+  last_update DateTime
+  max_combo String
+  mode String
+  packs String
+  passcount String
+  playcount String
+  rating String
+  source String
+  storyboard String
+  submit_date DateTime
+  tags String
+  title String
+  title_unicode String
+  total_length String
+  version String
+  video String
+  InPools MapInPool [not null]
+}
+
+Table Team {
+  id Int [pk, increment]
+  name String [not null]
+  icon_url String [not null]
+  color String [not null]
+  Members UserInTeam [not null]
+  Tournament Tournament [not null]
+  tournamentId Int [not null]
+  scrim Boolean [not null, default: false]
+  InBracketMatches TeamInMatch [not null]
+  InQualifiers TeamInQualifierMatch [not null]
+  InvitedUsers TeamInvite [not null]
+}
+
+Table UserInTeam {
+  osuId Int [not null]
+  User User [not null]
+  Team Team [not null]
+  teamId Int [not null]
+  member_order Int [not null, default: 0]
+  delete_warning Boolean
+
+  indexes {
+    (osuId, teamId) [pk]
+  }
+}
+
+Table Match {
+  id Int [pk, increment]
+  Teams TeamInMatch [not null]
+  start_time DateTime
+  message_id String
+  channel_id String
+  mp_link String
+  waiting_on Int
+  Round Round
+  roundId Int
+  ScrimSettings ScrimSettings
+  MapsInMatch MapInMatch [not null]
+  state Int [not null]
+  scrim Boolean [not null, default: false]
+}
+
+Table ScrimSettings {
+  matchId Int [pk]
+  Match Match [not null]
+  bans Int [not null]
+  best_of Int [not null]
+}
+
+Table TeamInMatch {
+  matchId Int [not null]
+  teamId Int [not null]
+  Match Match [not null]
+  Team Team [not null]
+  score Int [not null]
+  roll Int
+  pick_order Int
+  ban_order Int
+  aborts Int [not null, default: 0]
+  faults Int [not null, default: 0]
+  warmed_up Boolean [not null, default: false]
+  Bans MapInMatch [not null]
+  Wins MapInMatch [not null]
+  Picks MapInMatch [not null]
+  winner Boolean
+
+  indexes {
+    (teamId, matchId) [pk]
+  }
+}
+
+Table MapInMatch {
+  Map MapInPool [not null]
+  Match Match [not null]
+  matchId Int [not null]
+  mapIdentifier String [not null]
+  poolId Int [not null]
+  BannedByTeam TeamInMatch
+  bannedByTeamId Int
+  bannedByMatchId Int
+  PickedByTeam TeamInMatch
+  pickedByTeamId Int
+  pickedByMatchId Int
+  pickNumber Int
+  pickTeamNumber Int
+  WonBy TeamInMatch
+  wonByTeamId Int
+  wonByMatchId Int
+
+  indexes {
+    (mapIdentifier, matchId) [pk]
+  }
+}
+
+Table QualifierRound {
+  id Int [pk, increment]
+  Mappool Mappool [not null]
+  mappoolId Int [unique, not null]
+}
+
+Table QualifierMatch {
+  id Int [pk, increment]
+  Teams TeamInQualifierMatch [not null]
+  map_index Int [not null, default: 0]
+}
+
+Table TeamInQualifierMatch {
+  Team Team [not null]
+  teamId Int [not null]
+  Match QualifierMatch [not null]
+  matchId Int [not null]
+
+  indexes {
+    (teamId, matchId) [pk]
+  }
+}
+
+Table AutoHostRotate {
+  Owner User [not null]
+  osuId Int [pk]
+  mp_link String [not null]
+  min_stars Float
+  max_stars Float
+  min_length Int
+  max_length Int
+  min_rank Int
+  max_rank Int
+  PlayerOrder AutoHostRotatePlayer [not null]
+  CurrentHost AutoHostRotatePlayer
+  currentHostId Int [unique]
+}
+
+Table AutoHostRotatePlayer {
+  id Int [pk]
+  username String [not null]
+  rank Int [not null]
+  lobbyId Int [not null]
+  InLobby AutoHostRotate [not null]
+  HostIn AutoHostRotate
+}
+
+Ref: UserWithOsuBadge.userId > User.id
+
+Ref: UserWithOsuBadge.badgeId > OsuBadge.id
+
+Ref: UserWithCustomBadge.userId > User.id
+
+Ref: UserWithCustomBadge.badgeId > CustomBadge.id
+
+Ref: UsersHostingTournament.userId > User.id [delete: Cascade]
+
+Ref: UsersHostingTournament.tourney > Tournament.id [delete: Cascade]
+
+Ref: DiscordAccount.osuId > User.id
+
+Ref: TwitchAccount.osuId > User.id
+
+Ref: OsuOauth.userId - User.id
+
+Ref: DiscordOauth.userId - DiscordAccount.id
+
+Ref: TwitchOauth.userId - TwitchAccount.id
+
+Ref: UserSession.osuId > User.id
+
+Ref: Tournament.Guild_id > Guild.guild_id
+
+Ref: Tournament.twitchAccountId > TwitchAccount.id
+
+Ref: ModMultiplier.tournament_id > Tournament.id
+
+Ref: Round.tournamentId > Tournament.id [delete: Cascade]
+
+Ref: Round.mappoolId - Mappool.id
+
+Ref: TeamInvite.inviteeUserId > User.id
+
+Ref: TeamInvite.teamId > Team.id [delete: Cascade]
+
+Ref: MapInPool.mapId > Map.beatmap_id
+
+Ref: MapInPool.mappoolId > Mappool.id [delete: Cascade]
+
+Ref: Team.tournamentId > Tournament.id [delete: Cascade]
+
+Ref: UserInTeam.osuId > User.id
+
+Ref: UserInTeam.teamId > Team.id [delete: Cascade]
+
+Ref: Match.roundId > Round.id
+
+Ref: ScrimSettings.matchId - Match.id
+
+Ref: TeamInMatch.matchId > Match.id [delete: Cascade]
+
+Ref: TeamInMatch.teamId > Team.id [delete: Cascade]
+
+Ref: MapInMatch.(mapIdentifier, poolId) > MapInPool.(identifier, mappoolId) [delete: Cascade]
+
+Ref: MapInMatch.matchId > Match.id [delete: Cascade]
+
+Ref: MapInMatch.(bannedByMatchId, bannedByTeamId) > TeamInMatch.(matchId, teamId)
+
+Ref: MapInMatch.(pickedByMatchId, pickedByTeamId) > TeamInMatch.(matchId, teamId)
+
+Ref: MapInMatch.(wonByMatchId, wonByTeamId) > TeamInMatch.(matchId, teamId)
+
+Ref: QualifierRound.mappoolId - Mappool.id
+
+Ref: TeamInQualifierMatch.teamId > Team.id
+
+Ref: TeamInQualifierMatch.matchId > QualifierMatch.id
+
+Ref: AutoHostRotate.osuId - User.id
+
+Ref: AutoHostRotate.currentHostId - AutoHostRotatePlayer.id
+
+Ref: AutoHostRotatePlayer.lobbyId > AutoHostRotate.osuId [delete: Cascade]
