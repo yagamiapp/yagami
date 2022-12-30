@@ -24,7 +24,7 @@ module.exports = {
 
     client.connect();
 
-    client.on("message", (channel, data, msg, self) => {
+    client.on("message", async (channel, data, msg, self) => {
       if (self) {
         console.log("self");
         return;
@@ -36,7 +36,7 @@ module.exports = {
       let osuLinkRegex = /(https:\/\/osu\.ppy\.sh)|(https:\/\/lazer\.ppy\.sh)/g;
 
       if (msg.match(osuLinkRegex)) {
-        osuLinkHandler(channel, data, msg, client);
+        await osuLinkHandler(channel, data, msg, client);
       }
     });
 
