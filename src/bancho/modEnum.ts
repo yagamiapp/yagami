@@ -1,4 +1,4 @@
-const modList = [
+export const modList = [
   { name: 'None', acronym: 'NM', enum: 0 },
   { name: 'No Fail', acronym: 'NF', enum: 1 },
   { name: 'Easy', acronym: 'EZ', enum: 2 },
@@ -33,21 +33,21 @@ const modList = [
   { name: 'Mirror', acronym: 'MI', enum: 1073741824 },
 ];
 
-module.exports = {
-  convertAcronymToEnum(mods) {
-    let modArr = mods.match(/\w{2}/g);
+export const convertAcronymToEnum = (mods: string) => {
+    const modArr = mods.match(/\w{2}/g);
     let modEnum = 0;
     modArr.forEach((str) => {
-      let mod = modList.find((mod) => mod.acronym == str);
+      const mod = modList.find((mod) => mod.acronym == str);
       modEnum += mod.enum;
     });
     return modEnum;
-  },
-  convertEnumToMods(num) {
+}
+
+export const convertEnumToMods = (num: number) => {
     if (num == 0) {
       return [modList[0]];
     }
-    let modArr = [];
+    const modArr = [];
     for (let i = modList.length - 1; i > 0; i--) {
       if (num >= modList[i].enum) {
         modArr.push(modList[i]);
@@ -55,12 +55,14 @@ module.exports = {
       }
     }
     return modArr;
-  },
-  convertEnumToAcro(num) {
+}
+
+export const convertEnumToAcro =(num: number) => {
+
     if (num == 0) {
       return ['NM'];
     }
-    let modArr = [];
+    const modArr = [];
     for (let i = modList.length - 1; i > 0; i--) {
       if (num >= modList[i].enum) {
         modArr.push(modList[i].acronym);
@@ -68,5 +70,4 @@ module.exports = {
       }
     }
     return modArr;
-  },
-};
+}

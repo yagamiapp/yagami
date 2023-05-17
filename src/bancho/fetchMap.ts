@@ -1,21 +1,16 @@
-let nodesu = require('nodesu');
-let { prisma } = require('../lib/prisma');
+import {Client} from 'nodesu';
+import {prisma} from "../lib/prisma";
+import type {Map} from "@prisma/client"
 
-let client = new nodesu.Client(process.env.BANCHO_API_KEY);
+const client = new Client(process.env.BANCHO_API_KEY);
 
-/**
- *
- * @param {number} id
- * @returns {import("@prisma/client").Map}
- */
-module.exports = {
-  async fetchMap(id) {
+export const fetchMap: (id: number) => Promise<Map> = async (id: number) => {
     let map = await prisma.map.findUnique({
       where: {
         beatmap_id: id,
       },
     });
-    let sinceLastCache = (Date.now() - map?.fetch_time) / 1000 / 60 / 60;
+    const sinceLastCache = (Date.now() - map?.fetch_time) / 1000 / 60 / 60;
     if (map || sinceLastCache < 12) return map;
     map = await client.beatmaps.getByBeatmapId(id);
     map = map[0];
@@ -32,5 +27,4 @@ module.exports = {
       },
     });
     return map;
-  },
-};
+}

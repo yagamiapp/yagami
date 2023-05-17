@@ -1,25 +1,26 @@
-const { prisma } = require('../lib/prisma');
-const { MatchManager } = require('./match-types/bracket/Match');
-const { bot } = require('../discord');
-const { EmbedBuilder } = require('discord.js');
-module.exports.recover = async () => {
-  let matches = await prisma.match.findMany({});
+import { prisma } from "../lib/prisma";
+import { MatchManager } from "./match-types/bracket/Match";
+import { bot } from "../discord";
+import { EmbedBuilder } from "discord.js";
+
+export const recover = async () => {
+  const matches = await prisma.match.findMany({});
 
   for (const match of matches) {
     if (match.state < 8 && match.state != -1) {
-      let manager = new MatchManager(match.id, match.mp_link);
+      const manager = new MatchManager(match.id, match.mp_link);
       await manager.createMatch();
     } else if (match.state == -1) {
-      let channel = await bot.channels.fetch(match.channel_id);
-      let message = await channel.messages.fetch(match.message_id);
+      const channel = await bot.channels.fetch(match.channel_id);
+      const message = await channel.messages.fetch(match.message_id);
 
-      let round = await prisma.round.findUnique({
+      const round = await prisma.round.findUnique({
         where: {
           id: match.roundId,
         },
       });
 
-      let teams = await prisma.team.findMany({
+      const teams = await prisma.team.findMany({
         where: {
           InBracketMatches: {
             some: {
@@ -29,7 +30,7 @@ module.exports.recover = async () => {
         },
       });
 
-      let finalEmbed = EmbedBuilder.from(message.embeds[0]);
+      const finalEmbed = EmbedBuilder.from(message.embeds[0]);
       finalEmbed
         .setTitle(`DELETED: ${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`)
         .setColor('#555555')
@@ -45,4 +46,4 @@ module.exports.recover = async () => {
       await message.edit({ embeds: [finalEmbed], components: [] });
     }
   }
-};
+}
