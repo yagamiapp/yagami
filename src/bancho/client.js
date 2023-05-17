@@ -1,5 +1,5 @@
-const { BanchoClient } = require("bancho.js");
-const { pmHandler } = require("./pmHandler");
+const { BanchoClient } = require('bancho.js');
+const { pmHandler } = require('./pmHandler');
 
 let credentials = {
   username: process.env.BANCHO_USERNAME,
@@ -13,9 +13,9 @@ module.exports = {
   client,
   async init() {
     await client.connect();
-    console.log("Connected to Bancho!");
+    console.log('Connected to Bancho!');
 
-    client.on("PM", (msg) => {
+    client.on('PM', (msg) => {
       pmHandler(msg, this);
     });
   },

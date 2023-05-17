@@ -1,6 +1,6 @@
-const tmi = require("tmi.js");
-const { prisma } = require("../lib/prisma");
-const { osuLinkHandler } = require("./commands/osulink");
+const tmi = require('tmi.js');
+const { prisma } = require('../lib/prisma');
+const { osuLinkHandler } = require('./commands/osulink');
 const { TWITCH_USERNAME, TWITCH_TOKEN } = process.env;
 
 /**
@@ -24,14 +24,14 @@ module.exports = {
 
     client.connect();
 
-    client.on("message", async (channel, data, msg, self) => {
+    client.on('message', async (channel, data, msg, self) => {
       if (self) {
-        console.log("self");
+        console.log('self');
         return;
       }
 
       // This is getting disabled eventually
-      console.log(`${channel} >> ${data["display-name"]}: ${msg}`);
+      console.log(`${channel} >> ${data['display-name']}: ${msg}`);
 
       let osuLinkRegex = /(https:\/\/osu\.ppy\.sh)|(https:\/\/lazer\.ppy\.sh)/g;
 
@@ -40,8 +40,8 @@ module.exports = {
       }
     });
 
-    client.once("connected", async () => {
-      console.log("Connected to Twitch!");
+    client.once('connected', async () => {
+      console.log('Connected to Twitch!');
 
       // Until I implement settings, all twitch accounts will recieve map requests.
       let channelsToJoin = channels;

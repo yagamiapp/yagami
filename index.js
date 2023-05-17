@@ -1,9 +1,9 @@
-require("dotenv").config(); // Load ENV Vars
+require('dotenv').config(); // Load ENV Vars
 
-const discord = require("./src/discord");
-const bancho = require("./src/bancho");
-const twitch = require("./src/twitch");
-const { refreshTokens } = require("./src/lib/prisma");
+const discord = require('./src/discord');
+const bancho = require('./src/bancho');
+const twitch = require('./src/twitch');
+const { refreshTokens } = require('./src/lib/prisma');
 
 if (!process.env.disableDiscord) {
   discord.init();

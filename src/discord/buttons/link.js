@@ -1,8 +1,8 @@
-const { execute } = require("../commands/link");
+const { execute } = require('../commands/link');
 
 module.exports = {
-	data: { customId: "link" },
-	async execute(interaction, command) {
-		await execute(interaction);
-	},
+  data: { customId: 'link' },
+  async execute(interaction, command) {
+    await execute(interaction);
+  },
 };

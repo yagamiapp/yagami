@@ -1,6 +1,6 @@
-const prismaClientBuilder = require("@prisma/client");
+const prismaClientBuilder = require('@prisma/client');
 const prisma = new prismaClientBuilder.PrismaClient();
-const axios = require("axios").default;
+const axios = require('axios').default;
 module.exports = {
   prisma,
   /**
@@ -20,8 +20,7 @@ module.exports = {
     });
     guild.tournaments = tournaments;
     tournaments.forEach((tournament) => {
-      if (tournament.id == guild.active_tournament)
-        guild.active_tournament = tournament;
+      if (tournament.id == guild.active_tournament) guild.active_tournament = tournament;
     });
     return guild;
   },
@@ -60,16 +59,16 @@ async function refreshOsuToken(user, force) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     let response = await axios({
-      method: "POST",
-      url: "https://osu.ppy.sh/oauth/token",
+      method: 'POST',
+      url: 'https://osu.ppy.sh/oauth/token',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       data: {
         client_id: process.env.OSU_CLIENT_ID,
         client_secret: process.env.OSU_CLIENT_SECRET,
-        grant_type: "refresh_token",
+        grant_type: 'refresh_token',
         refresh_token: token.refresh_token,
       },
       validateStatus: () => true,
@@ -110,18 +109,18 @@ async function refreshOsuToken(user, force) {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
     let userData = await axios({
-      method: "get",
-      url: "https://osu.ppy.sh/api/v2/me/osu",
+      method: 'get',
+      url: 'https://osu.ppy.sh/api/v2/me/osu',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + access_token,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + access_token,
       },
       validateStatus: () => true,
     });
 
     if (userData.status == 429) {
-      console.log("Ratelimited");
+      console.log('Ratelimited');
       return true;
     }
 
@@ -132,10 +131,8 @@ async function refreshOsuToken(user, force) {
 
     userData = userData.data;
 
-    if (userData.authentication == "basic") {
-      console.log(
-        `An error occured while authenticating to fetch ${userData.username}'s data`
-      );
+    if (userData.authentication == 'basic') {
+      console.log(`An error occured while authenticating to fetch ${userData.username}'s data`);
       return;
     }
     console.log(
@@ -167,9 +164,7 @@ async function refreshOsuToken(user, force) {
     setTimeout(refreshOsuToken, expires_in * 1000, user);
     await new Promise((resolve) => setTimeout(resolve, 2000));
   } else {
-    console.log(
-      `Data for ${user.username} is up to date! (https://osu.ppy.sh/u/${user.id})`
-    );
+    console.log(`Data for ${user.username} is up to date! (https://osu.ppy.sh/u/${user.id})`);
     setTimeout(refreshOsuToken, time, user);
   }
 }
