@@ -27,7 +27,7 @@ export const pmHandler = async (msg: BanchoMessage, client: BanchoClient) => {
 
     if (!command) return;
 
-    const options = args.splice(1, 1);
+    const options: string[] = args.splice(1, 1);
     try {
       await command.exec(msg, options, client);
     } catch (e) {
