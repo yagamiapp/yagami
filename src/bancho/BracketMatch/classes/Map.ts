@@ -1,7 +1,7 @@
-import type Match from "./Match";
-import { BracketMatch } from "../match";
-import type { MapInPool, Map as MapObj } from "@prisma/client";
-import Team from "./Team";
+import type Match from './Match';
+import { BracketMatch } from '../match';
+import type { MapInPool, Map as MapObj } from '@prisma/client';
+import Team from './Team';
 
 export default class Map {
   mapdata: MapObj;
@@ -32,20 +32,20 @@ export default class Map {
     this.mods = map.Map.mods;
     this.modPriority = map.Map.modPriority;
 
-    this.banned = map.bannedByTeamId != null
-    this.picked = map.pickedByTeamId != null
-    this.won = map.wonByTeamId != null
+    this.banned = map.bannedByTeamId != null;
+    this.picked = map.pickedByTeamId != null;
+    this.won = map.wonByTeamId != null;
 
     if (this.banned) {
-      this.banned_by = match.teams.find(team => team.id == map.bannedByTeamId);
+      this.banned_by = match.teams.find((team) => team.id == map.bannedByTeamId);
     }
 
     if (this.picked) {
-      this.picked_by = match.teams.find(team => team.id == map.pickedByTeamId);
+      this.picked_by = match.teams.find((team) => team.id == map.pickedByTeamId);
     }
 
     if (this.won) {
-      this.won_by = match.teams.find(team => team.id == map.wonByTeamId);
+      this.won_by = match.teams.find((team) => team.id == map.wonByTeamId);
     }
 
     this.pickNumber = map.pickNumber;
@@ -65,8 +65,8 @@ export default class Map {
       pickedByTeamId: this.picked ? this.picked_by.id : null,
       wonByMatchId: this.won ? this.match.id : null,
       wonByTeamId: this.won ? this.won_by.id : null,
-      Map: this.toMapInPool()
-    }
+      Map: this.toMapInPool(),
+    };
   }
 
   toMapInPool(): MapInPool & { Map: MapObj } {
@@ -77,6 +77,6 @@ export default class Map {
       modPriority: this.modPriority,
       mappoolId: this.match.round.mappoolId,
       Map: this.mapdata,
-    }
+    };
   }
 }

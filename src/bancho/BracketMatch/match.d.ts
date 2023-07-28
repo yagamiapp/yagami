@@ -1,10 +1,21 @@
-import { Match, TeamInMatch, MapInMatch, Map, MapInPool, Tournament, Round, Mappool, Team, UserInTeam, User } from '@prisma/client';
+import {
+  Match,
+  TeamInMatch,
+  MapInMatch,
+  Map,
+  MapInPool,
+  Tournament,
+  Round,
+  Mappool,
+  Team,
+  UserInTeam,
+  User,
+} from '@prisma/client';
 import { BanchoLobbyPlayer, BanchoUser } from 'bancho.js';
 import type { MultiScore } from 'nodesu';
-import type MatchClass from "./classes/Match";
+import type MatchClass from './classes/Match';
 
 declare namespace BracketMatch {
-
   type Score = {
     user: BanchoUser;
     score: MultiScore;
@@ -24,7 +35,7 @@ declare namespace BracketMatch {
   };
 
   type Payload = {
-    match_id: number,
+    match_id: number;
     match?: MatchClass;
     movement?: MovePlayer[];
     messages?: string[];
@@ -47,23 +58,22 @@ declare namespace BracketMatch {
 
   type TeamWithUsers = Team & {
     Members: (UserInTeam & {
-      User: User
-    })[]
-  }
+      User: User;
+    })[];
+  };
 
   type MatchRound = Round & {
     Tournament: Tournament;
     mappool: Mappool & {
-      Maps: Map[]
-    }
-  }
-
-  type MatchMap = MapInMatch
-    & {
-      Map: MapInPool & {
-        Map: Map;
-      };
+      Maps: Map[];
     };
+  };
+
+  type MatchMap = MapInMatch & {
+    Map: MapInPool & {
+      Map: Map;
+    };
+  };
 
   type MatchTeam = TeamInMatch & {
     Team: TeamWithUsers;
@@ -72,12 +82,11 @@ declare namespace BracketMatch {
     Wins: MatchMap[];
   };
 
-  type Data = Match
-    & {
-      Teams: MatchTeam[];
-      Round: MatchRound;
-      MapsInMatch: MatchMap[];
-    };
+  type Data = Match & {
+    Teams: MatchTeam[];
+    Round: MatchRound;
+    MapsInMatch: MatchMap[];
+  };
 }
 
 export { BracketMatch };

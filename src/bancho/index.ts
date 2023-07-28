@@ -57,12 +57,12 @@ export const joinChannel = async (mpId: number, matchState: number) => {
   try {
     await channel.join();
   } catch (e) {
-    const error = `Channel #mp_${mpId} is not joinable`
+    const error = `Channel #mp_${mpId} is not joinable`;
     console.log(error);
     return { error };
   }
 
-  if (!isMultiplayerChannel(channel)) return { error: "Requested ID is not a multiplayer channel" };
+  if (!isMultiplayerChannel(channel)) return { error: 'Requested ID is not a multiplayer channel' };
 
   channel.lobby.on('playerJoined', join);
   channel.lobby.on('allPlayersReady', () => ready(channel));
@@ -87,10 +87,10 @@ export const joinChannel = async (mpId: number, matchState: number) => {
   });
 
   // Run phase change handler to recover from restart
-  const recoverFunction = phases[matchState]?.onPhaseChange
-  const match = await getMatch(`${mpId}`)
+  const recoverFunction = phases[matchState]?.onPhaseChange;
+  const match = await getMatch(`${mpId}`);
   if (!recoverFunction) return;
-  await channel.lobby.updateSettings()
+  await channel.lobby.updateSettings();
   const payload = recoverFunction(match, channel.lobby);
   await payloadHandler(payload, match, channel);
 };

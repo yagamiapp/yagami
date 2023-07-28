@@ -15,7 +15,7 @@ export const states = {
 states[-1] = 'Archived';
 
 export const maxWarmupLength = 300;
-export const badWarmupReplacementId = 975342
+export const badWarmupReplacementId = 975342;
 
 export const allowedFMMods = ['ez', 'hd', 'hr', 'fl'];
 export const maxAborts = 1;
@@ -31,16 +31,16 @@ export const timers = {
 export const emotes = {
   loading: `<a:loading:970406520124764200>`,
   success: `<a:verified:970410957710954636>`,
-  teams: [":red_square:", ":blue_square:"],
+  teams: [':red_square:', ':blue_square:'],
   grades: {
-    SSH: "<:rank_SSH:979114277929631764>",
-    SS: "<:rank_SS:979114272955179069>",
-    SH: "<:rank_SH:979114267850727465>",
-    S: "<:rank_S:979114262502973450>",
-    A: "<:rank_A:979114140465516645>",
-    B: "<:rank_B:979114234233372752>",
-    C: "<:rank_C:979114239736299570>",
-    D: "<:rank_D:979114244777857096>",
-    F: "<:rank_F:979114251337744504>",
+    SSH: '<:rank_SSH:979114277929631764>',
+    SS: '<:rank_SS:979114272955179069>',
+    SH: '<:rank_SH:979114267850727465>',
+    S: '<:rank_S:979114262502973450>',
+    A: '<:rank_A:979114140465516645>',
+    B: '<:rank_B:979114234233372752>',
+    C: '<:rank_C:979114239736299570>',
+    D: '<:rank_D:979114244777857096>',
+    F: '<:rank_F:979114251337744504>',
   },
-}
+};

@@ -1,7 +1,7 @@
-import { BracketMatch } from "../match";
-import type Match from "./Match";
-import Map from "./Map";
-import { User } from "@prisma/client";
+import { BracketMatch } from '../match';
+import type Match from './Match';
+import Map from './Map';
+import { User } from '@prisma/client';
 
 export default class Team {
   match: Match;
@@ -43,20 +43,20 @@ export default class Team {
     this.faults = team.faults;
     this.winner = team.winner;
 
-    this.members = team.Team.Members.map(x => x.User)
+    this.members = team.Team.Members.map((x) => x.User);
     this.scrim = team.Team.scrim;
 
     this.picks = [];
     for (const pick of team.Picks) {
-      this.picks.push(new Map(match, pick))
+      this.picks.push(new Map(match, pick));
     }
     this.bans = [];
     for (const pick of team.Bans) {
-      this.bans.push(new Map(match, pick))
+      this.bans.push(new Map(match, pick));
     }
     this.wins = [];
     for (const pick of team.Wins) {
-      this.wins.push(new Map(match, pick))
+      this.wins.push(new Map(match, pick));
     }
   }
 
@@ -88,13 +88,13 @@ export default class Team {
         icon_url: this.icon_url,
         tournamentId: 1,
         scrim: this.scrim,
-        Members: this.members.map(x => ({
+        Members: this.members.map((x) => ({
           User: x,
           osuId: x.id,
           teamId: this.id,
           member_order: this.members.indexOf(x),
           delete_warning: false,
-        }))
+        })),
       },
       roll: this.roll,
       score: this.score,
@@ -103,10 +103,9 @@ export default class Team {
       warmed_up: this.warmed_up,
       aborts: this.aborts,
       faults: this.faults,
-      Picks: this.picks.map(x => x.toMapInMatch()),
-      Bans: this.bans.map(x => x.toMapInMatch()),
-      Wins: this.wins.map(x => x.toMapInMatch()),
-    }
+      Picks: this.picks.map((x) => x.toMapInMatch()),
+      Bans: this.bans.map((x) => x.toMapInMatch()),
+      Wins: this.wins.map((x) => x.toMapInMatch()),
+    };
   }
-
 }

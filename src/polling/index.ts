@@ -1,4 +1,4 @@
-import { readdirSync } from "fs";
+import { readdirSync } from 'fs';
 
 export const init = async () => {
   const commandFiles = readdirSync('./src/polling')
@@ -7,6 +7,6 @@ export const init = async () => {
 
   for (const file of commandFiles) {
     const interval = await import(`./${file}`);
-    setInterval(interval.onInterval, interval.pollingInterval)
+    setInterval(interval.onInterval, interval.pollingInterval);
   }
-}
+};

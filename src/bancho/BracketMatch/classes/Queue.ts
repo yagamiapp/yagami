@@ -22,9 +22,9 @@ export default class Queue {
     }
 
     await new Promise((resolve) => setTimeout(resolve, this.ratelimit));
-    const func = this.#queue.splice(0, 1)[0]
-    await func()
+    const func = this.#queue.splice(0, 1)[0];
+    await func();
 
-    this.#run()
+    this.#run();
   }
 }

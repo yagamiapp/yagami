@@ -1,4 +1,4 @@
-import { BracketMatch } from "../match";
+import { BracketMatch } from '../match';
 
 export default class MatchPayloadBuilder {
   state: number | null = null;
@@ -20,25 +20,24 @@ export default class MatchPayloadBuilder {
   host: string | null = null;
   clearhost: boolean | null = null;
 
-  teamWarmUp: { id: number, set: boolean }[] = [];
-  teamScore: { id: number, set: number }[] = [];
-  teamRoll: { id: number, set: number }[] = [];
-  teamPickOrder: { id: number, set: number }[] = [];
-  teamBanOrder: { id: number, set: number }[] = [];
+  teamWarmUp: { id: number; set: boolean }[] = [];
+  teamScore: { id: number; set: number }[] = [];
+  teamRoll: { id: number; set: number }[] = [];
+  teamPickOrder: { id: number; set: number }[] = [];
+  teamBanOrder: { id: number; set: number }[] = [];
 
-
-  picks: { teamId: number, identifier: string }[] = [];
-  bans: { teamId: number, identifier: string }[] = [];
-  wins: { teamId: number, identifier: string }[] = [];
+  picks: { teamId: number; identifier: string }[] = [];
+  bans: { teamId: number; identifier: string }[] = [];
+  wins: { teamId: number; identifier: string }[] = [];
 
   setState(state: number) {
-    if (this.state != null) throw "State is already set"
+    if (this.state != null) throw 'State is already set';
     this.state = state;
     return this;
   }
 
   setWaitingOn(wo: number) {
-    if (this.waiting_on != null) throw "Waiting On Team is already set"
+    if (this.waiting_on != null) throw 'Waiting On Team is already set';
     this.waiting_on = wo;
     return this;
   }
@@ -51,7 +50,7 @@ export default class MatchPayloadBuilder {
   movePlayer(username: string, to: number) {
     this.moves.push({
       username,
-      to
+      to,
     });
     return this;
   }
@@ -62,21 +61,21 @@ export default class MatchPayloadBuilder {
   }
 
   setMods(mods: string) {
-    if (this.mods != null) throw "Mods have already been set";
+    if (this.mods != null) throw 'Mods have already been set';
     this.mods = mods;
     return this;
   }
 
   setMap(map: number) {
-    if (this.map != null) throw "Map has already been set";
+    if (this.map != null) throw 'Map has already been set';
     this.map = map;
     return this;
   }
 
   applySettings(team: number, score: number, size: number) {
-    if (team > 3 || team < 0) throw "Team mode must be between 0 and 3"
-    if (team > 3 || team < 0) throw "Score mode must be between 0 and 3"
-    if (team > 16 || team < 0) throw "Size must be between 0 and 16"
+    if (team > 3 || team < 0) throw 'Team mode must be between 0 and 3';
+    if (team > 3 || team < 0) throw 'Score mode must be between 0 and 3';
+    if (team > 16 || team < 0) throw 'Size must be between 0 and 16';
     this.settings = [team, score, size];
     return this;
   }
@@ -103,8 +102,8 @@ export default class MatchPayloadBuilder {
   }
 
   setHost(user: string) {
-    if (this.host != null) throw "Host has already been set"
-    this.host = user
+    if (this.host != null) throw 'Host has already been set';
+    this.host = user;
     return this;
   }
 
@@ -114,47 +113,47 @@ export default class MatchPayloadBuilder {
   }
 
   setName(name: string) {
-    if (this.name != null) throw "Name has already been set"
-    this.name = name
+    if (this.name != null) throw 'Name has already been set';
+    this.name = name;
     return this;
   }
 
   setTeamWarmedUp(teamId: number, warmedUp: boolean) {
-    this.teamWarmUp.push({ id: teamId, set: warmedUp })
+    this.teamWarmUp.push({ id: teamId, set: warmedUp });
     return this;
   }
 
   setTeamScore(teamId: number, score: number) {
-    this.teamScore.push({ id: teamId, set: score })
+    this.teamScore.push({ id: teamId, set: score });
     return this;
   }
 
   setTeamRoll(teamId: number, roll: number) {
-    this.teamRoll.push({ id: teamId, set: roll })
+    this.teamRoll.push({ id: teamId, set: roll });
     return this;
   }
 
   setTeamPickOrder(teamId: number, order: number) {
-    this.teamPickOrder.push({ id: teamId, set: order })
+    this.teamPickOrder.push({ id: teamId, set: order });
     return this;
   }
 
   setTeamBanOrder(teamId: number, order: number) {
-    this.teamBanOrder.push({ id: teamId, set: order })
+    this.teamBanOrder.push({ id: teamId, set: order });
     return this;
   }
   addPick(teamId: number, mapIdentifier: string) {
-    this.picks.push({ teamId, identifier: mapIdentifier })
+    this.picks.push({ teamId, identifier: mapIdentifier });
     return this;
   }
 
   addBan(teamId: number, mapIdentifier: string) {
-    this.bans.push({ teamId, identifier: mapIdentifier })
+    this.bans.push({ teamId, identifier: mapIdentifier });
     return this;
   }
 
   addWin(teamId: number, mapIdentifier: string) {
-    this.wins.push({ teamId, identifier: mapIdentifier })
+    this.wins.push({ teamId, identifier: mapIdentifier });
     return this;
   }
 }

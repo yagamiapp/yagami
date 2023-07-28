@@ -1,6 +1,6 @@
-import { Tournament } from "@prisma/client";
-import { BracketMatch } from "../match";
-import Map from "./Map";
+import { Tournament } from '@prisma/client';
+import { BracketMatch } from '../match';
+import Map from './Map';
 
 export default class Round {
   id: number;
@@ -17,10 +17,10 @@ export default class Round {
   constructor(round: BracketMatch.MatchRound) {
     this.id = round.id;
     this.name = round.name;
-    this.acronym = round.acronym
+    this.acronym = round.acronym;
     this.bans = round.bans;
     this.best_of = round.best_of;
-    this.tournament = round.Tournament
+    this.tournament = round.Tournament;
     this.show_mappool = round.show_mappool;
     this.mappoolId = round.mappool.id;
     this.mappoolGlobal = round.mappool.global;
@@ -36,7 +36,7 @@ export default class Round {
       tournamentId: this.tournament.id,
       show_mappool: this.show_mappool,
       mappoolId: this.mappoolId,
-      delete_warning: "false",
+      delete_warning: 'false',
       Tournament: this.tournament,
       mappool: {
         id: this.mappoolId,
@@ -46,8 +46,8 @@ export default class Round {
         tournament_iteration: `${new Date().getFullYear()}`,
         round_acronym: this.acronym,
         round_name: this.name,
-        Maps: this.mappool.map(x => x.mapdata)
-      }
+        Maps: this.mappool.map((x) => x.mapdata),
+      },
     };
   }
 }

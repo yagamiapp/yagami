@@ -4,42 +4,52 @@
  * about.
  */
 
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ColorResolvable, EmbedBuilder, MessageActionRowComponentBuilder } from "discord.js";
-import { bot } from "../../discord";
-import Match from "./classes/Match";
-import { emotes, states } from "./config";
-import { BracketMatch } from "./match";
-import { stripIndents } from "common-tags";
-import { BanchoLobby } from "bancho.js";
-import type { Beatmap } from "nodesu";
-import Team from "./classes/Team";
-import { convertEnumToAcro } from "../modEnum";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ColorResolvable,
+  EmbedBuilder,
+  MessageActionRowComponentBuilder,
+} from 'discord.js';
+import { bot } from '../../discord';
+import Match from './classes/Match';
+import { emotes, states } from './config';
+import { BracketMatch } from './match';
+import { stripIndents } from 'common-tags';
+import { BanchoLobby } from 'bancho.js';
+import type { Beatmap } from 'nodesu';
+import Team from './classes/Team';
+import { convertEnumToAcro } from '../modEnum';
 
-export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: BracketMatch.Score[], lastMap?: Beatmap) => {
+export const updateMessage = async (
+  match: Match,
+  lobby: BanchoLobby,
+  scores?: BracketMatch.Score[],
+  lastMap?: Beatmap,
+) => {
   const { round, teams, tournament, state } = match;
   const { beatmap } = lobby;
 
   const channel = await bot.channels.fetch(match.channel_id);
-  if (!channel.isTextBased()) throw "Match Channel ID is Invalid"
+  if (!channel.isTextBased()) throw 'Match Channel ID is Invalid';
   const message = await channel.messages.fetch(match.message_id);
   const oldembed = message.embeds[0];
-  let description = "";
+  let description = '';
   const embed = new EmbedBuilder()
-    .setTitle(
-      `${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
-    )
-    .setColor((tournament.color as ColorResolvable))
+    .setTitle(`${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`)
+    .setColor(tournament.color as ColorResolvable)
     .setAuthor(oldembed.data.author)
     .setThumbnail(oldembed.data.thumbnail?.url)
     .setURL(match.mp_link)
     .setImage(oldembed.data.image?.url)
-    .setFooter({ text: "Current phase: " + states[state] })
+    .setFooter({ text: 'Current phase: ' + states[state] })
     .setTimestamp();
 
   // Score line
   if (state <= 2 || (state >= 5 && state <= 7)) {
     embed.addFields({
-      name: "Score",
+      name: 'Score',
       value: `
 				${emotes.teams[0]} ${teams[0].name} | ${teams[0].score} - ${teams[1].score} | ${teams[1].name} ${emotes.teams[1]}`,
     });
@@ -57,12 +67,12 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
     scores &&
     lastMap
   ) {
-    let leaderboard = "";
+    let leaderboard = '';
 
     const { title, artist, version } = lastMap;
     const lastMapIdentifier =
       match.round.mappool.find((map) => map.mapdata.beatmap_id == `${lastMap.beatmapId}`)
-        ?.identifier || "Warmup";
+        ?.identifier || 'Warmup';
     leaderboard += `**${lastMapIdentifier}**: ${title} - ${artist} [${version}]\n`;
 
     const teamStrings = {};
@@ -86,76 +96,65 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
 
       // Calculate acc
       let accuracy =
-        300 * score.score.count300 +
-        100 * score.score.count100 +
-        50 * score.score.count50;
+        300 * score.score.count300 + 100 * score.score.count100 + 50 * score.score.count50;
       const divisor =
         300 *
-        (score.score.count300 +
-          score.score.count100 +
-          score.score.count50 +
-          score.score.countMiss);
+        (score.score.count300 + score.score.count100 + score.score.count50 + score.score.countMiss);
       accuracy = accuracy / divisor;
       // Calculate grade
-      let grade = "";
+      let grade = '';
       const percent300 =
         score.score.count300 /
-        (score.score.count300 +
-          score.score.count100 +
-          score.score.count50 +
-          score.score.countMiss);
+        (score.score.count300 + score.score.count100 + score.score.count50 + score.score.countMiss);
       const percent50 =
         score.score.count50 /
-        (score.score.count300 +
-          score.score.count100 +
-          score.score.count50 +
-          score.score.countMiss);
+        (score.score.count300 + score.score.count100 + score.score.count50 + score.score.countMiss);
 
       if (score.score.countMiss == 0) {
         if (percent300 > 0.9) {
           if (percent50 < 0.1) {
-            if (mods.includes("HD") || mods.includes("FL")) {
-              grade = "SH";
+            if (mods.includes('HD') || mods.includes('FL')) {
+              grade = 'SH';
             } else {
-              grade = "S";
+              grade = 'S';
             }
           }
         } else if (percent300 > 0.8) {
-          grade = "A";
+          grade = 'A';
         } else if (percent300 > 0.7) {
-          grade = "B";
+          grade = 'B';
         }
       } else {
         if (percent300 > 0.9) {
-          grade = "A";
+          grade = 'A';
         } else if (percent300 > 0.8) {
-          grade = "B";
+          grade = 'B';
         } else if (percent300 > 0.6) {
-          grade = "C";
+          grade = 'C';
         }
       }
       if (accuracy == 1) {
-        if (mods.includes("HD") || mods.includes("FL")) {
-          grade = "SSH";
+        if (mods.includes('HD') || mods.includes('FL')) {
+          grade = 'SSH';
         } else {
-          grade = "SS";
+          grade = 'SS';
         }
       }
 
-      if (grade == "") {
-        grade = "D";
+      if (grade == '') {
+        grade = 'D';
       }
       if (!score.score.pass) {
-        grade = "F";
+        grade = 'F';
       }
 
       const userScore = [
         emotes.grades[grade],
         user.username,
         score.score.score.toLocaleString(),
-        score.score.maxCombo.toLocaleString() + "x",
-        (accuracy * 100).toFixed(2) + "%",
-        `${mods.filter(x => x != "").length == 0 ? "" : "+" + mods.join("")}`,
+        score.score.maxCombo.toLocaleString() + 'x',
+        (accuracy * 100).toFixed(2) + '%',
+        `${mods.filter((x) => x != '').length == 0 ? '' : '+' + mods.join('')}`,
       ];
 
       teamStrings[team.id].userScores.push(userScore);
@@ -164,8 +163,7 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
     for (const key in teamStrings) {
       const teamString = teamStrings[key];
       if (teamString.userScores?.length > 0) {
-        let teamLb = `${emotes.teams[teamString.team.id]} **${teamString.team.name
-          }**\n`;
+        let teamLb = `${emotes.teams[teamString.team.id]} **${teamString.team.name}**\n`;
         // TODO: Get max of each column and add spaces to align
         const maxes = [];
         for (let i = 1; i < teamString.userScores[0].length; i++) {
@@ -180,54 +178,51 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
           for (let i = 0; i < userScore.length; i++) {
             let prop = userScore[i];
             for (let j = prop.length; j < maxes[i]; j++) {
-              prop += " ";
+              prop += ' ';
             }
             userScore[i] = prop;
           }
 
-          teamLb += `${grade} \`${userScore.join("` `")}\``;
-          if (lastMapIdentifier.includes("FM") || lastMapIdentifier == "Warmup") {
+          teamLb += `${grade} \`${userScore.join('` `')}\``;
+          if (lastMapIdentifier.includes('FM') || lastMapIdentifier == 'Warmup') {
             teamLb += `${mods}\n`;
           } else {
-            teamLb += "\n";
+            teamLb += '\n';
           }
         }
-        leaderboard += teamLb + "\n";
+        leaderboard += teamLb + '\n';
       }
     }
-    description += "\n" + leaderboard;
+    description += '\n' + leaderboard;
   }
 
   // Lobby Player List
   if (state == 1) {
-    let leaderboard = "";
+    let leaderboard = '';
 
-    const players = lobby.slots
-      .filter((x) => x)
-      .map((x) => x.user.username);
+    const players = lobby.slots.filter((x) => x).map((x) => x.user.username);
     for (const team of teams) {
-      const inLobbyPlayers = team.members.filter((x) =>
-        players.includes(x.username)
-      );
+      const inLobbyPlayers = team.members.filter((x) => players.includes(x.username));
 
       leaderboard += `${emotes.teams[team.id]} **${team.name}**\n`;
       for (const user of inLobbyPlayers) {
         leaderboard += `\`${user.username}\`\n`;
       }
-      leaderboard += "\n";
+      leaderboard += '\n';
     }
-    description += "\n" + leaderboard;
+    description += '\n' + leaderboard;
   }
 
   // Match In Progress
   if (state == 2) {
-    description += `\n${emotes.loading} **Map in progress**: ${match.picks[match.picks.length - 1].identifier
-      }`;
+    description += `\n${emotes.loading} **Map in progress**: ${
+      match.picks[match.picks.length - 1].identifier
+    }`;
   }
 
   // Match Rolls
   if (state >= 5 && state <= 7) {
-    description += "\n";
+    description += '\n';
 
     for (const team of teams) {
       if (team.roll == null) return;
@@ -238,72 +233,64 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
 
   // Beatmap Image
   if (beatmap) {
-    embed.setImage(
-      `https://assets.ppy.sh/beatmaps/${beatmap?.setId}/covers/cover.jpg`
-    );
+    embed.setImage(`https://assets.ppy.sh/beatmaps/${beatmap?.setId}/covers/cover.jpg`);
   }
 
   // Handle bans
   if (match.bans.length > 0) {
-    let banString = "";
+    let banString = '';
     const teamString = new Map<number, string>();
     for (const ban of match.bans) {
       if (!ban.banned) continue;
-      teamString.set(ban.banned_by.id, "");
+      teamString.set(ban.banned_by.id, '');
       const string =
-        teamString.get(ban.banned_by.id) == ""
-          ? `${ban.identifier}`
-          : `, ${ban.identifier}`;
+        teamString.get(ban.banned_by.id) == '' ? `${ban.identifier}` : `, ${ban.identifier}`;
 
-      teamString.set(ban.banned_by.id, teamString.get(ban.banned_by.id) + string)
+      teamString.set(ban.banned_by.id, teamString.get(ban.banned_by.id) + string);
     }
 
     console.log(teamString);
     banString = `
-				${emotes.teams[0]} **${teams[0].name}:** ${teamString.get(teams[0].id) || ""}
-				${emotes.teams[1]} **${teams[1].name}:** ${teamString.get(teams[1].id) || ""}
+				${emotes.teams[0]} **${teams[0].name}:** ${teamString.get(teams[0].id) || ''}
+				${emotes.teams[1]} **${teams[1].name}:** ${teamString.get(teams[1].id) || ''}
 			`;
 
-    embed.addFields({ name: "Bans", value: banString });
+    embed.addFields({ name: 'Bans', value: banString });
   }
   // Handle Picks
   const picks = match.picks.sort((a, b) => a.pickNumber - b.pickNumber);
 
   if (teams[0].pick_order) {
     embed.addFields({
-      name: "First Pick",
+      name: 'First Pick',
       value: teams[teams[0].pick_order - 1].name,
     });
     let pickString = ``;
     for (const pick of picks) {
       if (!pick.picked) return;
-      const string = `${emotes.teams[pick.won_by?.id] || emotes.loading
-        } **${pick.identifier}**\n`;
+      const string = `${emotes.teams[pick.won_by?.id] || emotes.loading} **${pick.identifier}**\n`;
 
       pickString += string;
     }
     embed.addFields({
-      name: "Picks",
-      value: pickString || "No picks yet",
+      name: 'Picks',
+      value: pickString || 'No picks yet',
     });
   }
 
   if (state == 0) {
-    description += `${emotes.loading} **${teams[match.waiting_on].name
-      }** is currently picking.`;
+    description += `${emotes.loading} **${teams[match.waiting_on].name}** is currently picking.`;
     embed.setThumbnail(teams[match.waiting_on].icon_url);
   }
 
   // If no match link
   if (state == -1) {
     if (match.mp_link) {
-      embed.addFields({ name: "Previous MP Link: ", value: match.mp_link });
+      embed.addFields({ name: 'Previous MP Link: ', value: match.mp_link });
     }
     embed
-      .setTitle(
-        `ARCHIVED: ${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`
-      )
-      .setColor("#AAAAAA")
+      .setTitle(`ARCHIVED: ${round.acronym}: (${teams[0].name}) vs (${teams[1].name})`)
+      .setColor('#AAAAAA')
       .setURL(null)
       .setDescription(
         stripIndents`
@@ -311,20 +298,20 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
 				
 				**Recover Match:** I will ask for a new mp link from the players, and the match will start where it left off
 
-				**Delete Match:** The match will be deleted, this message will be kept for reference`
+				**Delete Match:** The match will be deleted, this message will be kept for reference`,
       );
-    embed.setImage(null)
+    embed.setImage(null);
     const recoverButton = new ButtonBuilder()
-      .setCustomId("start_match?id=" + match.id + "&recover=true")
-      .setLabel("Recover Match")
+      .setCustomId('start_match?id=' + match.id + '&recover=true')
+      .setLabel('Recover Match')
       .setStyle(ButtonStyle.Primary);
     const deleteButton = new ButtonBuilder()
-      .setCustomId("delete_match?id=" + match.id)
-      .setLabel("Delete Match")
+      .setCustomId('delete_match?id=' + match.id)
+      .setLabel('Delete Match')
       .setStyle(ButtonStyle.Danger);
     const components = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
       recoverButton,
-      deleteButton
+      deleteButton,
     );
     await message.edit({
       content: null,
@@ -338,17 +325,13 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
   if (state == 4) {
     if (!match.waiting_on) return;
     if (beatmap == null) {
-      embed.setDescription(
-        `${teams[match.waiting_on].name} is picking a warmup`
-      );
+      embed.setDescription(`${teams[match.waiting_on].name} is picking a warmup`);
       embed.setThumbnail(teams[match.waiting_on].icon_url);
     } else {
       embed.setDescription(
-        `**Warmup:** ${beatmap.artist} -  ${beatmap.title} [${beatmap.version}]`
+        `**Warmup:** ${beatmap.artist} -  ${beatmap.title} [${beatmap.version}]`,
       );
-      embed.setImage(
-        `https://assets.ppy.sh/beatmaps/${beatmap.setId}/covers/cover.jpg`
-      );
+      embed.setImage(`https://assets.ppy.sh/beatmaps/${beatmap.setId}/covers/cover.jpg`);
     }
   }
 
@@ -357,33 +340,27 @@ export const updateMessage = async (match: Match, lobby: BanchoLobby, scores?: B
     // Bold name on scorepost
     if (teams[0].score > teams[1].score) {
       description = `
-					${emotes.teams[0]} **${teams[0].name}** | ${teams[0].score
-        } - ${teams[1].score} | ${teams[1].name} ${emotes.teams[1]
-        }`;
-      embed.setColor((teams[0].color as ColorResolvable))
+					${emotes.teams[0]} **${teams[0].name}** | ${teams[0].score} - ${teams[1].score} | ${teams[1].name} ${emotes.teams[1]}`;
+      embed.setColor(teams[0].color as ColorResolvable);
       embed.setThumbnail(teams[0].icon_url);
     } else if (teams[0].score < teams[1].score) {
       description = `
-					${emotes.teams[0]} ${teams[0].name} | ${teams[0].score
-        } - ${teams[1].score} | **${teams[1].name}** ${emotes.teams[1]
-        }`;
-      embed.setColor((teams[1].color as ColorResolvable))
+					${emotes.teams[0]} ${teams[0].name} | ${teams[0].score} - ${teams[1].score} | **${teams[1].name}** ${emotes.teams[1]}`;
+      embed.setColor(teams[1].color as ColorResolvable);
       embed.setThumbnail(teams[1].icon_url);
     } else {
       description = `
-					${emotes.teams[0]} ${teams[0].name} | ${teams[0].score
-        } - ${teams[1].score} | ${teams[1].name} ${emotes.teams[1]
-        }`;
+					${emotes.teams[0]} ${teams[0].name} | ${teams[0].score} - ${teams[1].score} | ${teams[1].name} ${emotes.teams[1]}`;
     }
     embed.setFooter(null);
     embed.setImage(null);
   }
 
-  if (description != "") {
+  if (description != '') {
     embed.setDescription(description);
   }
   await message.edit({ embeds: [embed] });
-}
+};
 
 const getMaxLength = (obj: unknown[], index: number) => {
   let max = 0;
@@ -393,4 +370,4 @@ const getMaxLength = (obj: unknown[], index: number) => {
     }
   }
   return max;
-}
+};
