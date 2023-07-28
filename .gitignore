@@ -1,6 +1,7 @@
 node_modules
 .ENV
 .env
+out
 *.sqlite
 *.sqlite-journal
 firebaseData.json

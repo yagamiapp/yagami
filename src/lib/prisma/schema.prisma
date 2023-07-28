@@ -9,6 +9,7 @@ generator client {
 generator dbml {
   provider = "prisma-dbml-generator"
 }
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")

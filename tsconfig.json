@@ -1,7 +1,12 @@
 {
-	"compilerOptions": {
-		"lib": ["ES2021"]
-	},
-	"include": ["**/*"],
-	"exclude": ["node_modules"]
+  "compilerOptions": {
+    "lib": ["ES2021"],
+    "target": "ES2021",
+    "module": "NodeNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "outDir": "out"
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules"]
 }
