@@ -20,6 +20,7 @@ import Match from './classes/Match';
 import MatchPayloadBuilder from './classes/MatchPayloadBuilder';
 import { isPromise } from 'util/types';
 import { prisma } from '../../lib/prisma';
+import { setTimer } from './classes/Timekeeper';
 
 // type Partials = {
 //   choosing: boolean;
@@ -36,7 +37,8 @@ type PhaseHandler = {
   onFinish?: (match: Match, scores: BracketMatch.Score[]) => ReturnValue;
   onJoin?: (match: Match, player: BanchoLobbyPlayer) => ReturnValue;
   onBeatmap?: (match: Match, map: Beatmap) => ReturnValue;
-  onPhaseChange?: (match: Match, lobby: BanchoLobby) => ReturnValue;
+  onPhaseChange?: (match: Match, lobby: BanchoLobby) => ReturnValue; // Triggered when the previous payload calls the setState function
+  onTimerEnd?: (match: Match, lobby: BanchoLobby) => ReturnValue;
 };
 
 export const phases: { [key: number]: PhaseHandler } = {
@@ -53,7 +55,7 @@ export const phases: { [key: number]: PhaseHandler } = {
 export const payloadHandler = async (
   payload: ReturnValue,
   match: Match,
-  channel: BanchoChannel,
+  channel: BanchoChannel
 ) => {
   if (isPromise(payload)) payload = await payload;
   if (!payload) return;
@@ -103,6 +105,11 @@ export const payloadHandler = async (
 
   if (payload.clearhost) {
     await channel.lobby.clearHost();
+  }
+
+  if (payload.timer) {
+    await channel.lobby.startTimer(payload.timer);
+    setTimer(match.id, payload.timer, () => timerCallback(match, channel.lobby));
   }
 
   if (payload.waiting_on != null) {
@@ -272,10 +279,18 @@ export const payloadHandler = async (
     });
     match = await getMatch(match.mp_link.match(/\d+/)[0]);
 
+    // Any change of state (including to itself) triggers the onPhaseChange function
     const phaseChangeFunction = phases[payload.state].onPhaseChange;
     if (phaseChangeFunction) payload = phaseChangeFunction(match, channel.lobby);
     payloadHandler(payload, match, channel);
   }
+};
+
+const timerCallback = (match: Match, lobby: BanchoLobby) => {
+  const timerFunction = phases[match.state].onTimerEnd;
+  if (!timerFunction) return;
+  const payload = timerFunction(match, lobby);
+  payloadHandler(payload, match, lobby.channel);
 };
 
 export const getMatch = async (mp_id: string): Promise<Match> => {
@@ -361,7 +376,7 @@ export const getMatch = async (mp_id: string): Promise<Match> => {
 };
 
 const isMultiplayerChannel = (
-  channel: BanchoChannel | BanchoMultiplayerChannel,
+  channel: BanchoChannel | BanchoMultiplayerChannel
 ): channel is BanchoMultiplayerChannel => {
   return (channel as BanchoMultiplayerChannel).lobby !== undefined;
 };
