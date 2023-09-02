@@ -31,13 +31,11 @@ export default class MatchPayloadBuilder {
   wins: { teamId: number; identifier: string }[] = [];
 
   setState(state: number) {
-    if (this.state != null) throw 'State is already set';
     this.state = state;
     return this;
   }
 
   setWaitingOn(wo: number) {
-    if (this.waiting_on != null) throw 'Waiting On Team is already set';
     this.waiting_on = wo;
     return this;
   }
@@ -61,13 +59,11 @@ export default class MatchPayloadBuilder {
   }
 
   setMods(mods: string) {
-    if (this.mods != null) throw 'Mods have already been set';
     this.mods = mods;
     return this;
   }
 
   setMap(map: number) {
-    if (this.map != null) throw 'Map has already been set';
     this.map = map;
     return this;
   }
@@ -102,7 +98,6 @@ export default class MatchPayloadBuilder {
   }
 
   setHost(user: string) {
-    if (this.host != null) throw 'Host has already been set';
     this.host = user;
     return this;
   }
@@ -113,7 +108,6 @@ export default class MatchPayloadBuilder {
   }
 
   setName(name: string) {
-    if (this.name != null) throw 'Name has already been set';
     this.name = name;
     return this;
   }

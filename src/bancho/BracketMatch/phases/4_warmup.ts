@@ -76,7 +76,7 @@ const switchTeams = (match: Match) => {
   const payload = new MatchPayloadBuilder();
 
   const nextWaitingOn = (match.waiting_on + 1) % match.teams.length;
-  payload.setWaitingOn(nextWaitingOn).setTeamWarmedUp(match.teams[match.waiting_on].id, true);
+  payload.setState(4).setWaitingOn(nextWaitingOn).setTeamWarmedUp(match.teams[match.waiting_on].id, true);
 
   const team = match.teams[nextWaitingOn];
 

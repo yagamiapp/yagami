@@ -62,10 +62,10 @@ export const onMessage = (match: Match, msg: ChannelMessage) => {
     return payload.addMessage(`You cannot pick from the same modpool twice in a row`);
 
   // Other Exception message
-  return payload.addMessage(`${map.identifier} is not in the list of available bans`);
+  return payload.addMessage(`${map.identifier} is not in the list of available picks`);
 };
 
-export const onJoin = (match: Match, player: BanchoLobbyPlayer) => {
+export const onJoin = (match: Match, _player: BanchoLobbyPlayer) => {
   console.log(`Join Event during ${states[match.state]}!`);
 };
 

@@ -1,10 +1,13 @@
-import { BanchoLobbyPlayer, ChannelMessage } from 'bancho.js';
+import { BanchoLobby, BanchoLobbyPlayer, ChannelMessage } from 'bancho.js';
 import { BracketMatch } from '../match';
 import type Match from '../classes/Match';
 import { states, timers } from '../config';
 import MatchPayloadBuilder from '../classes/MatchPayloadBuilder';
 
 export const onMessage = (match: Match, msg: ChannelMessage) => {
+  console.log(`Message Event during ${states[match.state]}!`);
+};
+export const onReady = (match: Match, lobby: BanchoLobby) => {
   console.log(`Message Event during ${states[match.state]}!`);
 };
 export const onFinish = (match: Match, scores: BracketMatch.Score[]) => {
@@ -50,12 +53,12 @@ export const onFinish = (match: Match, scores: BracketMatch.Score[]) => {
   const tb = match.teams.map((x) => x.score).filter((x) => x == scoreToWin - 1);
   const tbMap = match.maps.filter((x) => x.identifier.toUpperCase().includes('TB'))[0];
 
-  let mods = tbMap.mods;
+  let mods = tbMap?.mods;
   if (match.tournament.force_nf) {
     mods += mods == '' ? 'NF' : ' NF';
   }
   // TODO: 3TB styled picks
-  if (tb && tbMap)
+  if (tb.length > 1 && tbMap)
     return payload
       .addMessage("Looks like it's a tie, we're heading into tiebreaker!")
       .setMap(parseInt(tbMap.mapdata.beatmap_id))

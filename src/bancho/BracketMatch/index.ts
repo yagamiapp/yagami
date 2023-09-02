@@ -116,6 +116,22 @@ export const payloadHandler = async (
     });
   }
 
+  if (payload.teamScore.length > 0) {
+    for (const teamScore of payload.teamScore) {
+      await prisma.teamInMatch.update({
+        where: {
+          teamId_matchId: {
+            teamId: teamScore.id,
+            matchId: match.id,
+          },
+        },
+        data: {
+          score: teamScore.set
+        },
+      });
+    }
+  }
+
   if (payload.teamWarmUp.length > 0) {
     for (const teamWarmUp of payload.teamWarmUp) {
       await prisma.teamInMatch.update({
@@ -272,9 +288,11 @@ export const payloadHandler = async (
     });
     match = await getMatch(match.mp_link.match(/\d+/)[0]);
 
-    const phaseChangeFunction = phases[payload.state].onPhaseChange;
-    if (phaseChangeFunction) payload = phaseChangeFunction(match, channel.lobby);
-    payloadHandler(payload, match, channel);
+    const phaseChangeFunction = phases[payload.state]?.onPhaseChange;
+    if (phaseChangeFunction) {
+      payload = phaseChangeFunction(match, channel.lobby);
+      if (payload) payloadHandler(payload, match, channel);
+    }
   }
 };
 
