@@ -4,7 +4,7 @@ const {
   BANCHO_API_KEY,
   OSU_CLIENT_ID,
   OSU_CLIENT_SECRET,
-  CLIENT_ID,
+  DISCORD_CLIENT_ID,
   DISCORD_TOKEN,
   DATABASE_URL,
 } = process.env;
@@ -20,7 +20,7 @@ export default {
     client_secret: OSU_CLIENT_SECRET,
   },
   discord: {
-    client_id: CLIENT_ID,
+    client_id: DISCORD_CLIENT_ID,
     token: DISCORD_TOKEN,
   },
   database_url: DATABASE_URL,

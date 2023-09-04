@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { OAuth2Scopes, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { stripIndents } from 'common-tags/lib';
 import { EmbedBuilder, version as djs } from 'discord.js';
 import { version } from '../../../package.json';
@@ -25,7 +25,20 @@ export async function execute(interaction: CommandInteraction) {
     (uptimeSplits.mins != 0 ? `${uptimeSplits.mins} mins ` : '') +
     (uptimeSplits.secs != 0 ? `${uptimeSplits.secs} secs` : '');
 
-  // TODO: Right align text
+  const inviteLink = interaction.client.generateInvite({
+    permissions: [
+      PermissionFlagsBits.ReadMessageHistory,
+      PermissionFlagsBits.AddReactions,
+      PermissionFlagsBits.EmbedLinks,
+      PermissionFlagsBits.ViewChannel,
+      PermissionFlagsBits.ManageNicknames,
+      PermissionFlagsBits.SendMessages,
+      PermissionFlagsBits.ManageWebhooks,
+      PermissionFlagsBits.ManageRoles,
+      PermissionFlagsBits.ManageGuild,
+    ],
+    scopes: [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands],
+  });
   const matches =
     // await prisma.match.findMany();
     [];
@@ -63,9 +76,9 @@ export async function execute(interaction: CommandInteraction) {
         name: 'Developer',
         value: stripIndents`
 					<@265144290240495617>
-					[Discord](https://yagami.clxxiii.dev/discord) | [Twitter](https://twitter.com/clxxiii1) | [GitHub](https://github.com/clxxiii) | [osu!](https://osu.ppy.sh/users/10962678)
+					[Discord](https://yagami.clxxiii.dev/discord) | [Twitter](https://twitter.com/clxxiii1) | [GitHub](https://github.com/clxxiii) | [osu!](https://osu.ppy.sh/users/10962678) | [Invite](${inviteLink})
 					`,
-      },
+      }
     )
     .setTimestamp()
     .setFooter({
