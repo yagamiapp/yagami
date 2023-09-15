@@ -29,7 +29,12 @@ export const onInterval = async () => {
 
     let playerString = '';
     for (const player of players) {
-      playerString += `<@${player.DiscordAccounts[0].id}> `;
+      if (player.DiscordAccounts.length > 0) {
+        playerString += `<@${player.DiscordAccounts[0].id}> `;
+      }
+      else {
+        playerString += `@${player.username} `;
+      }
     }
 
     if (!channel.isTextBased()) return;
