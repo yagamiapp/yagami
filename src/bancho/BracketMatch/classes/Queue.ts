@@ -1,30 +1,31 @@
 /**
- * An automatically-emptying queue, which can take many asynchronous functions, and run them one after the other in order
+ * This file controls and maintains that each event in a BracketMatch lobby is handled:
+ * a) One at a time
+ * b) In order
+ * Such that bugs caused by command spam are fully eliminated.
+ * 
+ * Each match as it's own queue.
  */
 
-export default class Queue {
-  ratelimit = 0;
-  #queue: (() => Promise<void>)[] = [];
-  #running = false;
+import Queue from "queue";
+import MatchPayloadBuilder from "./MatchPayloadBuilder";
+import { payloadHandler } from "..";
+import Match from "./Match";
+import { BanchoMultiplayerChannel } from "bancho.js";
+import { updateMessage } from "../discord_message";
 
-  add(f: () => Promise<void>) {
-    this.#queue.push(f);
-    if (!this.#running) {
-      this.#run().catch(console.error);
-      this.#running = true;
+type ReturnValue = Promise<MatchPayloadBuilder> | Promise<void> | MatchPayloadBuilder | void;
+
+const q = new Queue({ concurrency: 1, autostart: true })
+
+export const addTask = (match: Match, channel: BanchoMultiplayerChannel, command: () => ReturnValue) => {
+  q.push(async () => {
+    const payload = command(); // Logic Function
+    await payloadHandler(payload, match, channel) // Set properties from logic function
+    try {
+      await updateMessage(match, channel.lobby);
+    } catch (e) {
+      console.log(e);
     }
-  }
-
-  async #run() {
-    if (this.#queue.length == 0) {
-      this.#running = false;
-      return;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, this.ratelimit));
-    const func = this.#queue.splice(0, 1)[0];
-    await func();
-
-    this.#run();
-  }
+  })
 }
