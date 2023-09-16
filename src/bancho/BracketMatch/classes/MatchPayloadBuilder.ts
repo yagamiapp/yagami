@@ -150,4 +150,18 @@ export default class MatchPayloadBuilder {
     this.wins.push({ teamId, identifier: mapIdentifier });
     return this;
   }
+
+  toString() {
+    const copy = { ...this };
+    for (const key in copy) {
+      const value = copy[key];
+      if (value == null) delete copy[key]
+      if (isArray(value) && value.length == 0) delete copy[key]
+    }
+    return copy;
+  }
+}
+
+const isArray = (a: unknown): a is Array<unknown> => {
+  return Array.isArray(a);
 }

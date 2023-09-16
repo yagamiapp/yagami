@@ -61,7 +61,7 @@ export const payloadHandler = async (
   if (!payload) return;
   if (!isMultiplayerChannel(channel)) return;
 
-  console.log(payload);
+  console.log(payload.toString());
 
   if (payload.invite.length > 0) {
     for (const user of payload.invite) {
@@ -298,7 +298,7 @@ export const payloadHandler = async (
     const phaseChangeFunction = phases[payload.state]?.onPhaseChange;
     if (phaseChangeFunction) {
       payload = phaseChangeFunction(match, channel.lobby);
-      if (payload) payloadHandler(payload, match, channel);
+      if (payload) await payloadHandler(payload, match, channel);
     }
   }
 };
