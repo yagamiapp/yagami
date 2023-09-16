@@ -206,14 +206,37 @@ export const payloadHandler = async (
 
   if (payload.bans.length > 0) {
     for (const ban of payload.bans) {
-      await prisma.mapInMatch.update({
+      await prisma.mapInMatch.upsert({
         where: {
           mapIdentifier_matchId: {
             mapIdentifier: ban.identifier,
             matchId: match.id,
           },
         },
-        data: {
+        create: {
+          Match: {
+            "connect": {
+              "id": match.id,
+            }
+          },
+          Map: {
+            connect: {
+              "identifier_mappoolId": {
+                identifier: ban.identifier,
+                mappoolId: match.round.mappoolId
+              }
+            }
+          },
+          BannedByTeam: {
+            connect: {
+              teamId_matchId: {
+                matchId: match.id,
+                teamId: ban.teamId,
+              },
+            },
+          },
+        },
+        update: {
           BannedByTeam: {
             connect: {
               teamId_matchId: {
@@ -229,14 +252,37 @@ export const payloadHandler = async (
 
   if (payload.picks.length > 0) {
     for (const pick of payload.picks) {
-      await prisma.mapInMatch.update({
+      await prisma.mapInMatch.upsert({
         where: {
           mapIdentifier_matchId: {
             mapIdentifier: pick.identifier,
             matchId: match.id,
           },
         },
-        data: {
+        create: {
+          Match: {
+            "connect": {
+              "id": match.id,
+            }
+          },
+          Map: {
+            connect: {
+              "identifier_mappoolId": {
+                identifier: pick.identifier,
+                mappoolId: match.round.mappoolId
+              }
+            }
+          },
+          BannedByTeam: {
+            connect: {
+              teamId_matchId: {
+                matchId: match.id,
+                teamId: pick.teamId,
+              },
+            },
+          },
+        },
+        update: {
           pickNumber: match.maps.filter((x) => x.picked).length + 1,
           pickTeamNumber: match.teams[match.waiting_on].picks.length + 1,
           PickedByTeam: {
@@ -247,24 +293,44 @@ export const payloadHandler = async (
               },
             },
           },
-        },
-        include: {
-          Map: true,
-        },
+        }
       });
     }
   }
 
   if (payload.wins.length > 0) {
     for (const wins of payload.wins) {
-      await prisma.mapInMatch.update({
+      await prisma.mapInMatch.upsert({
         where: {
           mapIdentifier_matchId: {
             mapIdentifier: wins.identifier,
             matchId: match.id,
           },
         },
-        data: {
+        create: {
+          Match: {
+            "connect": {
+              "id": match.id,
+            }
+          },
+          Map: {
+            connect: {
+              "identifier_mappoolId": {
+                identifier: wins.identifier,
+                mappoolId: match.round.mappoolId
+              }
+            }
+          },
+          BannedByTeam: {
+            connect: {
+              teamId_matchId: {
+                matchId: match.id,
+                teamId: wins.teamId,
+              },
+            },
+          },
+        },
+        update: {
           WonBy: {
             connect: {
               teamId_matchId: {

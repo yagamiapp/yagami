@@ -23,14 +23,23 @@ export default class Map {
   pickNumber: number;
   pickTeamNumber: number;
 
-  constructor(match: Match, map: BracketMatch.MatchMap) {
-    this.mapdata = map.Map.Map;
+  constructor(match: Match, map: BracketMatch.MatchMap | BracketMatch.PoolMap) {
+
+    let poolMap: BracketMatch.PoolMap;
+    if (isPoolMap(map)) {
+      poolMap = map;
+    } else {
+      poolMap = map.Map;
+    }
+    this.mapdata = poolMap.Map;
 
     this.match = match;
 
-    this.identifier = map.Map.identifier;
-    this.mods = map.Map.mods;
-    this.modPriority = map.Map.modPriority;
+    this.identifier = poolMap.identifier;
+    this.mods = poolMap.mods;
+    this.modPriority = poolMap.modPriority;
+
+    if (isPoolMap(map)) return this;
 
     this.banned = map.bannedByTeamId != null;
     this.picked = map.pickedByTeamId != null;
@@ -38,14 +47,26 @@ export default class Map {
 
     if (this.banned) {
       this.banned_by = match.teams.find((team) => team.id == map.bannedByTeamId);
+
+      // Update properties in mappool list
+      match.maps.find((x) => x.identifier == this.identifier).banned = true;
+      match.maps.find((x) => x.identifier == this.identifier).banned_by = match.teams.find((team) => team.id == map.bannedByTeamId);
     }
 
     if (this.picked) {
       this.picked_by = match.teams.find((team) => team.id == map.pickedByTeamId);
+
+      // Update properties in mappool list
+      match.maps.find((x) => x.identifier == this.identifier).picked = true;
+      match.maps.find((x) => x.identifier == this.identifier).picked_by = match.teams.find((team) => team.id == map.bannedByTeamId);
     }
 
     if (this.won) {
       this.won_by = match.teams.find((team) => team.id == map.wonByTeamId);
+
+      // Update properties in mappool list
+      match.maps.find((x) => x.identifier == this.identifier).won = true;
+      match.maps.find((x) => x.identifier == this.identifier).won_by = match.teams.find((team) => team.id == map.bannedByTeamId);
     }
 
     this.pickNumber = map.pickNumber;
@@ -79,4 +100,8 @@ export default class Map {
       Map: this.mapdata,
     };
   }
+}
+
+const isPoolMap = (map: BracketMatch.MatchMap | BracketMatch.PoolMap): map is BracketMatch.PoolMap => {
+  return (map as BracketMatch.PoolMap).identifier != undefined;
 }

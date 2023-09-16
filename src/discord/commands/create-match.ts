@@ -114,25 +114,5 @@ export const execute = async (interaction: CommandInteraction) => {
     });
   }
 
-  for (const map of tournament.rounds[0].mappool.Maps) {
-    await prisma.mapInMatch.create({
-      data: {
-        Match: {
-          connect: {
-            id: match.id,
-          },
-        },
-        Map: {
-          connect: {
-            identifier_mappoolId: {
-              identifier: map.identifier,
-              mappoolId: tournament.rounds[0].mappoolId,
-            },
-          },
-        },
-      },
-    });
-  }
-
   await interaction.editReply('Done!');
 };

@@ -56,6 +56,10 @@ declare namespace BracketMatch {
    * MATCH OBJECT
    */
 
+  type PoolMap = MapInPool & {
+    Map: Map
+  }
+
   type TeamWithUsers = Team & {
     Members: (UserInTeam & {
       User: User;
@@ -65,7 +69,7 @@ declare namespace BracketMatch {
   type MatchRound = Round & {
     Tournament: Tournament;
     mappool: Mappool & {
-      Maps: Map[];
+      Maps: PoolMap[]
     };
   };
 

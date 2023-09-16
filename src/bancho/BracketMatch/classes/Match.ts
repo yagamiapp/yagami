@@ -38,12 +38,16 @@ export default class Match {
       this.teams.push(new Team(team, this));
     }
 
-    for (const mapdata of match.MapsInMatch) {
+    for (const mapdata of match.Round.mappool.Maps) {
       const map = new Map(this, mapdata);
       this.maps.push(map);
+    }
+    for (const mapdata of match.MapsInMatch) {
+      const map = new Map(this, mapdata);
       if (map.banned) this.bans.push(map);
       if (map.picked) this.picks.push(map);
       if (map.won) this.wins.push(map);
+
     }
   }
 
