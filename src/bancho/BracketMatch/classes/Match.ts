@@ -43,11 +43,10 @@ export default class Match {
       this.maps.push(map);
     }
     for (const mapdata of match.MapsInMatch) {
-      const map = new Map(this, mapdata);
-      if (map.banned) this.bans.push(map);
-      if (map.picked) this.picks.push(map);
-      if (map.won) this.wins.push(map);
-
+      const map = this.maps.find(x => x.identifier == mapdata.mapIdentifier);
+      if (mapdata.bannedByTeamId) this.bans.push(map);
+      if (mapdata.pickedByTeamId) this.picks.push(map);
+      if (mapdata.wonByTeamId) this.wins.push(map);
     }
   }
 

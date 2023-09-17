@@ -12,13 +12,13 @@ export default class Map {
   mods: string;
   modPriority: number;
 
-  picked: boolean;
-  banned: boolean;
-  won: boolean;
+  picked: boolean | undefined;
+  banned: boolean | undefined;
+  won: boolean | undefined;
 
-  picked_by: Team;
-  banned_by: Team;
-  won_by: Team;
+  picked_by: Team | undefined;
+  banned_by: Team | undefined;
+  won_by: Team | undefined;
 
   pickNumber: number;
   pickTeamNumber: number;
@@ -49,24 +49,24 @@ export default class Map {
       this.banned_by = match.teams.find((team) => team.id == map.bannedByTeamId);
 
       // Update properties in mappool list
-      match.maps.find((x) => x.identifier == this.identifier).banned = true;
-      match.maps.find((x) => x.identifier == this.identifier).banned_by = match.teams.find((team) => team.id == map.bannedByTeamId);
+      // match.maps.find((x) => x.identifier == this.identifier).banned = true;
+      // match.maps.find((x) => x.identifier == this.identifier).banned_by = match.teams.find((team) => team.id == map.bannedByTeamId);
     }
 
     if (this.picked) {
       this.picked_by = match.teams.find((team) => team.id == map.pickedByTeamId);
 
       // Update properties in mappool list
-      match.maps.find((x) => x.identifier == this.identifier).picked = true;
-      match.maps.find((x) => x.identifier == this.identifier).picked_by = match.teams.find((team) => team.id == map.bannedByTeamId);
+      // match.maps.find((x) => x.identifier == this.identifier).picked = true;
+      // match.maps.find((x) => x.identifier == this.identifier).picked_by = match.teams.find((team) => team.id == map.bannedByTeamId);
     }
 
     if (this.won) {
       this.won_by = match.teams.find((team) => team.id == map.wonByTeamId);
 
       // Update properties in mappool list
-      match.maps.find((x) => x.identifier == this.identifier).won = true;
-      match.maps.find((x) => x.identifier == this.identifier).won_by = match.teams.find((team) => team.id == map.bannedByTeamId);
+      // match.maps.find((x) => x.identifier == this.identifier).won = true;
+      // match.maps.find((x) => x.identifier == this.identifier).won_by = match.teams.find((team) => team.id == map.bannedByTeamId);
     }
 
     this.pickNumber = map.pickNumber;

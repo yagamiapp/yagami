@@ -260,6 +260,8 @@ export const payloadHandler = async (
           },
         },
         create: {
+          pickNumber: match.maps.filter((x) => x.picked).length + 1,
+          pickTeamNumber: match.teams[match.waiting_on].picks.length + 1,
           Match: {
             "connect": {
               "id": match.id,
@@ -273,7 +275,7 @@ export const payloadHandler = async (
               }
             }
           },
-          BannedByTeam: {
+          PickedByTeam: {
             connect: {
               teamId_matchId: {
                 matchId: match.id,
@@ -282,6 +284,7 @@ export const payloadHandler = async (
             },
           },
         },
+
         update: {
           pickNumber: match.maps.filter((x) => x.picked).length + 1,
           pickTeamNumber: match.teams[match.waiting_on].picks.length + 1,
@@ -321,7 +324,7 @@ export const payloadHandler = async (
               }
             }
           },
-          BannedByTeam: {
+          WonBy: {
             connect: {
               teamId_matchId: {
                 matchId: match.id,

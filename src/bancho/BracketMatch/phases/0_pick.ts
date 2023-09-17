@@ -85,9 +85,9 @@ export const onPhaseChange = (match: Match) => {
 };
 
 const getAvailablePicks = (match: Match) => {
-  const picked = match.maps.filter((x) => x.picked);
-  const banned = match.maps.filter((x) => x.banned);
-  const won = match.maps.filter((x) => x.won);
+  const picked = match.picks;
+  const banned = match.bans;
+  const won = match.wins;
   const tb = match.maps.filter((x) => x.identifier.toUpperCase().includes('TB'));
 
   let availablePicks = match.maps
