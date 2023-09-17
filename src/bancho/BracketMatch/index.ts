@@ -6,6 +6,7 @@ import * as startup from './phases/3_startup';
 import * as warmup from './phases/4_warmup';
 import * as rolling from './phases/5_rolling';
 import * as order from './phases/6_order_selection';
+import * as winner from './phases/8_winner_found';
 
 import {
   BanchoChannel,
@@ -50,6 +51,7 @@ export const phases: { [key: number]: PhaseHandler } = {
   5: rolling,
   6: order,
   7: ban,
+  8: winner
 };
 
 export const payloadHandler = async (
@@ -105,6 +107,10 @@ export const payloadHandler = async (
 
   if (payload.clearhost) {
     await channel.lobby.clearHost();
+  }
+
+  if (payload.closematch) {
+    await channel.lobby.closeLobby()
   }
 
 

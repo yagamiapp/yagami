@@ -19,6 +19,7 @@ export default class MatchPayloadBuilder {
   abort: boolean | null = null;
   host: string | null = null;
   clearhost: boolean | null = null;
+  closematch: boolean | null = null;
 
   teamWarmUp: { id: number; set: boolean }[] = [];
   teamScore: { id: number; set: number }[] = [];
@@ -148,6 +149,11 @@ export default class MatchPayloadBuilder {
 
   addWin(teamId: number, mapIdentifier: string) {
     this.wins.push({ teamId, identifier: mapIdentifier });
+    return this;
+  }
+
+  close() {
+    this.closematch = true;
     return this;
   }
 
