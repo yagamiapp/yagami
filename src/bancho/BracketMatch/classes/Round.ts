@@ -46,7 +46,7 @@ export default class Round {
         tournament_iteration: `${new Date().getFullYear()}`,
         round_acronym: this.acronym,
         round_name: this.name,
-        Maps: this.mappool.map((x) => x.mapdata),
+        Maps: this.mappool.map((x) => x.toMapInPool()),
       },
     };
   }
