@@ -26,6 +26,7 @@ export const timers = {
   4: 180, // Warmup Selection
   6: 90, // Roll Winner Selection
   7: 120, // Bans
+  8: 90, // Match Close Tier
 };
 
 export const emotes = {

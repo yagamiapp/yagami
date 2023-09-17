@@ -107,10 +107,6 @@ export const payloadHandler = async (
     await channel.lobby.clearHost();
   }
 
-  if (payload.timer) {
-    await channel.lobby.startTimer(payload.timer);
-    setTimer(match.id, payload.timer, () => timerCallback(match, channel.lobby));
-  }
 
   if (payload.waiting_on != null) {
     await prisma.match.update({
@@ -347,10 +343,16 @@ export const payloadHandler = async (
     }
   }
 
+
   if (payload.messages.length > 0) {
     for (const msg of payload.messages) {
       await channel.sendMessage(msg);
     }
+  }
+
+  if (payload.timer) {
+    await channel.lobby.startTimer(payload.timer);
+    setTimer(match.id, payload.timer, () => timerCallback(match, channel.lobby));
   }
 
   if (payload.state != null) {

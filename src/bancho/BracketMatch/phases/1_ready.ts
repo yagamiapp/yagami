@@ -7,7 +7,6 @@ import Team from '../classes/Team';
 export const onReady = async (match: Match, lobby: BanchoLobby) => {
   const payload = new MatchPayloadBuilder();
   const pick = match.picks[match.picks.length - 1];
-  console.log(pick);
 
   // Count Players
   const lobbyPlayerIDs = lobby.slots.filter((x) => x).map((x) => x.user?.id);

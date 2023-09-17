@@ -1,15 +1,9 @@
-import { BanchoLobby, BanchoLobbyPlayer, ChannelMessage } from 'bancho.js';
+import { BanchoLobbyPlayer } from 'bancho.js';
 import { BracketMatch } from '../match';
 import type Match from '../classes/Match';
 import { states, timers } from '../config';
 import MatchPayloadBuilder from '../classes/MatchPayloadBuilder';
 
-export const onMessage = (match: Match, msg: ChannelMessage) => {
-  console.log(`Message Event during ${states[match.state]}!`);
-};
-export const onReady = (match: Match, lobby: BanchoLobby) => {
-  console.log(`Message Event during ${states[match.state]}!`);
-};
 export const onFinish = (match: Match, scores: BracketMatch.Score[]) => {
   const payload = new MatchPayloadBuilder();
   const map = match.picks[match.picks.length - 1];
@@ -48,6 +42,7 @@ export const onFinish = (match: Match, scores: BracketMatch.Score[]) => {
     return payload
       .addMessage(`${winningTeam.name} won the match! GGWP!`)
       .addMessage(`The lobby will be closed in ${timers[8]} seconds`)
+      .setTimer(timers[8])
       .setState(8);
 
   const tb = match.teams.map((x) => x.score).filter((x) => x == scoreToWin - 1);
