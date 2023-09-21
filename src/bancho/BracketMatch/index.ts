@@ -158,8 +158,8 @@ export const payloadHandler = async (
   }
 
   if (payload.teamRoll.length > 0) {
-    for (let teamRoll of payload.teamRoll) {
-      teamRoll = teamRoll.set === 0 ? null : teamRoll;
+    for (const teamRoll of payload.teamRoll) {
+      teamRoll.set = teamRoll.set ?? null;
       await prisma.teamInMatch.update({
         where: {
           teamId_matchId: {

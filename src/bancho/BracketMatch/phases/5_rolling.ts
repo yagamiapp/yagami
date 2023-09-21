@@ -19,20 +19,26 @@ export const onMessage = (match: Match, msg: ChannelMessage) => {
   if (!rollMsg) return;
 
   // Verify User Roll
-  const { username, roll } = rollMsg.groups;
+  const { username } = rollMsg.groups;
+  let roll: number = parseInt(rollMsg.groups.roll);
   const user = rollVerifier.get(`${match.id}-${username}`);
   if (!user) return;
   rollVerifier.delete(`${match.id}-${username}`);
 
   // Set team roll
   const team = match.teams.find((x) => x.members.map((y) => y.id).includes(user.id));
-  if (!team || team.roll != null) return;
+  if (!team) return;
 
-  const payload = new MatchPayloadBuilder()
-    .setTeamRoll(team.id, parseInt(roll))
-    .addMessage(`${team.name} rolls ${roll}`);
+  const payload = new MatchPayloadBuilder();
 
-  match.teams[match.teams.indexOf(team)].roll = parseInt(roll); // Set roll in match object for checking
+  if (!team.roll) {
+    match.teams[match.teams.indexOf(team)].roll = roll; // Set roll in match object for checking
+    payload.setTeamRoll(team.id, roll)
+      .addMessage(`${team.name} rolls ${roll}`);
+  }
+  else {
+    roll = team.roll;
+  }
 
   // Should I Check for roll winner?
   const teamRolls = match.teams.map((x) => x.roll);
