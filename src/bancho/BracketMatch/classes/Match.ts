@@ -44,9 +44,21 @@ export default class Match {
     }
     for (const mapdata of match.MapsInMatch) {
       const map = this.maps.find(x => x.identifier == mapdata.mapIdentifier);
-      if (mapdata.bannedByTeamId) this.bans.push(map);
-      if (mapdata.pickedByTeamId) this.picks.push(map);
-      if (mapdata.wonByTeamId) this.wins.push(map);
+      if (mapdata.bannedByTeamId) {
+        map.banned = true;
+        map.banned_by = this.teams.find((team) => team.id == mapdata.bannedByTeamId);
+        this.bans.push(map);
+      }
+      if (mapdata.pickedByTeamId) {
+        map.picked = true;
+        map.picked_by = this.teams.find((team) => team.id == mapdata.pickedByTeamId);
+        this.picks.push(map);
+      }
+      if (mapdata.wonByTeamId) {
+        map.won = true;
+        map.won_by = this.teams.find((team) => team.id == mapdata.wonByTeamId);
+        this.wins.push(map);
+      }
     }
   }
 

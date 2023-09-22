@@ -89,7 +89,7 @@ const getAvailableBans = (match: Match) => {
 
   // Remove double ban options
   const banningTeam = match.teams[match.waiting_on];
-  const otherBans = match.maps.filter((x) => x.banned_by?.id == banningTeam.id);
+  const otherBans = banningTeam.bans;
   const otherBanMods = otherBans.map((x) => x.mods);
   let doubleBans = match.maps.filter((x) => otherBanMods.includes(x.mods));
   if (double_ban == 1) doubleBans = doubleBans.filter((x) => x.mods != ''); // Remove NM
