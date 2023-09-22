@@ -240,13 +240,11 @@ export const updateMessage = async (
   if (match.bans.length > 0) {
     let banString = '';
     const teamString = new Map<number, string>();
-    for (const ban of match.bans) {
-      if (!ban.banned) continue;
-      teamString.set(ban.banned_by.id, '');
-      const string =
-        teamString.get(ban.banned_by.id) == '' ? `${ban.identifier}` : `, ${ban.identifier}`;
-
-      teamString.set(ban.banned_by.id, teamString.get(ban.banned_by.id) + string);
+    for (const team of match.teams) {
+      const teamBans = team.bans;
+      if (teamBans.length > 0) {
+        teamString.set(team.id, team.bans.map((x) => x.identifier).join(', '));
+      }
     }
 
     console.log(teamString);
