@@ -51,7 +51,7 @@ export const phases: { [key: number]: PhaseHandler } = {
   5: rolling,
   6: order,
   7: ban,
-  8: winner
+  8: winner,
 };
 
 export const payloadHandler = async (
@@ -110,9 +110,8 @@ export const payloadHandler = async (
   }
 
   if (payload.closematch) {
-    await channel.lobby.closeLobby()
+    await channel.lobby.closeLobby();
   }
-
 
   if (payload.waiting_on != null) {
     await prisma.match.update({
@@ -135,7 +134,7 @@ export const payloadHandler = async (
           },
         },
         data: {
-          score: teamScore.set
+          score: teamScore.set,
         },
       });
     }
@@ -217,17 +216,17 @@ export const payloadHandler = async (
         },
         create: {
           Match: {
-            "connect": {
-              "id": match.id,
-            }
+            connect: {
+              id: match.id,
+            },
           },
           Map: {
             connect: {
-              "identifier_mappoolId": {
+              identifier_mappoolId: {
                 identifier: ban.identifier,
-                mappoolId: match.round.mappoolId
-              }
-            }
+                mappoolId: match.round.mappoolId,
+              },
+            },
           },
           BannedByTeam: {
             connect: {
@@ -265,17 +264,17 @@ export const payloadHandler = async (
           pickNumber: match.maps.filter((x) => x.picked).length + 1,
           pickTeamNumber: match.teams[match.waiting_on].picks.length + 1,
           Match: {
-            "connect": {
-              "id": match.id,
-            }
+            connect: {
+              id: match.id,
+            },
           },
           Map: {
             connect: {
-              "identifier_mappoolId": {
+              identifier_mappoolId: {
                 identifier: pick.identifier,
-                mappoolId: match.round.mappoolId
-              }
-            }
+                mappoolId: match.round.mappoolId,
+              },
+            },
           },
           PickedByTeam: {
             connect: {
@@ -298,7 +297,7 @@ export const payloadHandler = async (
               },
             },
           },
-        }
+        },
       });
     }
   }
@@ -314,17 +313,17 @@ export const payloadHandler = async (
         },
         create: {
           Match: {
-            "connect": {
-              "id": match.id,
-            }
+            connect: {
+              id: match.id,
+            },
           },
           Map: {
             connect: {
-              "identifier_mappoolId": {
+              identifier_mappoolId: {
                 identifier: wins.identifier,
-                mappoolId: match.round.mappoolId
-              }
-            }
+                mappoolId: match.round.mappoolId,
+              },
+            },
           },
           WonBy: {
             connect: {
@@ -349,7 +348,6 @@ export const payloadHandler = async (
     }
   }
 
-
   if (payload.messages.length > 0) {
     for (const msg of payload.messages) {
       await channel.sendMessage(msg);
@@ -358,7 +356,7 @@ export const payloadHandler = async (
 
   if (payload.timer) {
     await channel.lobby.startTimer(payload.timer);
-    setTimer(match.id, payload.timer, () => timerCallback(match, channel.lobby));
+    setTimer(match.id, payload.timer * 1000, () => timerCallback(match, channel.lobby));
   }
 
   if (payload.state != null) {
