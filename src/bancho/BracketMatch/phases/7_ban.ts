@@ -62,7 +62,7 @@ export const onPhaseChange = (match: Match) => {
   return payload
     .addMessage(`${team.name}, It's your turn to ban. Use !ban [map] to ban a map!`)
     .addMessage(
-      `You have ${banOpportunities} ban${banOpportunities == 1 ? 's' : ''
+      `You have ${banOpportunities} ban${banOpportunities == 1 ? '' : 's'
       } left, use !list to see the available bans!`,
     )
     .setTimer(timers[match.state]);
