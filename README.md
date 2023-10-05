@@ -60,33 +60,25 @@ You will need to add a .ENV file and add the following variables:
 
 ```env
 # Your osu username
-BANCHO_USERNAME=
+BANCHO_USERNAME=""
 # Your osu IRC password (https://old.ppy.sh/p/irc)
-BANCHO_PASSWORD=
+BANCHO_PASSWORD=""
 # Your API key (https://old.ppy.sh/p/api)
-BANCHO_API_KEY=
+BANCHO_API_KEY=""
 # An osu application Client ID
 OSU_CLIENT_ID=
 # An osu application Client Secret
-OSU_CLIENT_SECRET=
-# An osu application Redirect URI
-OSU_REDIRECT_URI=
+OSU_CLIENT_SECRET=""
 # A discord bot token
-DISCORD_TOKEN=
-# The ID of the guild you are developing in
-TEST_GUILD_ID=
+DISCORD_TOKEN=""
 # The client ID of your discord application
 DISCORD_CLIENT_ID=
 # The channel in which global bug reports should be sent to
-BUG_CHANNEL_ID=
+BUG_CHANNEL_ID=""
 # This can be changed to a different location if you wish
 DATABASE_URL="file:./db/dev.db"
-# A github secret to be used in webhooks
-GITHUB_SECRET=
-# The branch that will be updated when a commit is made to it
-GITHUB_PROD_BRANCH=
 # The channel to send log messages to
-LOG_CHANNEL
+LOG_CHANNEL=""
 # Your twitch bot username
 TWITCH_USERNAME=""
 # Your twitch bot token
