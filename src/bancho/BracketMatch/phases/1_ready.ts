@@ -23,7 +23,7 @@ export const onReady = async (match: Match, lobby: BanchoLobby) => {
   }
   if (badTeams.length >= 1) {
     return payload.addMessage(
-      `The following teams do not have enough players: ${badTeams.map((x) => x.name).join(', ')}`,
+      `The following teams do not have enough players: ${badTeams.map((x) => x.name).join(', ')}`
     );
   }
 
@@ -85,17 +85,24 @@ export const onReady = async (match: Match, lobby: BanchoLobby) => {
         .addMessage(
           `The following teams do not meet FM requirements: ${badTeams
             .map((x) => x.name)
-            .join(', ')}`,
+            .join(', ')}`
         )
         .addMessage(`Teams must have at least ${match.tournament.fm_mods} player${s} with a mod`);
     }
   }
 
-  return payload.setState(2).startMatch(5).addMessage('glhf!');
+  return payload.setState(2).startMatch(5).addMessage(glhf());
 };
 export const onJoin = (match: Match, _player: BanchoLobbyPlayer) => {
   console.log(`Join Event during ${states[match.state]}!`);
 };
 export const onPhaseChange = (match: Match) => {
   return new MatchPayloadBuilder().setTimer(timers[match.state]);
+};
+
+const glhf = (): string => {
+  const golfProbability = 0.01;
+  const chance = Math.floor(Math.random() * (1 / golfProbability));
+  if (chance == 0) return 'golf';
+  return 'glhf!';
 };
